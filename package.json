@@ -1,0 +1,19 @@
+{
+  "private": true,
+  "devDependencies": {
+    "typescript": "5.1.3",
+    "@types/three": "0.153.0"
+  },
+  "name": "luminathreejstesting",
+  "version": "1.0.0",
+  "main": "index.js",
+  "dependencies": {
+    "three": "^0.154.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}
