@@ -125,15 +125,20 @@ export default class World {
     private lastRender = Date.now();
 
     public spawnOrb () {
+        const starPosition = new THREE.Vector3(0, 0, 0);
+        const starDirection = new THREE.Vector3(0, 0, 0);
+        if (!this.cameraControls) {
+            return;
+        }
+        this._camera.getWorldPosition(starPosition)
+        this._camera.getWorldDirection(starDirection)
+        starPosition.addScaledVector(starDirection, 5);
         const star = new Star(`star number ${this.stars.length}`, new THREE.Color(0xAA0000),
-            this.cameraControls?.getObject().position || new THREE.Vector3(0, 0, 0),
+            starPosition || new THREE.Vector3(0, 0, 0),
             this.stars.length.toString(),
             this._scene);
         this.stars.push(star);
         this.colliders.push(star.collider);
-        for (const i in this.colliders) {
-            console.log(this.colliders[i]);
-        }
     }
 
     public showDetails () {
