@@ -6,6 +6,7 @@ import Math2 from "./utility/Math2.js";
 import FlyMovement from "./systems/FlyMovement.js";
 import Star from "./components/Star.js";
 import Collider from "./components/Collider.js";
+import { CSS3DRenderer, CSS3DObject } from "three/examples/jsm/renderers/CSS3DRenderer.js"
 import { WebGLRenderer, PerspectiveCamera, Raycaster, Scene, Object3D, Vector3, PCFSoftShadowMap, DirectionalLight, BoxGeometry, Mesh, MeshBasicMaterial, Color, Vector2 } from "three";
 
 export default class World {
@@ -13,8 +14,8 @@ export default class World {
     public keyboard: Record<string, number> = {};
     public mouse: Record<string, number> = {};
     public _threejs: WebGLRenderer;
+    public _labelRender: CSS3DRenderer;
     public _camera: PerspectiveCamera;
-    //public _placeRaycaster: Raycaster;
     public _raycaster: Raycaster;
 
     public _scene: Scene;
@@ -41,8 +42,14 @@ export default class World {
         this._threejs.shadowMap.type = PCFSoftShadowMap;
         this._threejs.setPixelRatio(window.devicePixelRatio);
         this._threejs.setSize(window.innerWidth, window.innerHeight);
-
         document.body.appendChild(this._threejs.domElement);
+
+        this._labelRender = new CSS3DRenderer();
+        this._labelRender.setSize(window.innerWidth, window.innerHeight);
+        this._labelRender.domElement.style.position = 'absolute';
+        this._labelRender.domElement.style.top = '0px';
+        document.body.appendChild(this._labelRender.domElement);
+
         const fov = 90;
         const aspect = 1920 / 1080;
         const near = 1.0;
@@ -120,6 +127,7 @@ export default class World {
         this._camera.aspect = window.innerWidth / window.innerHeight;
         this._camera.updateProjectionMatrix();
         this._threejs.setSize(window.innerWidth, window.innerHeight);
+        this._labelRender.setSize(window.innerWidth, window.innerHeight);
     }
 
     private lastRender = Date.now();
@@ -141,6 +149,7 @@ export default class World {
             return;
         }
         console.log(collider.relatedStar.textField);
+
     }
 
     private getCursorPosition () {
@@ -161,12 +170,15 @@ export default class World {
 
         this.movementControls?.update(delta);
         this.cameraControls?.getObject().position.add(this.movementControls.updatePlayer(delta))
+
+        for (const i in this.stars) {
+            this.stars[i].rotateLabel(this._camera.getWorldPosition(new Vector3));
+        }
     }
 
     public render () {
         this._Update();
         this._threejs.render(this._scene, this._camera);
-
-
+        this._labelRender.render(this._scene, this._camera);
     }
 }

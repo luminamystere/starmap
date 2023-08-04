@@ -1,5 +1,6 @@
 import { Color, Mesh, MeshBasicMaterial, Object3D, Scene, SphereGeometry, Vector3 } from "three";
 import Collider from "./Collider.js";
+import { CSS3DObject } from "three/examples/jsm/renderers/CSS3DRenderer.js";
 
 export default class Star {
 
@@ -9,6 +10,7 @@ export default class Star {
     public mesh?: Mesh;
     public collider: Collider;
     public name: String;
+    public starLabel?: CSS3DObject;
 
     public constructor (text: String, colour: Color, position: Vector3, name: String, scene: Scene) {
         this.starColour = colour;
@@ -17,6 +19,7 @@ export default class Star {
         this.name = name;
         this.createStar(scene);
         this.collider = this.createCollider(scene);
+        this.createLabel();
     }
 
 
@@ -44,6 +47,27 @@ export default class Star {
 
     public get currentCollider () {
         return this.collider;
+    }
+
+    public createLabel () {
+        const starDiv = document.createElement('div');
+        starDiv.className = 'label';
+        starDiv.textContent = this.textField.toString();
+        this.starLabel = new CSS3DObject(starDiv);
+        this.starLabel.scale.set(0.005, 0.005, 0.005);
+        this.starLabel.position.set(0, 0.8, 0);
+        this.mesh?.add(this.starLabel);
+    }
+
+    public rotateLabel (camera: Vector3) {
+        if (!this.starLabel) {
+            return;
+        }
+        this.starLabel.lookAt(camera);
+        // this.starLabel?.rotation.set(0, this.starLabel.rotation.y, 0);
+        // this.starLabel.rotation.x = 0;
+        // this.starLabel.rotation.y = 0;
+        // this.starLabel.rotation.z = 0;
     }
 
     public showDetails () {
