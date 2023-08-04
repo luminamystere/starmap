@@ -1,8 +1,7 @@
 //import { InScene } from "game/object/Feature";
-import { Camera, Euler, Object3D, Scene, Vector3 } from "three";
+import { Camera, Euler, Object3D, Scene, Vector2, Vector3 } from "three";
 //import Bound from "util/Bound";
 //import Configurable from "util/config/Configurable";
-import Vector2 from "../utility/Vector2.js";
 import World from "../World.js";
 
 const PI_2 = Math.PI / 2;
@@ -132,7 +131,7 @@ export default class MouseControls {
 
             if (this.delayedMovement.length > this.SKIP_DELAY) {
                 for (const delayedMovement of this.delayedMovement) {
-                    this.applyMovement(...delayedMovement.xy);
+                    this.applyMovement(delayedMovement.x, delayedMovement.y);
                     this.delayedMovement.splice(0, Infinity);
                 }
             }

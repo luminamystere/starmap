@@ -1,23 +1,23 @@
 //@ts-check
-import * as THREE from "three";
+// import * as THREE from "three";
 import { createScene } from "./components/scene.js";
 import MouseControls from "./systems/MouseControls.js"
 import Math2 from "./utility/Math2.js";
 import FlyMovement from "./systems/FlyMovement.js";
 import Star from "./components/Star.js";
-import Vector2 from "./utility/Vector2.js";
 import Collider from "./components/Collider.js";
+import { WebGLRenderer, PerspectiveCamera, Raycaster, Scene, Object3D, Vector3, PCFSoftShadowMap, DirectionalLight, BoxGeometry, Mesh, MeshBasicMaterial, Color, Vector2 } from "three";
 
 export default class World {
 
     public keyboard: Record<string, number> = {};
     public mouse: Record<string, number> = {};
-    public _threejs: THREE.WebGLRenderer;
-    public _camera: THREE.PerspectiveCamera;
-    //public _placeRaycaster: THREE.Raycaster;
-    public _raycaster: THREE.Raycaster;
+    public _threejs: WebGLRenderer;
+    public _camera: PerspectiveCamera;
+    //public _placeRaycaster: Raycaster;
+    public _raycaster: Raycaster;
 
-    public _scene: THREE.Scene;
+    public _scene: Scene;
     public cameraControls?: MouseControls;
     public movementControls?: FlyMovement;
     public time = Date.now();
@@ -28,17 +28,17 @@ export default class World {
     public SENSITIVITY = 500;
 
     public stars: Star[] = [];
-    public colliders: THREE.Object3D[] = [];
+    public colliders: Object3D[] = [];
 
-    public playerVelocity = new THREE.Vector3();
-    public playerDirection = new THREE.Vector3();
-    public playerPosition = new THREE.Vector3();
+    public playerVelocity = new Vector3();
+    public playerDirection = new Vector3();
+    public playerPosition = new Vector3();
 
     public constructor () {
 
-        this._threejs = new THREE.WebGLRenderer();
+        this._threejs = new WebGLRenderer();
         this._threejs.shadowMap.enabled = true;
-        this._threejs.shadowMap.type = THREE.PCFSoftShadowMap;
+        this._threejs.shadowMap.type = PCFSoftShadowMap;
         this._threejs.setPixelRatio(window.devicePixelRatio);
         this._threejs.setSize(window.innerWidth, window.innerHeight);
 
@@ -47,12 +47,12 @@ export default class World {
         const aspect = 1920 / 1080;
         const near = 1.0;
         const far = 1000;
-        this._camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+        this._camera = new PerspectiveCamera(fov, aspect, near, far);
         this._camera.position.set(0, 1, 0);
         this._camera.rotation.order = 'YXZ';
 
-        //this._placeRaycaster = new THREE.Raycaster(this._camera.position, new THREE.Vector3(0, 0, 0), 0, 10);
-        this._raycaster = new THREE.Raycaster();
+        //this._placeRaycaster = new Raycaster(this._camera.position, new Vector3(0, 0, 0), 0, 10);
+        this._raycaster = new Raycaster();
         this._raycaster.camera = this._camera;
 
         this._scene = createScene();
@@ -89,7 +89,7 @@ export default class World {
             delete this.mouse[event.button];
         });
 
-        let light = new THREE.DirectionalLight(0xFFFFFF);
+        let light = new DirectionalLight(0xFFFFFF);
         light.position.set(100, 100, 100);
         light.target.position.set(0, 0, 0);
         light.castShadow = true;
@@ -104,8 +104,8 @@ export default class World {
         light.shadow.camera.bottom = -200;
         this._scene.add(light);
 
-        const floor = new THREE.BoxGeometry(1, 1, 1);
-        const ground = new THREE.Mesh(floor, new THREE.MeshBasicMaterial({ color: 0xAAAAAA }));
+        const floor = new BoxGeometry(1, 1, 1);
+        const ground = new Mesh(floor, new MeshBasicMaterial({ color: 0xAAAAAA }));
         ground.position.set(0, 0, -2);
         this._scene.add(ground);
 
@@ -125,16 +125,8 @@ export default class World {
     private lastRender = Date.now();
 
     public spawnOrb () {
-        const starPosition = new THREE.Vector3(0, 0, 0);
-        const starDirection = new THREE.Vector3(0, 0, 0);
-        if (!this.cameraControls) {
-            return;
-        }
-        this._camera.getWorldPosition(starPosition)
-        this._camera.getWorldDirection(starDirection)
-        starPosition.addScaledVector(starDirection, 5);
-        const star = new Star(`star number ${this.stars.length}`, new THREE.Color(0xAA0000),
-            starPosition || new THREE.Vector3(0, 0, 0),
+        const star = new Star(`star number ${this.stars.length}`, new Color(0xAA0000),
+            this.getCursorPosition() || new Vector3(0, 0, 0),
             this.stars.length.toString(),
             this._scene);
         this.stars.push(star);
@@ -142,13 +134,19 @@ export default class World {
     }
 
     public showDetails () {
-        this._raycaster.setFromCamera(new THREE.Vector2(0, 0), this._camera);
+        this._raycaster.setFromCamera(new Vector2(0, 0), this._camera);
         const intersects = this._raycaster.intersectObjects(this.colliders, true);
         const collider = intersects[0]?.object as Collider;
         if (!(collider instanceof Collider)) {
             return;
         }
         console.log(collider.relatedStar.textField);
+    }
+
+    private getCursorPosition () {
+        return this._camera.getWorldPosition(new Vector3())
+            .add(this._camera.getWorldDirection(new Vector3())
+                .multiplyScalar(5));
     }
 
     public _Update () {
