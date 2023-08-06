@@ -110,8 +110,10 @@ export default class World {
                 this.interacting = [];
                 this.linePoints = [];
                 if (this.lineObject) {
+                    this.lineObject.geometry.dispose();
                     this._scene.remove(this.lineObject);
                 }
+                this.movingLine = [];
             }
             delete this.mouse[event.button];
         });
@@ -215,6 +217,11 @@ export default class World {
             return;
         }
         this.moving.push(collider.relatedStar);
+        if (collider.relatedStar.starPaths.length > 0) {
+            for (const i in collider.relatedStar.starPaths) {
+                this.movingLine.push(collider.relatedStar.starPaths[i]);
+            }
+        }
     }
 
     public createLine () {
@@ -249,6 +256,9 @@ export default class World {
             const cursorPos = this.getCursorPosition();
             this.moving[0].position.set(cursorPos.x, cursorPos.y, cursorPos.z)
             this.moving[0].updatePosition();
+            for (const i in this.movingLine) {
+                this.movingLine[i].updatePoint(cursorPos, this.moving[0]);
+            }
 
         }
         //right click dragging lines
