@@ -70,6 +70,11 @@ export default class Star {
         // this.starLabel.rotation.z = 0;
     }
 
+    public updatePosition () {
+        this.mesh?.position.set(this.position.x, this.position.y, this.position.z);
+        this.collider.position.set(this.position.x, this.position.y, this.position.z);
+    }
+
     public showDetails () {
         // console.log("got here successfully");
     }

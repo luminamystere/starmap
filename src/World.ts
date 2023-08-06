@@ -30,6 +30,7 @@ export default class World {
 
     public stars: Star[] = [];
     public colliders: Object3D[] = [];
+    public moving: Star[] = [];
 
     public playerVelocity = new Vector3();
     public playerDirection = new Vector3();
@@ -86,14 +87,15 @@ export default class World {
         document.body.addEventListener("mousedown", event => {
             this.mouse[event.button] ??= Date.now();
             if (this.mouse[0]) {
-                this.showDetails();
+                this.moveStar();
             }
             else if (this.mouse[2]) {
-                this.spawnOrb();
+                this.showDetails();
             }
         });
         document.body.addEventListener("mouseup", event => {
             delete this.mouse[event.button];
+            this.moving = [];
         });
 
         let light = new DirectionalLight(0xFFFFFF);
@@ -144,11 +146,16 @@ export default class World {
     public showDetails () {
         this._raycaster.setFromCamera(new Vector2(0, 0), this._camera);
         const intersects = this._raycaster.intersectObjects(this.colliders, true);
+        if (intersects.length == 0) {
+            this.spawnOrb();
+            console.log("spawning orb");
+            return;
+        }
         const collider = intersects[0]?.object as Collider;
         if (!(collider instanceof Collider)) {
             return;
         }
-        console.log(collider.relatedStar.textField);
+        console.log(collider.relatedStar.position.x, collider.relatedStar.position.y, collider.relatedStar.position.z);
 
     }
 
@@ -156,6 +163,22 @@ export default class World {
         return this._camera.getWorldPosition(new Vector3())
             .add(this._camera.getWorldDirection(new Vector3())
                 .multiplyScalar(5));
+    }
+
+    public moveStar () {
+        if (this.moving.length == 1) {
+            return;
+        }
+        this._raycaster.setFromCamera(new Vector2(0, 0), this._camera);
+        const intersects = this._raycaster.intersectObjects(this.colliders, false);
+        if (intersects.length == 0) {
+            return;
+        }
+        const collider = intersects[0]?.object as Collider;
+        if (!(collider instanceof Collider)) {
+            return;
+        }
+        this.moving.push(collider.relatedStar);
     }
 
     public _Update () {
@@ -173,6 +196,11 @@ export default class World {
 
         for (const i in this.stars) {
             this.stars[i].rotateLabel(this._camera.getWorldPosition(new Vector3));
+        }
+        if (this.mouse[0] && this.moving.length == 1) {
+            const cursorPos = this.getCursorPosition();
+            this.moving[0].position.set(cursorPos.x, cursorPos.y, cursorPos.z)
+            this.moving[0].updatePosition();
         }
     }
 
