@@ -232,6 +232,9 @@ export default class World {
         }
         const star1 = this.interacting[0];
         const star2 = intersects[0]?.object as Collider;
+        if (star1 == star2.relatedStar) {
+            return;
+        }
         this.starPaths.push(new StarPath(star1, star2.relatedStar, this._scene));
     }
 

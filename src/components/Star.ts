@@ -31,15 +31,12 @@ export default class Star {
         this.mesh.position.set(this.position.x || 0, this.position.y || 0, this.position.z || 0);
         this.mesh.name = this.name.toString();
         scene.add(this.mesh);
-        //this.createCollider(scene);
-        // console.log("spawned star at ", this.position);
     }
 
     public createCollider (scene: Scene) {
         const collider = new Collider(this);
         this.collider = collider;
         scene.add(this.collider);
-        // console.log("created collider ", this.collider);
         return collider;
     }
 
@@ -82,6 +79,6 @@ export default class Star {
     }
 
     public showDetails () {
-        // console.log("got here successfully");
+        console.log("got here successfully");
     }
 }

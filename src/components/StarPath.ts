@@ -26,7 +26,6 @@ export default class StarPath {
         this.createCylinder();
         if (this.cylinder) {
             scene.add(this.cylinder);
-            console.log(this.cylinder.scale.x, this.cylinder.scale.y, this.cylinder.scale.z);
         }
 
     }
@@ -71,23 +70,5 @@ export default class StarPath {
             this.cylinder.position.copy(this.star1.position);
             this.cylinder.lookAt(this.star2.position);
         }
-        // this.createCylinder();
-        // this.moveCylinder(linePos, starMoving);
-        console.log("updating line");
-    }
-
-    public moveCylinder (cursorPos: Vector3, star: Star) {
-        this.cylinder?.geometry.dispose();
-        // let direction: Vector3;
-        // if (!this.distance || !this.cylinder) {
-        //     return;
-        // }
-        // if (star == this.star1) {
-        //     direction = new Vector3().subVectors(cursorPos, this.star2.position);
-        // } else {
-        //     direction = new Vector3().subVectors(this.star1.position, cursorPos);
-        // }
-        // // const scale = direction.length() / this.distance;
-        // // this.cylinder.scale.x = scale;
     }
 }
