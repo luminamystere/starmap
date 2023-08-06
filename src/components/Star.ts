@@ -1,6 +1,7 @@
 import { Color, Mesh, MeshBasicMaterial, Object3D, Scene, SphereGeometry, Vector3 } from "three";
 import Collider from "./Collider.js";
 import { CSS3DObject } from "three/examples/jsm/renderers/CSS3DRenderer.js";
+import StarPath from "./StarPath.js";
 
 export default class Star {
 
@@ -11,6 +12,7 @@ export default class Star {
     public collider: Collider;
     public name: String;
     public starLabel?: CSS3DObject;
+    public starPaths: StarPath[] = [];
 
     public constructor (text: String, colour: Color, position: Vector3, name: String, scene: Scene) {
         this.starColour = colour;
@@ -57,6 +59,10 @@ export default class Star {
         this.starLabel.scale.set(0.005, 0.005, 0.005);
         this.starLabel.position.set(0, 0.8, 0);
         this.mesh?.add(this.starLabel);
+    }
+
+    public addStarPath (path: StarPath) {
+        this.starPaths.push(path);
     }
 
     public rotateLabel (camera: Vector3) {

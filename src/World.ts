@@ -7,7 +7,8 @@ import FlyMovement from "./systems/FlyMovement.js";
 import Star from "./components/Star.js";
 import Collider from "./components/Collider.js";
 import { CSS3DRenderer, CSS3DObject } from "three/examples/jsm/renderers/CSS3DRenderer.js"
-import { WebGLRenderer, PerspectiveCamera, Raycaster, Scene, Object3D, Vector3, PCFSoftShadowMap, DirectionalLight, BoxGeometry, Mesh, MeshBasicMaterial, Color, Vector2 } from "three";
+import { WebGLRenderer, PerspectiveCamera, Raycaster, Scene, Object3D, Vector3, PCFSoftShadowMap, DirectionalLight, BoxGeometry, Mesh, MeshBasicMaterial, Color, Vector2, BufferGeometry, Line, LineBasicMaterial } from "three";
+import StarPath from "./components/StarPath.js";
 
 export default class World {
 
@@ -30,7 +31,14 @@ export default class World {
 
     public stars: Star[] = [];
     public colliders: Object3D[] = [];
+    public starPaths: StarPath[] = [];
     public moving: Star[] = [];
+    public movingLine: StarPath[] = [];
+    public interacting: Star[] = [];
+
+    public linePoints: Vector3[] = [];
+    public lineGeometry?: BufferGeometry;
+    public lineObject?: Line;
 
     public playerVelocity = new Vector3();
     public playerDirection = new Vector3();
@@ -94,8 +102,18 @@ export default class World {
             }
         });
         document.body.addEventListener("mouseup", event => {
+            if (this.mouse[0]) {
+                this.moving = [];
+            } else if (this.mouse[2]) {
+                this.createLine();
+                this.showStarPanel(this.interacting[0]);
+                this.interacting = [];
+                this.linePoints = [];
+                if (this.lineObject) {
+                    this._scene.remove(this.lineObject);
+                }
+            }
             delete this.mouse[event.button];
-            this.moving = [];
         });
 
         let light = new DirectionalLight(0xFFFFFF);
@@ -144,6 +162,9 @@ export default class World {
     }
 
     public showDetails () {
+        if (this.interacting.length == 1) {
+            return;
+        }
         this._raycaster.setFromCamera(new Vector2(0, 0), this._camera);
         const intersects = this._raycaster.intersectObjects(this.colliders, true);
         if (intersects.length == 0) {
@@ -155,8 +176,23 @@ export default class World {
         if (!(collider instanceof Collider)) {
             return;
         }
-        console.log(collider.relatedStar.position.x, collider.relatedStar.position.y, collider.relatedStar.position.z);
+        this.interacting.push(collider.relatedStar);
+        this.linePoints.push(new Vector3(collider.relatedStar.position.x, collider.relatedStar.position.y, collider.relatedStar.position.z));
+        const cursorPos = this.getCursorPosition();
+        this.linePoints.push(new Vector3(cursorPos.x, cursorPos.y, cursorPos.z));
+        this.lineGeometry = new BufferGeometry().setFromPoints(this.linePoints);
+        this.lineObject = new Line(this.lineGeometry, new LineBasicMaterial({ color: 0xFFFFFF, linewidth: 1 }));
+        this._scene.add(this.lineObject);
+        // console.log(collider.relatedStar.position.x, collider.relatedStar.position.y, collider.relatedStar.position.z);
 
+    }
+
+    public showStarPanel (star: Star) {
+        if (star == undefined) {
+            console.log("no star yet");
+            return;
+        }
+        console.log("showing star details panel of ", star);
     }
 
     private getCursorPosition () {
@@ -181,6 +217,17 @@ export default class World {
         this.moving.push(collider.relatedStar);
     }
 
+    public createLine () {
+        this._raycaster.setFromCamera(new Vector2(0, 0), this._camera);
+        const intersects = this._raycaster.intersectObjects(this.colliders, false);
+        if (intersects.length == 0 || this.interacting.length == 0) {
+            return;
+        }
+        const star1 = this.interacting[0];
+        const star2 = intersects[0]?.object as Collider;
+        this.starPaths.push(new StarPath(star1, star2.relatedStar, this._scene));
+    }
+
     public _Update () {
 
         if (!this.movementControls) {
@@ -197,10 +244,19 @@ export default class World {
         for (const i in this.stars) {
             this.stars[i].rotateLabel(this._camera.getWorldPosition(new Vector3));
         }
+        //left click moving star
         if (this.mouse[0] && this.moving.length == 1) {
             const cursorPos = this.getCursorPosition();
             this.moving[0].position.set(cursorPos.x, cursorPos.y, cursorPos.z)
             this.moving[0].updatePosition();
+
+        }
+        //right click dragging lines
+        if (this.mouse[2] && this.interacting.length == 1) {
+            this.linePoints[1] = this.getCursorPosition();
+            // console.log(this.linePoints);
+            this.lineObject?.geometry.setFromPoints(this.linePoints);
+
         }
     }
 
