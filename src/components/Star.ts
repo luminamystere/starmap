@@ -5,16 +5,16 @@ import StarPath from "./StarPath.js";
 
 export default class Star {
 
-    public textField: String;
+    public textField: string;
     public starColour: Color;
     public position: Vector3;
     public mesh?: Mesh;
     public collider: Collider;
-    public name: String;
+    public name: string;
     public starLabel?: CSS3DObject;
     public starPaths: StarPath[] = [];
 
-    public constructor (text: String, colour: Color, position: Vector3, name: String, scene: Scene) {
+    public constructor (text: string, colour: Color, position: Vector3, name: string, scene: Scene) {
         this.starColour = colour;
         this.textField = text;
         this.position = position;
