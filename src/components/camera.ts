@@ -1,1 +1,0 @@
-import { PerspectiveCamera } from "three";
