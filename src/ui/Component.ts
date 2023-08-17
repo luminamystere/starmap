@@ -11,6 +11,11 @@ export default class Component<TAG_NAME extends keyof HTMLElementTagNameMap> {
         return this;
     }
 
+    public setId (id: string) {
+        this.element.id = id;
+        return this;
+    }
+
     public appendTo (component: AnyComponent) {
         component.element.appendChild(this.element);
         return this;
@@ -29,13 +34,25 @@ export default class Component<TAG_NAME extends keyof HTMLElementTagNameMap> {
         this.element.dispatchEvent(new Event(event, eventInfo));
     }
 
-    public addEventListener (event: string, handler: (event: Event) => any) {
-        this.element.addEventListener(event, handler);
+    public readonly listenerMap: Record<string, WeakMap<Function, Function>> = {};
+    public addEventListener (event: string, handler: (component: this, event: Event) => any) {
+        const realHandler = (event: Event) => handler(this, event);
+        this.element.addEventListener(event, realHandler);
+        this.listenerMap[event] ??= new WeakMap();
+        this.listenerMap[event].set(handler, realHandler);
         return this;
     }
 
-    public removeEventListener (event: string, handler: (event: Event) => any) {
-        this.element.removeEventListener(event, handler);
+    public removeEventListener (event: string, handler: (component: this, event: Event) => any) {
+        const realHandler = this.listenerMap[event]?.get(handler)
+        if (realHandler) {
+            this.element.removeEventListener(event, realHandler as any);
+        }
+        return this;
+    }
+
+    public setText (text: string) {
+        this.element.textContent = text;
         return this;
     }
 

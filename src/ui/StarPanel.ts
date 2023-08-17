@@ -1,18 +1,63 @@
 import Star from "../components/Star.js";
+import Component from "./Component.js";
+import Label from "./Label.js";
 import Panel from "./Panel.js";
+import SelectInput from "./SelectInput.js";
+import TextArea from "./TextArea.js";
 import TextInput from "./TextInput.js";
+
+export enum StarPanelClasses {
+    Main = "starpanel",
+    Label = "starpanel-label",
+    Name = "starpanel-input-name",
+    Description = "starpanel-input-description",
+    Faction = "starpanel-input-description",
+}
 
 export default class StarPanel extends Panel {
 
-    public readonly starName = new TextInput()
-        .addClass("starName")
+    public readonly nameLabel = new Label("starName")
+        .addClass(StarPanelClasses.Label)
+        .setText("Name:")
         .appendTo(this);
 
-    public constructor (star: Star) {
+    public readonly starName = new TextInput()
+        .addClass(StarPanelClasses.Name)
+        .setInputText(this.star.name)
+        .setId("starName")
+        .setMaxLength(30)
+        .addChangeListener(input => this.star.name = input.element.value)
+        .appendTo(this);
+
+    public readonly descriptionLabel = new Label("starDescription")
+        .addClass(StarPanelClasses.Label)
+        .setText("Description:")
+        .appendTo(this);
+
+    public readonly starDescription = new TextArea()
+        .addClass(StarPanelClasses.Description)
+        .setInputText(this.star.description)
+        .setId("starDescription")
+        .appendTo(this);
+
+    public readonly factionLabel = new Label("starFaction")
+        .addClass(StarPanelClasses.Label)
+        .setText("Faction:")
+        .appendTo(this);
+
+    public readonly factionSelect = new SelectInput()
+        .addClass(StarPanelClasses.Faction)
+        .setId("starFaction")
+        .appendTo(this);
+
+    public constructor (public readonly star: Star) {
         super();
         this.title.element.textContent = star.name;
         this.element.setAttribute("id", "starPanel");
+        this.addClass(StarPanelClasses.Main);
 
-        this.starName.setText(star.name);
+        this.factionSelect.addEntry("test faction 01");
+        this.factionSelect.addEntry("test faction 02");
+        this.factionSelect.addEntry("test faction 03");
     }
 }

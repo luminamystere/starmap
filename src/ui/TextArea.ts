@@ -1,18 +1,12 @@
 import Component from "./Component.js";
 
-export default class TextInput extends Component<"input"> {
+export default class TextArea extends Component<"textarea"> {
     public constructor () {
-        super("input");
-        this.element.type = "text";
+        super("textarea");
     }
 
     public setInputText (text: string) {
         this.element.value = text;
-        return this;
-    }
-
-    public setMaxLength (length: number) {
-        this.element.maxLength = length;
         return this;
     }
 

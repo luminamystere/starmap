@@ -5,20 +5,27 @@ import StarPath from "./StarPath.js";
 
 export default class Star {
 
-    public textField: string;
     public starColour: Color;
     public position: Vector3;
     public mesh?: Mesh;
     public collider: Collider;
-    public name: string;
+    private _name: string;
+    public get name () {
+        return this._name;
+    }
+    public set name (input: string) {
+        this._name = input;
+        this.updateLabel();
+    }
+    public description: string;
     public starLabel?: CSS3DObject;
     public starPaths: StarPath[] = [];
 
-    public constructor (text: string, colour: Color, position: Vector3, name: string, scene: Scene) {
+    public constructor (name: string, colour: Color, position: Vector3, scene: Scene) {
         this.starColour = colour;
-        this.textField = text;
         this.position = position;
-        this.name = name;
+        this._name = name;
+        this.description = "this is star no. " + name;
         this.createStar(scene);
         this.collider = this.createCollider(scene);
         this.createLabel();
@@ -51,11 +58,17 @@ export default class Star {
     public createLabel () {
         const starDiv = document.createElement('div');
         starDiv.className = 'label';
-        starDiv.textContent = this.textField.toString();
+        starDiv.textContent = this._name.toString();
         this.starLabel = new CSS3DObject(starDiv);
         this.starLabel.scale.set(0.005, 0.005, 0.005);
         this.starLabel.position.set(0, 0.8, 0);
         this.mesh?.add(this.starLabel);
+    }
+
+    public updateLabel () {
+        if (this.starLabel) {
+            this.starLabel.element.textContent = this._name;
+        }
     }
 
     public addStarPath (path: StarPath) {

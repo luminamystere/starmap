@@ -1,6 +1,6 @@
 import Component from "./Component.js";
 
-enum PanelClasses {
+export enum PanelClasses {
     Main = "panel",
     Header = "panel-header",
     Title = "panel-header-title",

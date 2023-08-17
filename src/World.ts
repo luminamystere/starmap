@@ -185,7 +185,6 @@ export default class World {
     public spawnOrb () {
         const star = new Star(`star number ${this.stars.length}`, new Color(0xAA0000),
             this.getCursorPosition() || new Vector3(0, 0, 0),
-            this.stars.length.toString(),
             this._scene);
         this.stars.push(star);
         this.colliders.push(star.collider);
