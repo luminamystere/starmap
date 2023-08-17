@@ -1,6 +1,6 @@
 import Component from "./Component.js";
 
-class Button extends Component<"button"> {
+export default class Button extends Component<"button"> {
 
     public constructor () {
         super("button");

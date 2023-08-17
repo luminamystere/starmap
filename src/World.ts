@@ -236,9 +236,11 @@ export default class World {
             console.log("no star yet");
             return;
         }
-        console.log("showing star details panel of ", star);
         this.starPanel = new StarPanel(star)
-            .addEventListener("closePanel", () => this.cameraControls?.lockMouse());
+            .addEventListener("closePanel", () => {
+                this.cameraControls?.lockMouse();
+                delete this.starPanel;
+            });
         document.body.append(this.starPanel.element);
     }
 

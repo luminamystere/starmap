@@ -1,4 +1,5 @@
 import Star from "../components/Star.js";
+import Button from "./Button.js";
 import Component from "./Component.js";
 import Label from "./Label.js";
 import Panel from "./Panel.js";
@@ -12,6 +13,7 @@ export enum StarPanelClasses {
     Name = "starpanel-input-name",
     Description = "starpanel-input-description",
     Faction = "starpanel-input-description",
+    Delete = "starpanel-input-delete",
 }
 
 export default class StarPanel extends Panel {
@@ -50,6 +52,12 @@ export default class StarPanel extends Panel {
         .setId("starFaction")
         .appendTo(this);
 
+    public readonly deleteButton = new Button()
+        .addClass(StarPanelClasses.Delete)
+        .setText("DELETE")
+        .addEventListener("click", () => this.deleteStar())
+        .appendTo(this);
+
     public constructor (public readonly star: Star) {
         super();
         this.title.element.textContent = star.name;
@@ -59,5 +67,9 @@ export default class StarPanel extends Panel {
         this.factionSelect.addEntry("test faction 01");
         this.factionSelect.addEntry("test faction 02");
         this.factionSelect.addEntry("test faction 03");
+    }
+
+    public deleteStar () {
+        this.star.delete();
     }
 }

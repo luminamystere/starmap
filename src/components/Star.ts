@@ -91,6 +91,10 @@ export default class Star {
         this.collider.position.set(this.position.x, this.position.y, this.position.z);
     }
 
+    public delete () {
+        console.log("aaaaaaaaa i'm dying");
+    }
+
     public showDetails () {
         console.log("got here successfully");
     }
