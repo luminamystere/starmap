@@ -73,12 +73,18 @@ export default class MouseControls {
         //         this.camera.rotation.x -= event.movementY / this.LISTENER_SENS;
         //     }
         // });
-        document.body.addEventListener("click", () => !document.documentElement.classList.contains("pointerlock-disabled")
-            && document.body.requestPointerLock());
+        document.body.addEventListener("click", () => this.lockMouse());
         document.addEventListener("pointerlockchange", () => {
             this.enabled = document.pointerLockElement === document.body;
             document.documentElement.classList.toggle("has-focus", this.enabled);
         });
+    }
+
+    public lockMouse () {
+        if (!document.documentElement.classList.contains("pointerlock-disabled")) {
+            document.body.requestPointerLock();
+        }
+
     }
 
     public initialise (scene: Scene) {

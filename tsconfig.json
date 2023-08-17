@@ -3,5 +3,6 @@
         "strict": true,
         "target": "ES2022",
         "outDir": "out",
+        "noImplicitOverride": true,
     }
 }

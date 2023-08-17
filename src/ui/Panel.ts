@@ -19,5 +19,12 @@ export default class Panel extends Component<"aside"> {
     public constructor () {
         super("aside");
         this.addClass(PanelClasses.Main);
+        document.documentElement.classList.add("pointerlock-disabled");
+    }
+
+    public override remove (): void {
+        document.documentElement.classList.remove("pointerlock-disabled");
+        this.emitEvent("closePanel");
+        super.remove();
     }
 }

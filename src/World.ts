@@ -45,6 +45,8 @@ export default class World {
     public playerDirection = new Vector3();
     public playerPosition = new Vector3();
 
+    public starPanel?: StarPanel;
+
     public constructor () {
 
         // console.log(JSON.stringify({
@@ -96,11 +98,9 @@ export default class World {
             if (event.code === "KeyT") {
                 this.saveToStorage();
             }
-            // if (event.code === "KeyW") {
-            //     this.createPanel();
-            // }
             if (event.code === "KeyQ") {
-                document.getElementById("starPanel")?.remove();
+                this.starPanel?.remove();
+                delete this.starPanel;
                 console.log("removing panel with ", event.code);
             }
             this.keyboard[event.key] ??= Date.now();
@@ -110,6 +110,9 @@ export default class World {
         })
         document.body.addEventListener("mousedown", event => {
             this.mouse[event.button] ??= Date.now();
+            if (this.starPanel) {
+                return;
+            }
             if (this.mouse[0]) {
                 this.moveStar();
             }
@@ -122,9 +125,13 @@ export default class World {
                 this.moving = [];
             } else if (this.mouse[2]) {
                 this.createLine();
+                if (this.starPanel) {
+                    return;
+                }
                 if (this.raycastForStar() == this.interacting[0]) {
                     console.log("showing star panel!");
                     this.showStarPanel(this.interacting[0]);
+                    document.exitPointerLock();
                 }
                 this.interacting = [];
                 this.linePoints = [];
@@ -224,8 +231,9 @@ export default class World {
             return;
         }
         console.log("showing star details panel of ", star);
-        const starPanel = new StarPanel(star);
-        document.body.append(starPanel.element);
+        this.starPanel = new StarPanel(star)
+            .addEventListener("closePanel", () => this.cameraControls?.lockMouse());
+        document.body.append(this.starPanel.element);
     }
 
     private getCursorPosition () {

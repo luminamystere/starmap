@@ -21,6 +21,24 @@ export default class Component<TAG_NAME extends keyof HTMLElementTagNameMap> {
         return this;
     }
 
+    public remove () {
+        this.element.remove();
+    }
+
+    public emitEvent (event: string, eventInfo?: object) {
+        this.element.dispatchEvent(new Event(event, eventInfo));
+    }
+
+    public addEventListener (event: string, handler: (event: Event) => any) {
+        this.element.addEventListener(event, handler);
+        return this;
+    }
+
+    public removeEventListener (event: string, handler: (event: Event) => any) {
+        this.element.removeEventListener(event, handler);
+        return this;
+    }
+
 }
 export type AnyComponent = Component<keyof HTMLElementTagNameMap>;
 
