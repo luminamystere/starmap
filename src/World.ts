@@ -9,6 +9,7 @@ import Collider from "./components/Collider.js";
 import { CSS3DRenderer, CSS3DObject } from "three/examples/jsm/renderers/CSS3DRenderer.js"
 import { WebGLRenderer, PerspectiveCamera, Raycaster, Scene, Object3D, Vector3, PCFSoftShadowMap, DirectionalLight, BoxGeometry, Mesh, MeshBasicMaterial, Color, Vector2, BufferGeometry, Line, LineBasicMaterial } from "three";
 import StarPath from "./components/StarPath.js";
+import StarPanel from "./ui/StarPanel.js";
 
 export default class World {
 
@@ -45,6 +46,12 @@ export default class World {
     public playerPosition = new Vector3();
 
     public constructor () {
+
+        // console.log(JSON.stringify({
+        //     stars: this.stars.map(star => ({
+        //         name: star.name
+        //     }))
+        // }))
 
         this._threejs = new WebGLRenderer();
         this._threejs.shadowMap.enabled = true;
@@ -87,6 +94,16 @@ export default class World {
             if (event.code === "Escape") {
                 document.exitPointerLock();
             }
+            if (event.code === "KeyT") {
+                this.saveToStorage();
+            }
+            // if (event.code === "KeyW") {
+            //     this.createPanel();
+            // }
+            if (event.code === "KeyQ") {
+                document.getElementById("starPanel")?.remove();
+                console.log("removing panel with ", event.code);
+            }
             this.keyboard[event.key] ??= Date.now();
         });
         document.body.addEventListener("keyup", event => {
@@ -106,7 +123,10 @@ export default class World {
                 this.moving = [];
             } else if (this.mouse[2]) {
                 this.createLine();
-                this.showStarPanel(this.interacting[0]);
+                if (this.raycastForStar() == this.interacting[0]) {
+                    console.log("showing star panel!");
+                    this.showStarPanel(this.interacting[0]);
+                }
                 this.interacting = [];
                 this.linePoints = [];
                 if (this.lineObject) {
@@ -152,7 +172,9 @@ export default class World {
         this._labelRender.setSize(window.innerWidth, window.innerHeight);
     }
 
-    private lastRender = Date.now();
+    public saveToStorage () {
+        console.log(JSON.stringify(this.starPaths));
+    }
 
     public spawnOrb () {
         const star = new Star(`star number ${this.stars.length}`, new Color(0xAA0000),
@@ -163,6 +185,17 @@ export default class World {
         this.colliders.push(star.collider);
     }
 
+    public raycastForStar () {
+        this._raycaster.setFromCamera(new Vector2(0, 0), this._camera);
+        const intersects = this._raycaster.intersectObjects(this.colliders, true);
+        if (intersects.length == 0) {
+            return;
+        } else {
+            const collider = intersects[0]?.object as Collider;
+            return collider.relatedStar;
+        }
+    }
+
     public showDetails () {
         if (this.interacting.length == 1) {
             return;
@@ -171,7 +204,6 @@ export default class World {
         const intersects = this._raycaster.intersectObjects(this.colliders, true);
         if (intersects.length == 0) {
             this.spawnOrb();
-            console.log("spawning orb");
             return;
         }
         const collider = intersects[0]?.object as Collider;
@@ -185,7 +217,6 @@ export default class World {
         this.lineGeometry = new BufferGeometry().setFromPoints(this.linePoints);
         this.lineObject = new Line(this.lineGeometry, new LineBasicMaterial({ color: 0xFFFFFF, linewidth: 1 }));
         this._scene.add(this.lineObject);
-        // console.log(collider.relatedStar.position.x, collider.relatedStar.position.y, collider.relatedStar.position.z);
 
     }
 
@@ -195,7 +226,15 @@ export default class World {
             return;
         }
         console.log("showing star details panel of ", star);
+        const starPanel = new StarPanel(star);
+        document.body.append(starPanel.element);
     }
+
+    // public createPanel () {
+    //     console.log("creating panel!");
+    //     // const starPanel = new StarPanel();
+    //     document.body.append(starPanel.element);
+    // }
 
     private getCursorPosition () {
         return this._camera.getWorldPosition(new Vector3())
@@ -267,7 +306,6 @@ export default class World {
         //right click dragging lines
         if (this.mouse[2] && this.interacting.length == 1) {
             this.linePoints[1] = this.getCursorPosition();
-            // console.log(this.linePoints);
             this.lineObject?.geometry.setFromPoints(this.linePoints);
 
         }

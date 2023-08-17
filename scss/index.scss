@@ -23,6 +23,15 @@ body {
 
 .panel {
     &-header {
-        &-title {}
+        &-title {
+            color: white;
+        }
     }
+
+    position: absolute;
+    width: 800px;
+    height: 800px;
+    top: 10%;
+    left: 10%;
+    background-color: black;
 }
