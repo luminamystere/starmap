@@ -74,7 +74,6 @@ export default class World {
         this._camera.position.set(0, 1, 0);
         this._camera.rotation.order = 'YXZ';
 
-        //this._placeRaycaster = new Raycaster(this._camera.position, new Vector3(0, 0, 0), 0, 10);
         this._raycaster = new Raycaster();
         this._raycaster.camera = this._camera;
 
@@ -192,6 +191,9 @@ export default class World {
             return;
         } else {
             const collider = intersects[0]?.object as Collider;
+            if (!(collider instanceof Collider)) {
+                return;
+            }
             return collider.relatedStar;
         }
     }
@@ -200,23 +202,19 @@ export default class World {
         if (this.interacting.length == 1) {
             return;
         }
-        this._raycaster.setFromCamera(new Vector2(0, 0), this._camera);
-        const intersects = this._raycaster.intersectObjects(this.colliders, true);
-        if (intersects.length == 0) {
+        const star = this.raycastForStar();
+        if (star == undefined) {
             this.spawnOrb();
             return;
+        } else {
+            this.interacting.push(star);
+            this.linePoints.push(new Vector3(star.position.x, star.position.y, star.position.z));
+            const cursorPos = this.getCursorPosition();
+            this.linePoints.push(new Vector3(cursorPos.x, cursorPos.y, cursorPos.z));
+            this.lineGeometry = new BufferGeometry().setFromPoints(this.linePoints);
+            this.lineObject = new Line(this.lineGeometry, new LineBasicMaterial({ color: 0xFFFFFF, linewidth: 1 }));
+            this._scene.add(this.lineObject);
         }
-        const collider = intersects[0]?.object as Collider;
-        if (!(collider instanceof Collider)) {
-            return;
-        }
-        this.interacting.push(collider.relatedStar);
-        this.linePoints.push(new Vector3(collider.relatedStar.position.x, collider.relatedStar.position.y, collider.relatedStar.position.z));
-        const cursorPos = this.getCursorPosition();
-        this.linePoints.push(new Vector3(cursorPos.x, cursorPos.y, cursorPos.z));
-        this.lineGeometry = new BufferGeometry().setFromPoints(this.linePoints);
-        this.lineObject = new Line(this.lineGeometry, new LineBasicMaterial({ color: 0xFFFFFF, linewidth: 1 }));
-        this._scene.add(this.lineObject);
 
     }
 
@@ -230,12 +228,6 @@ export default class World {
         document.body.append(starPanel.element);
     }
 
-    // public createPanel () {
-    //     console.log("creating panel!");
-    //     // const starPanel = new StarPanel();
-    //     document.body.append(starPanel.element);
-    // }
-
     private getCursorPosition () {
         return this._camera.getWorldPosition(new Vector3())
             .add(this._camera.getWorldDirection(new Vector3())
@@ -246,35 +238,29 @@ export default class World {
         if (this.moving.length == 1) {
             return;
         }
-        this._raycaster.setFromCamera(new Vector2(0, 0), this._camera);
-        const intersects = this._raycaster.intersectObjects(this.colliders, false);
-        if (intersects.length == 0) {
+        const star = this.raycastForStar();
+        if (star == undefined) {
             return;
         }
-        const collider = intersects[0]?.object as Collider;
-        if (!(collider instanceof Collider)) {
-            return;
-        }
-        this.moving.push(collider.relatedStar);
-        if (collider.relatedStar.starPaths.length > 0) {
-            for (const i in collider.relatedStar.starPaths) {
-                this.movingLine.push(collider.relatedStar.starPaths[i]);
+        this.moving.push(star);
+        if (star.starPaths.length > 0) {
+            for (const i in star.starPaths) {
+                this.movingLine.push(star.starPaths[i]);
             }
         }
     }
 
     public createLine () {
-        this._raycaster.setFromCamera(new Vector2(0, 0), this._camera);
-        const intersects = this._raycaster.intersectObjects(this.colliders, false);
-        if (intersects.length == 0 || this.interacting.length == 0) {
+        const star = this.raycastForStar();
+        if (star == undefined || this.interacting.length == 0) {
             return;
         }
         const star1 = this.interacting[0];
-        const star2 = intersects[0]?.object as Collider;
-        if (star1 == star2.relatedStar) {
+        const star2 = star;
+        if (star1 == star2) {
             return;
         }
-        this.starPaths.push(new StarPath(star1, star2.relatedStar, this._scene));
+        this.starPaths.push(new StarPath(star1, star2, this._scene));
     }
 
     public _Update () {
