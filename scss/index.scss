@@ -44,3 +44,9 @@ body {
     left: 10%;
     background-color: black;
 }
+
+.starpanel {
+    &-label {
+        color: white;
+    }
+}

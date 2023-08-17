@@ -120,6 +120,7 @@ export default class World {
                 this.showDetails();
             }
         });
+        let lastStarPanelShown = 0;
         document.body.addEventListener("mouseup", event => {
             if (this.mouse[0]) {
                 this.moving = [];
@@ -132,6 +133,7 @@ export default class World {
                     console.log("showing star panel!");
                     this.showStarPanel(this.interacting[0]);
                     document.exitPointerLock();
+                    lastStarPanelShown = Date.now();
                 }
                 this.interacting = [];
                 this.linePoints = [];
@@ -143,6 +145,11 @@ export default class World {
             }
             delete this.mouse[event.button];
         });
+        document.body.addEventListener("contextmenu", event => {
+            if (Date.now() - lastStarPanelShown < 10) {
+                event.preventDefault();
+            }
+        })
 
         let light = new DirectionalLight(0xFFFFFF);
         light.position.set(100, 100, 100);
