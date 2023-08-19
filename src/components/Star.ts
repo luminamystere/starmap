@@ -80,10 +80,6 @@ export default class Star {
             return;
         }
         this.starLabel.lookAt(camera);
-        // this.starLabel?.rotation.set(0, this.starLabel.rotation.y, 0);
-        // this.starLabel.rotation.x = 0;
-        // this.starLabel.rotation.y = 0;
-        // this.starLabel.rotation.z = 0;
     }
 
     public updatePosition () {
@@ -92,7 +88,10 @@ export default class Star {
     }
 
     public delete () {
-        console.log("aaaaaaaaa i'm dying");
+        while (this.starPaths.length >= 1) {
+            console.log("deleting starpath ", this.starPaths[0]);
+            this.starPaths[0].deleteStarPath();
+        }
     }
 
     public showDetails () {

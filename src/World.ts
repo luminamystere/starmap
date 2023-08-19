@@ -103,6 +103,9 @@ export default class World {
                 delete this.starPanel;
                 console.log("removing panel with ", event.code);
             }
+            if (event.code === "KeyA") {
+                console.log(this.starPaths);
+            }
             this.keyboard[event.key] ??= Date.now();
         });
         document.body.addEventListener("keyup", event => {
@@ -242,6 +245,7 @@ export default class World {
                 delete this.starPanel;
             });
         document.body.append(this.starPanel.element);
+        console.log(star);
     }
 
     private getCursorPosition () {
@@ -276,7 +280,7 @@ export default class World {
         if (star1 == star2) {
             return;
         }
-        this.starPaths.push(new StarPath(star1, star2, this._scene));
+        this.starPaths.push(new StarPath(star1, star2, this._scene, this));
     }
 
     public _Update () {

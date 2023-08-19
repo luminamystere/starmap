@@ -1,5 +1,6 @@
 import { BufferGeometry, CylinderGeometry, Line, LineBasicMaterial, MathUtils, Matrix4, Mesh, MeshBasicMaterial, Scene, Vector3 } from "three";
 import Star from "./Star.js";
+import World from "../World.js";
 
 export default class StarPath {
 
@@ -9,10 +10,14 @@ export default class StarPath {
     public line?: Line;
     public cylinder?: Mesh;
     public distance?: number;
+    public world: World;
+    public id: number;
 
-    public constructor (star1: Star, star2: Star, scene: Scene) {
+    public constructor (star1: Star, star2: Star, scene: Scene, world: World) {
         this.star1 = star1;
         this.star2 = star2;
+        this.world = world;
+        this.id = Date.now();
         this.createLine(scene);
     }
 
@@ -69,6 +74,34 @@ export default class StarPath {
             this.cylinder.geometry.applyMatrix4(new Matrix4().makeRotationX(MathUtils.degToRad(90)));
             this.cylinder.position.copy(this.star1.position);
             this.cylinder.lookAt(this.star2.position);
+        }
+    }
+
+    public deleteStarPath () {
+        this.star1.starPaths = this.star1.starPaths.filter(starpath => starpath !== this);
+        this.star2.starPaths = this.star2.starPaths.filter(starpath => starpath !== this);
+        this.world.starPaths = this.world.starPaths.filter(starpath => starpath !== this);
+        if (this.cylinder) {
+            if (this.cylinder.geometry) {
+                this.cylinder.geometry.dispose();
+            }
+            if (this.cylinder.material instanceof Array) {
+                this.cylinder.material.forEach(material => material.dispose());
+            } else {
+                this.cylinder.material.dispose();
+            }
+            this.cylinder.removeFromParent();
+        }
+        if (this.line) {
+            if (this.line.geometry) {
+                this.line.geometry.dispose();
+            }
+            if (this.line.material instanceof Array) {
+                this.line.material.forEach(material => material.dispose());
+            } else {
+                this.line.material.dispose();
+            }
+            this.line.removeFromParent();
         }
     }
 }
