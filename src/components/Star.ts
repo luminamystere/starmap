@@ -88,9 +88,8 @@ export default class Star {
     }
 
     public delete () {
-        while (this.starPaths.length >= 1) {
-            console.log("deleting starpath ", this.starPaths[0]);
-            this.starPaths[0].deleteStarPath();
+        for (let i = this.starPaths.length - 1; i >= 0; i--) {
+            this.starPaths[i].deleteStarPath();
         }
     }
 
