@@ -2,6 +2,7 @@ import { Color, Mesh, MeshBasicMaterial, Object3D, Scene, SphereGeometry, Vector
 import Collider from "./Collider.js";
 import { CSS3DObject } from "three/examples/jsm/renderers/CSS3DRenderer.js";
 import StarPath from "./StarPath.js";
+import World from "../World.js";
 
 export default class Star {
 
@@ -20,12 +21,14 @@ export default class Star {
     public description: string;
     public starLabel?: CSS3DObject;
     public starPaths: StarPath[] = [];
+    public world: World;
 
-    public constructor (name: string, colour: Color, position: Vector3, scene: Scene) {
+    public constructor (name: string, colour: Color, position: Vector3, scene: Scene, world: World) {
         this.starColour = colour;
         this.position = position;
         this._name = name;
         this.description = "this is star no. " + name;
+        this.world = world;
         this.createStar(scene);
         this.collider = this.createCollider(scene);
         this.createLabel();
@@ -90,6 +93,32 @@ export default class Star {
     public delete () {
         for (let i = this.starPaths.length - 1; i >= 0; i--) {
             this.starPaths[i].deleteStarPath();
+        }
+        this.world.stars = this.world.stars.filter(star => star !== this);
+        if (this.starLabel) {
+            this.starLabel.removeFromParent();
+        }
+        if (this.collider) {
+            if (this.collider.geometry) {
+                this.collider.geometry.dispose();
+            }
+            if (this.collider.material instanceof Array) {
+                this.collider.material.forEach(material => material.dispose());
+            } else {
+                this.collider.material.dispose();
+            }
+            this.collider.removeFromParent();
+        }
+        if (this.mesh) {
+            if (this.mesh.geometry) {
+                this.mesh.geometry.dispose();
+            }
+            if (this.mesh.material instanceof Array) {
+                this.mesh.material.forEach(material => material.dispose());
+            } else {
+                this.mesh.material.dispose();
+            }
+            this.mesh.removeFromParent();
         }
     }
 

@@ -71,5 +71,6 @@ export default class StarPanel extends Panel {
 
     public deleteStar () {
         this.star.delete();
+        this.remove();
     }
 }
