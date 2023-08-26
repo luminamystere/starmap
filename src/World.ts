@@ -104,7 +104,7 @@ export default class World {
                 console.log("removing panel with ", event.code);
             }
             if (event.code === "KeyA") {
-                console.log(this.starPaths);
+                console.log(this._scene);
             }
             this.keyboard[event.key] ??= Date.now();
         });

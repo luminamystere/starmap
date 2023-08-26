@@ -95,6 +95,7 @@ export default class Star {
             this.starPaths[i].deleteStarPath();
         }
         this.world.stars = this.world.stars.filter(star => star !== this);
+        this.world.colliders = this.world.colliders.filter(collider => collider !== this.collider);
         if (this.starLabel) {
             this.starLabel.removeFromParent();
         }
