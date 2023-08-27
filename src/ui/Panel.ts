@@ -5,7 +5,8 @@ export enum PanelClasses {
     Main = "panel",
     Header = "panel-header",
     Title = "panel-header-title",
-    CloseButton = "panel-header-closeButton"
+    CloseButton = "panel-header-closeButton",
+    Content = "panel-content"
 }
 
 export default class Panel extends Component<"aside"> {
@@ -20,9 +21,13 @@ export default class Panel extends Component<"aside"> {
 
     public readonly closeButton = new Button()
         .addClass(PanelClasses.CloseButton)
-        .setText("Close")
+        .setText("X")
         .addEventListener("click", () => this.remove())
         .appendTo(this.header);
+
+    public readonly content = new Component("div")
+        .addClass(PanelClasses.Content)
+        .appendTo(this);
 
     public constructor () {
         super("aside");

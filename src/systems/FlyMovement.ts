@@ -22,22 +22,22 @@ export default class FlyMovement {
         let leftRightInput = 0;
         let upDownInput = 0;
 
-        if (this.world.keyboard["e"]) {
+        if (this.world.keyboard["KeyE"]) {
             forwardBackInput++;
         }
-        if (this.world.keyboard["d"]) {
+        if (this.world.keyboard["KeyD"]) {
             forwardBackInput--;
         }
-        if (this.world.keyboard["s"]) {
+        if (this.world.keyboard["KeyS"]) {
             leftRightInput--;
         }
-        if (this.world.keyboard["f"]) {
+        if (this.world.keyboard["KeyF"]) {
             leftRightInput++;
         }
-        if (this.world.keyboard[" "]) {
+        if (this.world.keyboard["Space"]) {
             upDownInput++;
         }
-        if (this.world.keyboard["Shift"]) {
+        if (this.world.keyboard["ShiftLeft"]) {
             upDownInput--;
         }
         this.playerVelocity.add(this.getForwardVector().multiplyScalar(this.SPEED_HORIZONTAL * delta).multiplyScalar(forwardBackInput));

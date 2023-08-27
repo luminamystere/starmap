@@ -12,7 +12,7 @@ export enum StarPanelClasses {
     Label = "starpanel-label",
     Name = "starpanel-input-name",
     Description = "starpanel-input-description",
-    Faction = "starpanel-input-description",
+    Faction = "starpanel-input-faction",
     Delete = "starpanel-input-delete",
 }
 
@@ -21,7 +21,7 @@ export default class StarPanel extends Panel {
     public readonly nameLabel = new Label("starName")
         .addClass(StarPanelClasses.Label)
         .setText("Name:")
-        .appendTo(this);
+        .appendTo(this.content);
 
     public readonly starName = new TextInput()
         .addClass(StarPanelClasses.Name)
@@ -29,34 +29,34 @@ export default class StarPanel extends Panel {
         .setId("starName")
         .setMaxLength(30)
         .addChangeListener(input => this.star.name = input.element.value)
-        .appendTo(this);
+        .appendTo(this.content);
 
     public readonly descriptionLabel = new Label("starDescription")
         .addClass(StarPanelClasses.Label)
         .setText("Description:")
-        .appendTo(this);
+        .appendTo(this.content);
 
     public readonly starDescription = new TextArea()
         .addClass(StarPanelClasses.Description)
         .setInputText(this.star.description)
         .setId("starDescription")
-        .appendTo(this);
+        .appendTo(this.content);
 
     public readonly factionLabel = new Label("starFaction")
         .addClass(StarPanelClasses.Label)
         .setText("Faction:")
-        .appendTo(this);
+        .appendTo(this.content);
 
     public readonly factionSelect = new SelectInput()
         .addClass(StarPanelClasses.Faction)
         .setId("starFaction")
-        .appendTo(this);
+        .appendTo(this.content);
 
     public readonly deleteButton = new Button()
         .addClass(StarPanelClasses.Delete)
         .setText("DELETE")
         .addEventListener("click", () => this.deleteStar())
-        .appendTo(this);
+        .appendTo(this.content);
 
     public constructor (public readonly star: Star) {
         super();

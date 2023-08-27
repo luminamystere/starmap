@@ -10,6 +10,8 @@ import { CSS3DRenderer, CSS3DObject } from "three/examples/jsm/renderers/CSS3DRe
 import { WebGLRenderer, PerspectiveCamera, Raycaster, Scene, Object3D, Vector3, PCFSoftShadowMap, DirectionalLight, BoxGeometry, Mesh, MeshBasicMaterial, Color, Vector2, BufferGeometry, Line, LineBasicMaterial } from "three";
 import StarPath from "./components/StarPath.js";
 import StarPanel from "./ui/StarPanel.js";
+import ProjectPanel from "./ui/ProjectPanel.js";
+import Faction from "./components/Faction.js";
 
 export default class World {
 
@@ -36,6 +38,7 @@ export default class World {
     public moving: Star[] = [];
     public movingLine: StarPath[] = [];
     public interacting: Star[] = [];
+    public factions: Faction[] = [];
 
     public linePoints: Vector3[] = [];
     public lineGeometry?: BufferGeometry;
@@ -46,6 +49,7 @@ export default class World {
     public playerPosition = new Vector3();
 
     public starPanel?: StarPanel;
+    public projectPanel?: ProjectPanel;
 
     public constructor () {
 
@@ -94,22 +98,21 @@ export default class World {
         document.body.addEventListener("keydown", (event: KeyboardEvent) => {
             if (event.code === "Escape") {
                 document.exitPointerLock();
+                console.log("pressed escape");
             }
             if (event.code === "KeyT") {
                 this.saveToStorage();
             }
             if (event.code === "KeyQ") {
-                this.starPanel?.remove();
-                delete this.starPanel;
-                console.log("removing panel with ", event.code);
+                this.showProjectPanel();
             }
             if (event.code === "KeyA") {
                 console.log(this._scene);
             }
-            this.keyboard[event.key] ??= Date.now();
+            this.keyboard[event.code] ??= Date.now();
         });
         document.body.addEventListener("keyup", event => {
-            delete this.keyboard[event.key];
+            delete this.keyboard[event.code];
         })
         document.body.addEventListener("mousedown", event => {
             this.mouse[event.button] ??= Date.now();
@@ -135,7 +138,6 @@ export default class World {
                 if (this.raycastForStar() == this.interacting[0]) {
                     console.log("showing star panel!");
                     this.showStarPanel(this.interacting[0]);
-                    document.exitPointerLock();
                     lastStarPanelShown = Date.now();
                 }
                 this.interacting = [];
@@ -152,7 +154,14 @@ export default class World {
             if (Date.now() - lastStarPanelShown < 10) {
                 event.preventDefault();
             }
-        })
+        });
+        document.addEventListener("pointerlockchange", () => {
+            setTimeout(() => {
+                if (!document.pointerLockElement && !this.projectPanel && !this.starPanel) {
+                    this.showProjectPanel();
+                }
+            }, 100);
+        });
 
         let light = new DirectionalLight(0xFFFFFF);
         light.position.set(100, 100, 100);
@@ -234,6 +243,23 @@ export default class World {
 
     }
 
+    public showProjectPanel () {
+        if (this.projectPanel) {
+            this.projectPanel.remove();
+            delete this.projectPanel;
+            console.log("deleting project panel");
+        } else {
+            this.projectPanel = new ProjectPanel(this)
+                .addEventListener("closePanel", () => {
+                    this.cameraControls?.lockMouse();
+                    delete this.projectPanel;
+                });
+            document.body.append(this.projectPanel.element);
+            document.exitPointerLock();
+            console.log("showing project panel");
+        }
+    }
+
     public showStarPanel (star: Star) {
         if (star == undefined) {
             console.log("no star yet");
@@ -245,6 +271,7 @@ export default class World {
                 delete this.starPanel;
             });
         document.body.append(this.starPanel.element);
+        document.exitPointerLock();
         console.log(star);
     }
 
