@@ -22,6 +22,10 @@ export default class FlyMovement {
         let leftRightInput = 0;
         let upDownInput = 0;
 
+        if (document.documentElement.classList.contains("pointerlock-disabled")) {
+            return;
+        }
+
         if (this.world.keyboard["KeyE"]) {
             forwardBackInput++;
         }
