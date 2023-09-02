@@ -1,3 +1,4 @@
+import Faction from "../components/Faction.js";
 import Star from "../components/Star.js";
 import Button from "./Button.js";
 import Component from "./Component.js";
@@ -38,6 +39,7 @@ export default class StarPanel extends Panel {
 
     public readonly starDescription = new TextArea()
         .addClass(StarPanelClasses.Description)
+        .addChangeListener(input => this.star.name = input.element.value)
         .setInputText(this.star.description)
         .setId("starDescription")
         .appendTo(this.content);
@@ -49,6 +51,7 @@ export default class StarPanel extends Panel {
 
     public readonly factionSelect = new SelectInput()
         .addClass(StarPanelClasses.Faction)
+        .addChangeListener((event) => this.updateFaction(event.element.value))
         .setId("starFaction")
         .appendTo(this.content);
 
@@ -64,13 +67,18 @@ export default class StarPanel extends Panel {
         this.element.setAttribute("id", "starPanel");
         this.addClass(StarPanelClasses.Main);
 
-        this.factionSelect.addEntry("test faction 01");
-        this.factionSelect.addEntry("test faction 02");
-        this.factionSelect.addEntry("test faction 03");
+        this.factionSelect.addEntry("None");
+        for (const i in star.world.factions) {
+            this.factionSelect.addEntry(star.world.factions[i].name);
+        }
     }
 
     public deleteStar () {
         this.star.delete();
         this.remove();
+    }
+
+    public updateFaction (input: string) {
+        this.star.updateFaction(input);
     }
 }

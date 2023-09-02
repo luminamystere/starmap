@@ -9,4 +9,9 @@ export default class SelectInput extends Component<"select"> {
         this.element.options.add(new Option(entry, entry));
         return this;
     }
+
+    public addChangeListener (handler: (input: this, event: InputEvent) => any) {
+        this.addEventListener("change", handler as any);
+        return this;
+    }
 }

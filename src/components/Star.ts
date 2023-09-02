@@ -13,7 +13,7 @@ export default class Star {
     public collider: Collider;
     public faction?: Faction;
     public factionMesh: Mesh;
-    public factionMaterial?: MeshBasicMaterial;
+    public factionMaterial: MeshBasicMaterial;
     private _name: string;
     public get name () {
         return this._name;
@@ -35,6 +35,7 @@ export default class Star {
         this.world = world;
         this.createStar(scene);
         this.collider = this.createCollider(scene);
+        this.factionMaterial = this.createFactionMaterial();
         this.factionMesh = this.createFactionSphere(scene);
         this.createLabel();
     }
@@ -64,7 +65,13 @@ export default class Star {
         this.factionMesh.position.set(this.position.x || 0, this.position.y || 0, this.position.z || 0);
         scene.add(this.factionMesh);
         return this.factionMesh;
+    }
 
+    public createFactionMaterial () {
+        this.factionMaterial = new MeshBasicMaterial({ color: 0xFFFFFF });
+        this.factionMaterial.transparent = true;
+        this.factionMaterial.opacity = 0.6;
+        return this.factionMaterial;
     }
 
     public get currentMesh () {
@@ -113,17 +120,45 @@ export default class Star {
     }
 
     public hoverStar () {
-        if (this.factionMaterial && this.factionMesh) {
-            this.factionMaterial.opacity = 0.6;
-            this.factionMesh.material = this.factionMaterial;
+        this.factionMaterial.opacity = 0.6;
+        if (this.factionMesh.material instanceof Array) {
+            this.factionMesh.material.forEach(material => material.dispose());
+        } else {
+            this.factionMesh.material.dispose();
         }
+        this.factionMesh.material = this.factionMaterial;
+
     }
 
     public unHoverStar () {
-        if (this.factionMaterial && this.factionMesh) {
-            this.factionMaterial.opacity = 0;
-            this.factionMesh.material = this.factionMaterial;
+        this.factionMaterial.opacity = 0;
+        if (this.factionMesh.material instanceof Array) {
+            this.factionMesh.material.forEach(material => material.dispose());
+        } else {
+            this.factionMesh.material.dispose();
         }
+        this.factionMesh.material = this.factionMaterial;
+    }
+
+    public updateFaction (input: string) {
+        if (input == "None") {
+            this.factionMaterial.color = new Color(0xFFFFFF);
+        } else {
+            //look up faction by name
+            const faction = this.world.factions.find((element) => element.name == input);
+            if (faction == null) {
+                return;
+            }
+            this.faction = faction;
+            const colour = new Color(faction.colour);
+            this.factionMaterial.color = colour;
+        }
+        if (this.factionMesh.material instanceof Array) {
+            this.factionMesh.material.forEach(material => material.dispose());
+        } else {
+            this.factionMesh.material.dispose();
+        }
+        this.factionMesh.material = this.factionMaterial;
     }
 
     public delete () {
