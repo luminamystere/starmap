@@ -56,7 +56,7 @@ export default class StarPanel extends Panel {
         .addClass(StarPanelClasses.Delete)
         .setText("DELETE")
         .addEventListener("click", () => this.deleteStar())
-        .appendTo(this.content);
+        .appendTo(this.footer);
 
     public constructor (public readonly star: Star) {
         super();

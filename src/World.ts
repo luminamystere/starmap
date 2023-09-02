@@ -40,6 +40,8 @@ export default class World {
     public interacting: Star[] = [];
     public factions: Faction[] = [];
 
+    public hovering: Star[] = [];
+
     public linePoints: Vector3[] = [];
     public lineGeometry?: BufferGeometry;
     public lineObject?: Line;
@@ -322,6 +324,15 @@ export default class World {
 
         this.movementControls?.update(delta);
         this.cameraControls?.getObject().position.add(this.movementControls.updatePlayer(delta))
+
+        const star = this.raycastForStar();
+        if (star !== undefined) {
+            star.hoverStar();
+            this.hovering.push(star);
+        } else if (this.hovering.length > 0) {
+            this.hovering[0].unHoverStar();
+            this.hovering = [];
+        }
 
         for (const i in this.stars) {
             this.stars[i].rotateLabel(this._camera.getWorldPosition(new Vector3));

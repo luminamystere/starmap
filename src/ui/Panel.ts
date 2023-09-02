@@ -6,7 +6,9 @@ export enum PanelClasses {
     Header = "panel-header",
     Title = "panel-header-title",
     CloseButton = "panel-header-closeButton",
-    Content = "panel-content"
+    Wrapper = "panel-wrapper",
+    Content = "panel-content",
+    Footer = "panel-footer"
 }
 
 export default class Panel extends Component<"aside"> {
@@ -25,9 +27,17 @@ export default class Panel extends Component<"aside"> {
         .addEventListener("click", () => this.remove())
         .appendTo(this.header);
 
+    public readonly contentWrapper = new Component("div")
+        .addClass(PanelClasses.Wrapper)
+        .appendTo(this);
+
     public readonly content = new Component("div")
         .addClass(PanelClasses.Content)
-        .appendTo(this);
+        .appendTo(this.contentWrapper);
+
+    public readonly footer = new Component("footer")
+        .addClass(PanelClasses.Footer)
+        .appendTo(this.contentWrapper);
 
     public constructor () {
         super("aside");

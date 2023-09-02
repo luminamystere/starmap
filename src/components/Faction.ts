@@ -18,10 +18,10 @@ export default class Faction {
     }
     public _colour: Color;
     public get colour () {
-        return this._colour;
+        return `#${this._colour.getHexString()}`;
     }
-    public set colour (input: Color) {
-        this._colour = input;
+    public set colour (input: `#${string}`) {
+        this._colour = new Color(input);
     }
 
     public constructor (name: string, description: string, colour: Color) {
