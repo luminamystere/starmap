@@ -7,6 +7,7 @@ import FlyMovement from "./systems/FlyMovement.js";
 import Star from "./components/Star.js";
 import Collider from "./components/Collider.js";
 import { CSS3DRenderer, CSS3DObject } from "three/examples/jsm/renderers/CSS3DRenderer.js"
+import { CSS2DRenderer, CSS2DObject } from "three/examples/jsm/renderers/CSS2DRenderer.js"
 import { WebGLRenderer, PerspectiveCamera, Raycaster, Scene, Object3D, Vector3, PCFSoftShadowMap, DirectionalLight, BoxGeometry, Mesh, MeshBasicMaterial, Color, Vector2, BufferGeometry, Line, LineBasicMaterial, CubeTextureLoader } from "three";
 import StarPath from "./components/StarPath.js";
 import StarPanel from "./ui/StarPanel.js";
@@ -36,7 +37,8 @@ export default class World {
     public keyboard: Record<string, number> = {};
     public mouse: Record<string, number> = {};
     public _threejs: WebGLRenderer;
-    public _labelRender: CSS3DRenderer;
+    // public _labelRender: CSS3DRenderer;
+    public _labelRender: CSS2DRenderer;
     public _camera: PerspectiveCamera;
     public _raycaster: Raycaster;
 
@@ -82,7 +84,8 @@ export default class World {
         this._threejs.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(this._threejs.domElement);
 
-        this._labelRender = new CSS3DRenderer();
+        // this._labelRender = new CSS3DRenderer();
+        this._labelRender = new CSS2DRenderer();
         this._labelRender.setSize(window.innerWidth, window.innerHeight);
         this._labelRender.domElement.style.position = 'absolute';
         this._labelRender.domElement.style.top = '0px';
@@ -425,6 +428,10 @@ export default class World {
         this.time = Date.now();
         const delta = elapsed / this.TICKRATE;
 
+        if (this.starPanel || this.projectPanel) {
+            return;
+        }
+
         this.movementControls?.update(delta);
         this.cameraControls?.getObject().position.add(this.movementControls.updatePlayer(delta))
 
@@ -466,6 +473,7 @@ export default class World {
             this.lineObject?.geometry.setFromPoints(this.linePoints);
 
         }
+        this.stars[0].updateLabelScale(this._camera.getWorldPosition(new Vector3));
     }
 
     public render () {
