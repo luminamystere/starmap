@@ -153,6 +153,7 @@ export default class Star {
     public updateFaction (input: string) {
         if (input == "None") {
             this.factionMaterial.color = new Color(0xFFFFFF);
+            delete this.faction;
         } else {
             //look up faction by name
             const faction = this.world.factions.find((element) => element.name == input);

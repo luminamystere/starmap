@@ -98,5 +98,6 @@ export default class StarPanel extends Panel {
 
     public updateFaction (input: string) {
         this.star.updateFaction(input);
+        this.star.world.saveLocalStorage();
     }
 }

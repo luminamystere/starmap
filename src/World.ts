@@ -73,12 +73,6 @@ export default class World {
 
     public constructor () {
 
-        // console.log(JSON.stringify({
-        //     stars: this.stars.map(star => ({
-        //         name: star.name
-        //     }))
-        // }))
-
         this._threejs = new WebGLRenderer();
         this._threejs.shadowMap.enabled = true;
         this._threejs.shadowMap.type = PCFSoftShadowMap;
@@ -118,7 +112,6 @@ export default class World {
         document.body.addEventListener("keydown", (event: KeyboardEvent) => {
             if (event.code === "Escape") {
                 document.exitPointerLock();
-                console.log("pressed escape");
             }
             if (event.code === "KeyT") {
                 this.loadLocalStorage();
@@ -134,7 +127,6 @@ export default class World {
                 console.log("stars", this.stars);
                 console.log("starpaths", this.starPaths);
                 console.log("factions", this.factions);
-
             }
             this.keyboard[event.code] ??= Date.now();
         });
@@ -157,12 +149,13 @@ export default class World {
         document.body.addEventListener("mouseup", event => {
             if (this.mouse[0]) {
                 this.moving = [];
+                this.saveLocalStorage();
             } else if (this.mouse[1]) {
-                console.log("deleting starpath!");
                 const starpath = this.raycastForStarpath();
                 if (starpath instanceof StarPath) {
                     starpath.deleteStarPath();
                 }
+                this.saveLocalStorage();
 
             } else if (this.mouse[2]) {
                 this.createLine();
@@ -170,7 +163,6 @@ export default class World {
                     return;
                 }
                 if (this.raycastForStar() == this.interacting[0]) {
-                    console.log("showing star panel!");
                     this.showStarPanel(this.interacting[0]);
                     lastStarPanelShown = Date.now();
                 }
@@ -181,6 +173,7 @@ export default class World {
                     this._scene.remove(this.lineObject);
                 }
                 this.movingLine = [];
+                this.saveLocalStorage();
             }
             delete this.mouse[event.button];
         });
@@ -227,6 +220,7 @@ export default class World {
         this.cameraControls = new MouseControls(this);
         this.cameraControls.setCamera(this._camera);
         this._scene.add(this.cameraControls.getObject());
+        this.loadLocalStorage();
     }
 
     _OnWindowResize () {
@@ -272,7 +266,6 @@ export default class World {
                 this._scene, this);
             this.stars.push(star);
             this.colliders.push(star.collider);
-            console.log(savedStar.faction);
             const faction = this.factions[savedStar.faction];
             if (faction) {
                 star.updateFaction(faction.name);
@@ -324,7 +317,6 @@ export default class World {
             if (!(starPath instanceof StarPath)) {
                 return;
             }
-            console.log(starPath);
             return starPath;
         }
     }
@@ -378,7 +370,6 @@ export default class World {
             });
         document.body.append(this.starPanel.element);
         document.exitPointerLock();
-        console.log(star);
     }
 
     private getCursorPosition () {
