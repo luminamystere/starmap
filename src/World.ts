@@ -34,7 +34,7 @@ export default class World {
 
     public stars: Star[] = [];
     public colliders: Object3D[] = [];
-    public starPaths: Object3D[] = [];
+    public starPaths: StarPath[] = [];
     public moving: Star[] = [];
     public movingLine: StarPath[] = [];
     public interacting: Star[] = [];
@@ -103,13 +103,20 @@ export default class World {
                 console.log("pressed escape");
             }
             if (event.code === "KeyT") {
-                this.saveToStorage();
+                this.loadLocalStorage();
             }
             if (event.code === "KeyQ") {
                 this.showProjectPanel();
             }
-            if (event.code === "KeyA") {
-                console.log(this._scene);
+            if (event.code === "KeyY") {
+                this.saveLocalStorage();
+            }
+            if (event.code === "KeyU") {
+                console.log("localstorage", localStorage);
+                console.log("stars", this.stars);
+                console.log("starpaths", this.starPaths);
+                console.log("factions", this.factions);
+
             }
             this.keyboard[event.code] ??= Date.now();
         });
@@ -135,6 +142,9 @@ export default class World {
             } else if (this.mouse[1]) {
                 console.log("deleting starpath!");
                 const starpath = this.raycastForStarpath();
+                if (starpath instanceof StarPath) {
+                    starpath.deleteStarPath();
+                }
 
             } else if (this.mouse[2]) {
                 this.createLine();
@@ -208,8 +218,50 @@ export default class World {
         this._labelRender.setSize(window.innerWidth, window.innerHeight);
     }
 
-    public saveToStorage () {
-        console.log(JSON.stringify(this.starPaths));
+    public serialiseJSON () {
+        return JSON.stringify({
+            starPaths: this.starPaths.map(starPath => ({
+                star1: this.stars.indexOf(starPath.star1),
+                star2: this.stars.indexOf(starPath.star2),
+            })),
+            stars: this.stars.map(star => ({
+                name: star.name,
+                faction: this.factions.indexOf(star.faction!),
+                colour: star.starColour,
+                position: [star.position.x, star.position.y, star.position.z],
+            })),
+            factions: this.factions.map(faction => ({
+                name: faction.name,
+                description: faction.description,
+                colour: faction.colour,
+            })),
+        });
+    }
+
+    public saveLocalStorage () {
+        console.log("saving local storage");
+        localStorage.setItem("save", this.serialiseJSON());
+    }
+
+    public loadLocalStorage () {
+        console.log("loading local storage");
+        const saved = JSON.parse(localStorage.getItem("save") ?? '{"starPaths": [], "stars": [], "factions": []}');
+        this.factions = saved.factions as Faction[];
+        for (const i in saved.stars as Star[]) {
+            console.log("colour", saved.stars[i].colour);
+            console.log("faction", saved.stars[i].faction);
+            const star = new Star(saved.stars[i].name,
+                new Color(saved.stars[i].colour),
+                new Vector3(saved.stars[i].position[0], saved.stars[i].position[1], saved.stars[i].position[2]),
+                this._scene, this);
+            this.stars.push(star);
+            this.colliders.push(star.collider);
+        }
+        for (const i in saved.starPaths as StarPath[]) {
+            const starPath = new StarPath(this.stars[saved.starPaths[i].star1], this.stars[saved.starPaths[i].star2], this._scene, this);
+            this.starPaths.push(starPath);
+        }
+
     }
 
     public spawnOrb () {

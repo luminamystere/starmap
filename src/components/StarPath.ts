@@ -2,22 +2,30 @@ import { BufferGeometry, CylinderGeometry, Line, LineBasicMaterial, MathUtils, M
 import Star from "./Star.js";
 import World from "../World.js";
 
-export default class StarPath {
+export default class StarPath extends Mesh {
 
     public star1: Star;
     public star2: Star;
     public linePoints: Vector3[] = [];
     public line?: Line;
-    public cylinder?: Mesh;
-    public distance?: number;
     public world: World;
-    public id: number;
+    public timeCreated: number;
 
     public constructor (star1: Star, star2: Star, scene: Scene, world: World) {
+        const material = new MeshBasicMaterial({ color: 0x00FF00 });
+        const direction = new Vector3().subVectors(star1.position, star2.position);
+        const distance = direction.length();
+        const geometry = new CylinderGeometry(0.4, 0.4, distance, 6, 4, true)
+        geometry.applyMatrix4(new Matrix4().makeTranslation(0, distance / 2, 0));
+        geometry.applyMatrix4(new Matrix4().makeRotationX(MathUtils.degToRad(90)));
+        super(geometry, material);
+        scene.add(this);
+        this.position.copy(star1.position);
+        this.lookAt(star2.position);
         this.star1 = star1;
         this.star2 = star2;
         this.world = world;
-        this.id = Date.now();
+        this.timeCreated = Date.now();
         this.createLine(scene);
     }
 
@@ -28,22 +36,7 @@ export default class StarPath {
         scene.add(this.line);
         this.star1.addStarPath(this);
         this.star2.addStarPath(this);
-        this.createCylinder();
-        if (this.cylinder) {
-            scene.add(this.cylinder);
-        }
 
-    }
-
-    public createCylinder () {
-        this.distance = this.getDistance();
-        const material = new MeshBasicMaterial({ color: 0x00FF00 });
-        const geometry = new CylinderGeometry(0.4, 0.4, this.distance, 6, 4, true);
-        geometry.applyMatrix4(new Matrix4().makeTranslation(0, this.distance / 2, 0));
-        geometry.applyMatrix4(new Matrix4().makeRotationX(MathUtils.degToRad(90)));
-        this.cylinder = new Mesh(geometry, material);
-        this.cylinder.position.copy(this.star1.position);
-        this.cylinder.lookAt(this.star2.position);
     }
 
     public getDistance () {
@@ -66,14 +59,14 @@ export default class StarPath {
             return;
         }
         this.line.geometry.setFromPoints(this.linePoints);
-        if (this.cylinder) {
-            this.cylinder.geometry.dispose();
-            this.distance = this.getDistance();
-            this.cylinder.geometry = new CylinderGeometry(0.4, 0.4, this.distance, 6, 4, true)
-            this.cylinder.geometry.applyMatrix4(new Matrix4().makeTranslation(0, this.distance / 2, 0));
-            this.cylinder.geometry.applyMatrix4(new Matrix4().makeRotationX(MathUtils.degToRad(90)));
-            this.cylinder.position.copy(this.star1.position);
-            this.cylinder.lookAt(this.star2.position);
+        if (this.geometry) {
+            this.geometry.dispose();
+            const distance = this.getDistance();
+            this.geometry = new CylinderGeometry(0.4, 0.4, distance, 6, 4, true)
+            this.geometry.applyMatrix4(new Matrix4().makeTranslation(0, distance / 2, 0));
+            this.geometry.applyMatrix4(new Matrix4().makeRotationX(MathUtils.degToRad(90)));
+            this.position.copy(this.star1.position);
+            this.lookAt(this.star2.position);
         }
     }
 
@@ -81,16 +74,16 @@ export default class StarPath {
         this.star1.starPaths = this.star1.starPaths.filter(starpath => starpath !== this);
         this.star2.starPaths = this.star2.starPaths.filter(starpath => starpath !== this);
         this.world.starPaths = this.world.starPaths.filter(starpath => starpath !== this);
-        if (this.cylinder) {
-            if (this.cylinder.geometry) {
-                this.cylinder.geometry.dispose();
+        if (this.geometry) {
+            if (this.geometry) {
+                this.geometry.dispose();
             }
-            if (this.cylinder.material instanceof Array) {
-                this.cylinder.material.forEach(material => material.dispose());
+            if (this.material instanceof Array) {
+                this.material.forEach(material => material.dispose());
             } else {
-                this.cylinder.material.dispose();
+                this.material.dispose();
             }
-            this.cylinder.removeFromParent();
+            this.removeFromParent();
         }
         if (this.line) {
             if (this.line.geometry) {

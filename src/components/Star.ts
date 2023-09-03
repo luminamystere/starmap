@@ -51,7 +51,6 @@ export default class Star {
 
     public createStar (scene: Scene) {
         const geometry = new SphereGeometry(0.5, 16, 16);
-        this._colour = new Color(0x3BDE41);
         this.starMaterial = new MeshBasicMaterial({ color: this._colour });
         this.mesh = new Mesh(geometry, this.starMaterial);
         this.mesh.position.set(this.position.x || 0, this.position.y || 0, this.position.z || 0);
@@ -68,9 +67,9 @@ export default class Star {
 
     public createFactionSphere (scene: Scene) {
         const geometry = new SphereGeometry(2, 32, 32);
-        this.factionMaterial = new MeshBasicMaterial({ color: 0xFFFFFF });
-        this.factionMaterial.transparent = true;
-        this.factionMaterial.opacity = 0.6;
+        // this.factionMaterial = new MeshBasicMaterial({ color: 0xFFFFFF });
+        // this.factionMaterial.transparent = true;
+        // this.factionMaterial.opacity = 0.6;
         this.factionMesh = new Mesh(geometry, this.factionMaterial);
         this.factionMesh.position.set(this.position.x || 0, this.position.y || 0, this.position.z || 0);
         scene.add(this.factionMesh);
