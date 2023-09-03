@@ -7,9 +7,17 @@ import Faction from "./Faction.js";
 
 export default class Star {
 
-    public starColour: Color;
+    public _colour: Color;
+    public get starColour () {
+        return `#${this._colour.getHexString()}`;
+    }
+    public set starColour (input: `#${string}`) {
+        this._colour = new Color(input);
+        this.updateColour();
+    }
     public position: Vector3;
     public mesh?: Mesh;
+    public starMaterial?: MeshBasicMaterial;
     public collider: Collider;
     public faction?: Faction;
     public factionMesh: Mesh;
@@ -28,7 +36,7 @@ export default class Star {
     public world: World;
 
     public constructor (name: string, colour: Color, position: Vector3, scene: Scene, world: World) {
-        this.starColour = colour;
+        this._colour = colour;
         this.position = position;
         this._name = name;
         this.description = "this is star no. " + name;
@@ -43,7 +51,9 @@ export default class Star {
 
     public createStar (scene: Scene) {
         const geometry = new SphereGeometry(0.5, 16, 16);
-        this.mesh = new Mesh(geometry, new MeshBasicMaterial({ color: 0x3BDE41 }));
+        this._colour = new Color(0x3BDE41);
+        this.starMaterial = new MeshBasicMaterial({ color: this._colour });
+        this.mesh = new Mesh(geometry, this.starMaterial);
         this.mesh.position.set(this.position.x || 0, this.position.y || 0, this.position.z || 0);
         this.mesh.name = this.name.toString();
         scene.add(this.mesh);
@@ -120,7 +130,7 @@ export default class Star {
     }
 
     public hoverStar () {
-        this.factionMaterial.opacity = 0.6;
+        this.factionMaterial.opacity = 0.4;
         if (this.factionMesh.material instanceof Array) {
             this.factionMesh.material.forEach(material => material.dispose());
         } else {
@@ -159,6 +169,19 @@ export default class Star {
             this.factionMesh.material.dispose();
         }
         this.factionMesh.material = this.factionMaterial;
+    }
+
+    public updateColour () {
+        if (this.mesh) {
+            if (this.mesh.material instanceof Array) {
+                this.mesh.material.forEach(material => material.dispose());
+            } else {
+                this.mesh.material.dispose();
+            }
+            this.starMaterial = new MeshBasicMaterial({ color: this._colour });
+            this.mesh.material = this.starMaterial;
+
+        }
     }
 
     public delete () {

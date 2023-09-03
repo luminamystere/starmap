@@ -1,6 +1,7 @@
 import Faction from "../components/Faction.js";
 import Star from "../components/Star.js";
 import Button from "./Button.js";
+import ColourInput from "./ColourInput.js";
 import Component from "./Component.js";
 import Label from "./Label.js";
 import Panel from "./Panel.js";
@@ -14,6 +15,7 @@ export enum StarPanelClasses {
     Name = "starpanel-input-name",
     Description = "starpanel-input-description",
     Faction = "starpanel-input-faction",
+    Colour = "starpanel-input-colour",
     Delete = "starpanel-input-delete",
 }
 
@@ -53,6 +55,18 @@ export default class StarPanel extends Panel {
         .addClass(StarPanelClasses.Faction)
         .addChangeListener((event) => this.updateFaction(event.element.value))
         .setId("starFaction")
+        .appendTo(this.content);
+
+    public readonly colourLabel = new Label("starColour")
+        .addClass(StarPanelClasses.Label)
+        .setText("Colour:")
+        .appendTo(this.content);
+
+    public readonly starColour = new ColourInput()
+        .addClass(StarPanelClasses.Colour)
+        .setInputColour(this.star.starColour)
+        .setId("starColour")
+        .addChangeListener(input => this.star.starColour = input.element.value as `#${string}`)
         .appendTo(this.content);
 
     public readonly deleteButton = new Button()
