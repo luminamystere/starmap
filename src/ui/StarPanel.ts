@@ -82,8 +82,12 @@ export default class StarPanel extends Panel {
         this.addClass(StarPanelClasses.Main);
 
         this.factionSelect.addEntry("None");
-        for (const i in star.world.factions) {
-            this.factionSelect.addEntry(star.world.factions[i].name);
+        for (const faction of star.world.factions) {
+            if (faction == star.faction) {
+                this.factionSelect.addEntry(faction.name, true);
+            } else {
+                this.factionSelect.addEntry(faction.name);
+            }
         }
     }
 

@@ -5,8 +5,8 @@ export default class SelectInput extends Component<"select"> {
         super("select");
     }
 
-    public addEntry (entry: string) {
-        this.element.options.add(new Option(entry, entry));
+    public addEntry (entry: string, selected?: boolean) {
+        this.element.options.add(new Option(entry, entry, undefined, selected));
         return this;
     }
 
