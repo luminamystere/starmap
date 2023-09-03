@@ -49,10 +49,12 @@ export default class World {
     public SPEED_VERTICAL = 0.2;
     public TICKRATE = 1000 / 60;
     public SENSITIVITY = 500;
+    public savedCursorPosition?: Vector3;
 
     public stars: Star[] = [];
     public colliders: Object3D[] = [];
     public starPaths: StarPath[] = [];
+    public toMove: Star[] = [];
     public moving: Star[] = [];
     public movingLine: StarPath[] = [];
     public interacting: Star[] = [];
@@ -149,6 +151,8 @@ export default class World {
         document.body.addEventListener("mouseup", event => {
             if (this.mouse[0]) {
                 this.moving = [];
+                this.toMove = [];
+                delete this.savedCursorPosition;
                 this.saveLocalStorage();
             } else if (this.mouse[1]) {
                 const starpath = this.raycastForStarpath();
@@ -379,14 +383,18 @@ export default class World {
     }
 
     public moveStar () {
+        console.log("move star is executing");
         if (this.moving.length == 1) {
             return;
+        }
+        if (!this.savedCursorPosition) {
+            this.savedCursorPosition = this.getCursorPosition();
         }
         const star = this.raycastForStar();
         if (star == undefined) {
             return;
         }
-        this.moving.push(star);
+        this.toMove.push(star);
         if (star.starPaths.length > 0) {
             for (const i in star.starPaths) {
                 this.movingLine.push(star.starPaths[i]);
@@ -432,6 +440,16 @@ export default class World {
         for (const i in this.stars) {
             this.stars[i].rotateLabel(this._camera.getWorldPosition(new Vector3));
         }
+
+        if (this.toMove.length == 1 && this.savedCursorPosition) {
+            const movedLength = new Vector3().subVectors(this.savedCursorPosition, this.getCursorPosition()).length();
+            if (movedLength > 1) {
+                this.moving.push(this.toMove[0]);
+                this.toMove = [];
+                delete this.savedCursorPosition;
+            }
+        }
+
         //left click moving star
         if (this.mouse[0] && this.moving.length == 1) {
             const cursorPos = this.getCursorPosition();
