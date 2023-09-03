@@ -46,6 +46,7 @@ export default class Star {
         this.factionMaterial = this.createFactionMaterial();
         this.factionMesh = this.createFactionSphere(scene);
         this.createLabel();
+        this.unHoverStar();
     }
 
 

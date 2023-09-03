@@ -13,6 +13,24 @@ import StarPanel from "./ui/StarPanel.js";
 import ProjectPanel from "./ui/ProjectPanel.js";
 import Faction from "./components/Faction.js";
 
+interface SavedData {
+    starPaths: {
+        star1: number;
+        star2: number;
+    }[];
+    stars: {
+        name: string;
+        faction: number;
+        colour: string;
+        position: [number, number, number];
+    }[]
+    factions: {
+        name: string;
+        description: string;
+        colour: string;
+    }[];
+}
+
 export default class World {
 
     public keyboard: Record<string, number> = {};
@@ -235,7 +253,7 @@ export default class World {
                 description: faction.description,
                 colour: faction.colour,
             })),
-        });
+        } satisfies SavedData);
     }
 
     public saveLocalStorage () {
@@ -245,21 +263,28 @@ export default class World {
 
     public loadLocalStorage () {
         console.log("loading local storage");
-        const saved = JSON.parse(localStorage.getItem("save") ?? '{"starPaths": [], "stars": [], "factions": []}');
-        this.factions = saved.factions as Faction[];
-        for (const i in saved.stars as Star[]) {
-            console.log("colour", saved.stars[i].colour);
-            console.log("faction", saved.stars[i].faction);
-            const star = new Star(saved.stars[i].name,
-                new Color(saved.stars[i].colour),
-                new Vector3(saved.stars[i].position[0], saved.stars[i].position[1], saved.stars[i].position[2]),
+        const saved: SavedData = JSON.parse(localStorage.getItem("save") ?? '{"starPaths": [], "stars": [], "factions": []}');
+        this.factions = saved.factions.map(saved => new Faction(saved.name, saved.description, new Color(saved.colour))) as Faction[];
+        for (const savedStar of saved.stars) {
+            const star = new Star(savedStar.name,
+                new Color(savedStar.colour),
+                new Vector3(savedStar.position[0], savedStar.position[1], savedStar.position[2]),
                 this._scene, this);
             this.stars.push(star);
             this.colliders.push(star.collider);
+            console.log(savedStar.faction);
+            const faction = this.factions[savedStar.faction];
+            if (faction) {
+                star.updateFaction(faction.name);
+            }
         }
-        for (const i in saved.starPaths as StarPath[]) {
-            const starPath = new StarPath(this.stars[saved.starPaths[i].star1], this.stars[saved.starPaths[i].star2], this._scene, this);
-            this.starPaths.push(starPath);
+        for (const savedStarPath of saved.starPaths) {
+            const star1 = this.stars[savedStarPath.star1];
+            const star2 = this.stars[savedStarPath.star2];
+            if (star1 && star2) {
+                const starPath = new StarPath(star1, star2, this._scene, this);
+                this.starPaths.push(starPath);
+            }
         }
 
     }
