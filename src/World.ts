@@ -518,7 +518,9 @@ export default class World {
             star.hoverStar();
             this.hovering.push(star);
         } else if (this.hovering.length > 0) {
-            this.hovering[0].unHoverStar();
+            for (const star of this.hovering) {
+                star.unHoverStar();
+            }
             this.hovering = [];
         }
 
