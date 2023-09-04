@@ -218,7 +218,7 @@ export default class World {
         this._scene.add(ground);
 
         const loader = new CubeTextureLoader();
-        loader.setPath('./src/textures/skybox01/');
+        loader.setPath('./src/textures/skybox03/');
         const textureCube = loader.load(['skybox_right1.png', 'skybox_left2.png', 'skybox_top3.png', 'skybox_bottom4.png', 'skybox_front5.png', 'skybox_back6.png']);
         this._scene.background = textureCube;
 
