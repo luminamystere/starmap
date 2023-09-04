@@ -53,7 +53,7 @@ export default class Star {
 
 
     public createStar (scene: Scene) {
-        const geometry = new SphereGeometry(0.2, 16, 16);
+        const geometry = new SphereGeometry(0.2, 8, 8);
         this.starMaterial = new MeshStandardMaterial({ color: this._colour, emissive: this._colour, emissiveIntensity: 1, toneMapped: false });
         this.mesh = new Mesh(geometry, this.starMaterial);
         this.mesh.position.set(this.position.x || 0, this.position.y || 0, this.position.z || 0);
