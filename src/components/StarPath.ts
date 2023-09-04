@@ -1,4 +1,4 @@
-import { BufferGeometry, Color, CylinderGeometry, Line, LineBasicMaterial, MathUtils, Matrix4, Mesh, MeshBasicMaterial, MeshLambertMaterial, Scene, Vector3 } from "three";
+import { BufferGeometry, Color, CylinderGeometry, Line, LineBasicMaterial, MathUtils, Matrix4, Mesh, MeshBasicMaterial, MeshLambertMaterial, MeshStandardMaterial, Scene, Vector3 } from "three";
 import Star from "./Star.js";
 import World from "../World.js";
 
@@ -6,7 +6,7 @@ export default class StarPath extends Mesh {
 
     public star1: Star;
     public star2: Star;
-    public starpathMaterial?: MeshBasicMaterial;
+    public starpathMaterial?: MeshStandardMaterial;
     public _colour: Color;
     public get starpathColour () {
         return `#${this._colour.getHexString()}`;
@@ -21,16 +21,16 @@ export default class StarPath extends Mesh {
     public timeCreated: number;
 
     public constructor (star1: Star, star2: Star, scene: Scene, world: World) {
-        const material = new MeshBasicMaterial({ color: 0xCCCCCC });
+        const material = new MeshStandardMaterial({ color: 0xCCCCCC, emissive: 0xCCCCCC, emissiveIntensity: 0, toneMapped: false });
         // material.transparent = true;
         // material.opacity = 0.7;
         const direction = new Vector3().subVectors(star1.position, star2.position);
         const distance = direction.length();
-        const geometry = new CylinderGeometry(0.05, 0.05, distance, 8, 4, true)
+        const geometry = new CylinderGeometry(0.02, 0.02, distance, 8, 4, true)
         geometry.applyMatrix4(new Matrix4().makeTranslation(0, distance / 2, 0));
         geometry.applyMatrix4(new Matrix4().makeRotationX(MathUtils.degToRad(90)));
         super(geometry, material);
-        this.layers.set(1);
+        // this.layers.set(1);
         scene.add(this);
         this.position.copy(star1.position);
         this.lookAt(star2.position);
@@ -76,8 +76,8 @@ export default class StarPath extends Mesh {
         if (this.geometry) {
             this.geometry.dispose();
             const distance = this.getDistance();
-            this.geometry = new CylinderGeometry(0.05, 0.05, distance, 8, 4, true)
-            this.layers.set(1);
+            this.geometry = new CylinderGeometry(0.02, 0.02, distance, 8, 4, true)
+            // this.layers.set(1);
             this.geometry.applyMatrix4(new Matrix4().makeTranslation(0, distance / 2, 0));
             this.geometry.applyMatrix4(new Matrix4().makeRotationX(MathUtils.degToRad(90)));
             this.position.copy(this.star1.position);
@@ -93,7 +93,7 @@ export default class StarPath extends Mesh {
             } else {
                 this.material.dispose();
             }
-            this.starpathMaterial = new MeshBasicMaterial({ color: this._colour });
+            this.starpathMaterial = new MeshStandardMaterial({ color: this._colour, emissive: this._colour, emissiveIntensity: 0, toneMapped: false });
             this.material = this.starpathMaterial;
         }
     }

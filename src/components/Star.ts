@@ -1,4 +1,4 @@
-import { Color, Mesh, MeshBasicMaterial, MeshLambertMaterial, MeshPhysicalMaterial, Object3D, Scene, SphereGeometry, Vector3 } from "three";
+import { Color, Mesh, MeshBasicMaterial, MeshLambertMaterial, MeshPhysicalMaterial, MeshStandardMaterial, Object3D, Scene, SphereGeometry, Vector3 } from "three";
 import Collider from "./Collider.js";
 import { CSS3DObject } from "three/examples/jsm/renderers/CSS3DRenderer.js";
 import { CSS2DObject } from "three/examples/jsm/renderers/CSS2DRenderer.js";
@@ -19,11 +19,11 @@ export default class Star {
     }
     public position: Vector3;
     public mesh?: Mesh;
-    public starMaterial?: MeshBasicMaterial;
+    public starMaterial?: MeshStandardMaterial;
     public collider: Collider;
     public faction?: Faction;
     public factionMesh: Mesh;
-    public factionMaterial: MeshPhysicalMaterial;
+    public factionMaterial: MeshBasicMaterial;
     private _name: string;
     public get name () {
         return this._name;
@@ -54,11 +54,11 @@ export default class Star {
 
     public createStar (scene: Scene) {
         const geometry = new SphereGeometry(0.2, 16, 16);
-        this.starMaterial = new MeshBasicMaterial({ color: this._colour });
+        this.starMaterial = new MeshStandardMaterial({ color: this._colour, emissive: this._colour, emissiveIntensity: 1, toneMapped: false });
         this.mesh = new Mesh(geometry, this.starMaterial);
         this.mesh.position.set(this.position.x || 0, this.position.y || 0, this.position.z || 0);
         this.mesh.name = this.name.toString();
-        this.mesh.layers.set(1);
+        // this.mesh.layers.set(1);
         scene.add(this.mesh);
     }
 
@@ -76,13 +76,13 @@ export default class Star {
         // this.factionMaterial.opacity = 0.6;
         this.factionMesh = new Mesh(geometry, this.factionMaterial);
         this.factionMesh.position.set(this.position.x || 0, this.position.y || 0, this.position.z || 0);
-        this.factionMesh.layers.set(0);
+        // this.factionMesh.layers.set(0);
         scene.add(this.factionMesh);
         return this.factionMesh;
     }
 
     public createFactionMaterial () {
-        this.factionMaterial = new MeshPhysicalMaterial({ color: 0xFFFFFF, emissive: 0xFFFFFF });
+        this.factionMaterial = new MeshBasicMaterial({ color: 0xFFFFFF });
         this.factionMaterial.transparent = true;
         this.factionMaterial.opacity = 0.6;
         return this.factionMaterial;
@@ -169,7 +169,7 @@ export default class Star {
     public updateFaction (input: string) {
         if (input == "None") {
             this.factionMaterial.color = new Color(0xFFFFFF);
-            this.factionMaterial.emissive = new Color(0xFFFFFF);
+            // this.factionMaterial.emissive = new Color(0xFFFFFF);
             delete this.faction;
         } else {
             //look up faction by name
@@ -180,7 +180,7 @@ export default class Star {
             this.faction = faction;
             const colour = new Color(faction.colour);
             this.factionMaterial.color = colour;
-            this.factionMaterial.emissive = colour;
+            // this.factionMaterial.emissive = colour;
         }
         if (this.factionMesh.material instanceof Array) {
             this.factionMesh.material.forEach(material => material.dispose());
@@ -197,7 +197,7 @@ export default class Star {
             } else {
                 this.mesh.material.dispose();
             }
-            this.starMaterial = new MeshBasicMaterial({ color: this._colour });
+            this.starMaterial = new MeshStandardMaterial({ color: this._colour, emissive: this._colour, emissiveIntensity: 1, toneMapped: false });
             this.mesh.material = this.starMaterial;
 
         }
