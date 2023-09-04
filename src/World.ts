@@ -5,12 +5,16 @@ import MouseControls from "./systems/MouseControls.js"
 import FlyMovement from "./systems/FlyMovement.js";
 import Star from "./components/Star.js";
 import Collider from "./components/Collider.js";
-import { CSS2DRenderer, CSS2DObject } from "three/examples/jsm/renderers/CSS2DRenderer.js"
-import { WebGLRenderer, PerspectiveCamera, Raycaster, Scene, Object3D, Vector3, PCFSoftShadowMap, DirectionalLight, BoxGeometry, Mesh, MeshBasicMaterial, Color, Vector2, BufferGeometry, Line, LineBasicMaterial, CubeTextureLoader, CubeTexture } from "three";
+import { CSS2DRenderer } from "three/examples/jsm/renderers/CSS2DRenderer.js";
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
+import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
+import { WebGLRenderer, PerspectiveCamera, Raycaster, Scene, Object3D, Vector3, PCFSoftShadowMap, DirectionalLight, BoxGeometry, Mesh, MeshBasicMaterial, Color, Vector2, BufferGeometry, Line, LineBasicMaterial, CubeTextureLoader, CubeTexture, AmbientLight, BackSide, RGBAFormat, ShaderMaterial } from "three";
 import StarPath from "./components/StarPath.js";
 import StarPanel from "./ui/StarPanel.js";
 import ProjectPanel from "./ui/ProjectPanel.js";
 import Faction from "./components/Faction.js";
+import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
 
 interface SavedData {
     starPaths: {
@@ -39,7 +43,8 @@ export default class World {
     public keyboard: Record<string, number> = {};
     public mouse: Record<string, number> = {};
     public _threejs: WebGLRenderer;
-    // public _labelRender: CSS3DRenderer;
+    public bloomRenderer: EffectComposer;
+    public finalRenderer: EffectComposer;
     public _labelRender: CSS2DRenderer;
     public _camera: PerspectiveCamera;
     public _raycaster: Raycaster;
@@ -65,7 +70,10 @@ export default class World {
     public factions: Faction[] = [];
 
     public backgrounds: CubeTexture[] = [];
+    public currentBackground?: CubeTexture;
     public backgroundName?: string;
+    public skyboxMaterial: MeshBasicMaterial;
+    public skyboxMesh: Mesh;
 
     public hovering: Star[] = [];
 
@@ -98,9 +106,10 @@ export default class World {
         this._threejs.shadowMap.type = PCFSoftShadowMap;
         this._threejs.setPixelRatio(window.devicePixelRatio);
         this._threejs.setSize(window.innerWidth, window.innerHeight);
+        this._threejs.toneMappingExposure = Math.pow(0.9, 0.4);
+        this._threejs.autoClear = false;
         document.body.appendChild(this._threejs.domElement);
 
-        // this._labelRender = new CSS3DRenderer();
         this._labelRender = new CSS2DRenderer();
         this._labelRender.setSize(window.innerWidth, window.innerHeight);
         this._labelRender.domElement.style.position = 'absolute';
@@ -114,12 +123,47 @@ export default class World {
         this._camera = new PerspectiveCamera(fov, aspect, near, far);
         this._camera.position.set(0, 1, 0);
         this._camera.rotation.order = 'YXZ';
+        this._camera.layers.enableAll();
         this._starpathDefaultColor = new Color(0xCCCCCC);
 
         this._raycaster = new Raycaster();
         this._raycaster.camera = this._camera;
 
         this._scene = createScene();
+
+        //postprocessing
+        this.bloomRenderer = new EffectComposer(this._threejs);
+        this.bloomRenderer.setSize(window.innerWidth, window.innerHeight);
+        this.bloomRenderer.renderToScreen = true;
+
+        this.finalRenderer = new EffectComposer(this._threejs);
+
+        const lorgeCube = new BoxGeometry(1000, 1000, 1000);
+        this.skyboxMaterial = new MeshBasicMaterial({ color: 0xFFFFFF, side: BackSide });
+        this.skyboxMesh = new Mesh(lorgeCube, this.skyboxMaterial);
+        this.skyboxMesh.layers.set(0);
+        this.skyboxMesh.position.set(0, 0, 0);
+        // this._scene.add(this.skyboxMesh);
+
+        const loader = new CubeTextureLoader();
+
+        loader.setPath('./src/textures/skybox01/');
+        let textureCube = loader.load(['skybox_right1.png', 'skybox_left2.png', 'skybox_top3.png', 'skybox_bottom4.png', 'skybox_front5.png', 'skybox_back6.png']);
+        textureCube.name = "01"
+        this.backgrounds.push(textureCube);
+
+        loader.setPath('./src/textures/skybox02/');
+        textureCube = loader.load(['skybox_right1.png', 'skybox_left2.png', 'skybox_top3.png', 'skybox_bottom4.png', 'skybox_front5.png', 'skybox_back6.png']);
+        textureCube.name = "02"
+        this.backgrounds.push(textureCube);
+
+        loader.setPath('./src/textures/skybox03/');
+        textureCube = loader.load(['skybox_right1.png', 'skybox_left2.png', 'skybox_top3.png', 'skybox_bottom4.png', 'skybox_front5.png', 'skybox_back6.png']);
+        textureCube.name = "03"
+        this.backgrounds.push(textureCube);
+
+        this.currentBackground = this.backgrounds[1];
+
         this._Initialise();
     }
 
@@ -214,48 +258,58 @@ export default class World {
             }, 100);
         });
 
-        let light = new DirectionalLight(0xFFFFFF);
-        light.position.set(100, 100, 100);
-        light.target.position.set(0, 0, 0);
-        light.castShadow = true;
-        light.shadow.bias = -0.01;
-        light.shadow.mapSize.width = 2048;
-        light.shadow.mapSize.height = 2048;
-        light.shadow.camera.near = 1;
-        light.shadow.camera.far = 500;
-        light.shadow.camera.left = 200;
-        light.shadow.camera.right = -200;
-        light.shadow.camera.top = 200;
-        light.shadow.camera.bottom = -200;
+        let light = new AmbientLight(0xFFFFFF);
+        // light.position.set(100, 100, 100);
+        // light.target.position.set(0, 0, 0);
+        // light.castShadow = true;
+        // light.shadow.bias = -0.01;
+        // light.shadow.mapSize.width = 2048;
+        // light.shadow.mapSize.height = 2048;
+        // light.shadow.camera.near = 1;
+        // light.shadow.camera.far = 500;
+        // light.shadow.camera.left = 200;
+        // light.shadow.camera.right = -200;
+        // light.shadow.camera.top = 200;
+        // light.shadow.camera.bottom = -200;
         this._scene.add(light);
 
         const floor = new BoxGeometry(1, 1, 1);
         const ground = new Mesh(floor, new MeshBasicMaterial({ color: 0xAAAAAA }));
+        ground.layers.set(0);
         ground.position.set(0, 0, -2);
         this._scene.add(ground);
 
-        const loader = new CubeTextureLoader();
-
-        loader.setPath('./src/textures/skybox01/');
-        let textureCube = loader.load(['skybox_right1.png', 'skybox_left2.png', 'skybox_top3.png', 'skybox_bottom4.png', 'skybox_front5.png', 'skybox_back6.png']);
-        textureCube.name = "01"
-        this.backgrounds.push(textureCube);
-
-        loader.setPath('./src/textures/skybox02/');
-        textureCube = loader.load(['skybox_right1.png', 'skybox_left2.png', 'skybox_top3.png', 'skybox_bottom4.png', 'skybox_front5.png', 'skybox_back6.png']);
-        textureCube.name = "02"
-        this.backgrounds.push(textureCube);
-
-        loader.setPath('./src/textures/skybox03/');
-        textureCube = loader.load(['skybox_right1.png', 'skybox_left2.png', 'skybox_top3.png', 'skybox_bottom4.png', 'skybox_front5.png', 'skybox_back6.png']);
-        textureCube.name = "03"
-        this.backgrounds.push(textureCube);
 
 
-        this._scene.background = this.backgrounds[2];
+
+        this._scene.background = null;
         this.backgroundName = this.backgrounds[2].name;
 
         this.movementControls = new FlyMovement(this);
+
+        const renderScene = new RenderPass(this._scene, this._camera);
+        const bloomPass = new UnrealBloomPass(new Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.1);
+        bloomPass.renderToScreen = true;
+        // this.bloomRenderer.renderTarget1.format = RGBAFormat;
+
+        const finalPass = new ShaderPass(
+            new ShaderMaterial({
+                uniforms: {
+                    baseTexture: { value: null },
+                    bloomTexture: { value: this.bloomRenderer.renderTarget2.texture }
+                },
+                // vertexShader: document.getElementById('vertexshader')?.textContent,
+                // fragmentShader: document.getElementById('fragmentshader')?.textContent,
+                defines: {}
+            }), "baseTexture"
+        );
+        finalPass.needsSwap = true;
+
+        this.bloomRenderer.addPass(renderScene);
+        this.bloomRenderer.addPass(bloomPass);
+
+        this.finalRenderer.addPass(renderScene);
+        // this.finalRenderer.addPass(finalPass);
 
         this.cameraControls = new MouseControls(this);
         this.cameraControls.setCamera(this._camera);
@@ -471,14 +525,30 @@ export default class World {
 
     public chooseBackground (background: string) {
         console.log(background);
+        if (background == this.backgroundName) {
+            return;
+        }
+        if (this.skyboxMesh.material instanceof Array) {
+            this.skyboxMesh.material.forEach(material => material.dispose());
+        } else {
+            this.skyboxMesh.material.dispose();
+        }
         if (background == "None") {
+            this.skyboxMaterial = new MeshBasicMaterial({ color: 0xFFFFFF, side: BackSide });
+            this.skyboxMesh.material = this.skyboxMaterial;
             this._scene.background = null;
+            delete this.currentBackground;
+
         } else {
             const chosenBackground = this.backgrounds.find((element) => element.name == background);
             if (chosenBackground == null) {
                 return;
             }
-            this._scene.background = chosenBackground;
+            this.currentBackground = chosenBackground;
+            this._scene.background = this.currentBackground;
+
+            this.skyboxMaterial = new MeshBasicMaterial({ color: 0xFFFFFF, envMap: chosenBackground, side: BackSide });
+            this.skyboxMesh.material = this.skyboxMaterial;
         }
         this.backgroundName = background;
     }
@@ -492,6 +562,10 @@ export default class World {
         const elapsed = Date.now() - this.time;
         this.time = Date.now();
         const delta = elapsed / this.TICKRATE;
+
+        // this.skyboxMesh.position.set(this.cameraControls?.getObject().position.x || 0,
+        //     this.cameraControls?.getObject().position.y || 0,
+        //     this.cameraControls?.getObject().position.z || 0);
 
         if (this.starPanel || this.projectPanel) {
             return;
@@ -544,7 +618,19 @@ export default class World {
 
     public render () {
         this._Update();
+        this._threejs.clear();
+
+        // this._scene.background = null;
+        this._camera.layers.disable(0);
+        this.bloomRenderer.render();
+
+        this._threejs.clearDepth();
+
+        // this._scene.background = this.currentBackground || null;
+        this._camera.layers.enable(0);
         this._threejs.render(this._scene, this._camera);
         this._labelRender.render(this._scene, this._camera);
+
+
     }
 }
