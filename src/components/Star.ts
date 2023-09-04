@@ -33,7 +33,7 @@ export default class Star {
         this.updateLabel();
     }
     public description: string;
-    public starLabel?: CSS3DObject;
+    public starLabel?: CSS2DObject;
     public starPaths: StarPath[] = [];
     public world: World;
 
@@ -58,7 +58,6 @@ export default class Star {
         this.mesh = new Mesh(geometry, this.starMaterial);
         this.mesh.position.set(this.position.x || 0, this.position.y || 0, this.position.z || 0);
         this.mesh.name = this.name.toString();
-        // this.mesh.layers.set(1);
         scene.add(this.mesh);
     }
 
@@ -71,12 +70,8 @@ export default class Star {
 
     public createFactionSphere (scene: Scene) {
         const geometry = new SphereGeometry(2, 32, 32);
-        // this.factionMaterial = new MeshBasicMaterial({ color: 0xFFFFFF });
-        // this.factionMaterial.transparent = true;
-        // this.factionMaterial.opacity = 0.6;
         this.factionMesh = new Mesh(geometry, this.factionMaterial);
         this.factionMesh.position.set(this.position.x || 0, this.position.y || 0, this.position.z || 0);
-        // this.factionMesh.layers.set(0);
         scene.add(this.factionMesh);
         return this.factionMesh;
     }
@@ -124,7 +119,7 @@ export default class Star {
         const maxSize = 0.4;
         const scale = Math2.clamp(minSize, maxSize, minSize + (1 - (distance / distanceScaleValue)) * (maxSize - minSize));
         (this.starLabel.element.firstElementChild as HTMLElement).style.transform = `scale(${scale})`;
-        // console.log("distance:", distance, "\nscale:", scale);
+        (this.starLabel.element.firstElementChild as HTMLElement).style.opacity = `${1 - (distance / distanceScaleValue)}`;
     }
 
     public addStarPath (path: StarPath) {

@@ -25,6 +25,10 @@ body {
     color: white;
     background: #0006;
     padding: 10px 40px 30px;
+
+    &:empty {
+        display: none;
+    }
 }
 
 .panel {
