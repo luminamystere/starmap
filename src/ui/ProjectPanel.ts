@@ -12,7 +12,6 @@ import SelectInput from "./SelectInput.js";
 
 export enum ProjectPanelClasses {
     Main = "projectpanel",
-    Label = "projectpanel-label",
     Name = "projectpanel-name",
     Description = "projectpanel-description",
     FactionBox = "projectpanel-faction-box",
@@ -23,8 +22,12 @@ export enum ProjectPanelClasses {
     FactionDesc = "projectpanel-faction-description",
     FactionColour = "projectpanel-faction-colour",
     FactionDelete = "projectpanel-faction-delete",
+    BackgroundLabel = "projectpanel-background-label",
     Background = "projectpanel-background-select",
     Button = "projectpanel-button",
+    ControlsGuide = "projectpanel-controls",
+    ControlsHeading = "projectpanel-controls-heading",
+    ControlsText = "projectpanel-controls-text",
 }
 
 export default class ProjectPanel extends Panel {
@@ -40,7 +43,7 @@ export default class ProjectPanel extends Panel {
         .appendTo(this.content);
 
     public readonly backgroundLabel = new Label("background")
-        .addClass(ProjectPanelClasses.Label)
+        .addClass(ProjectPanelClasses.BackgroundLabel)
         .setText("Select Background")
         .appendTo(this.content);
 
@@ -49,6 +52,20 @@ export default class ProjectPanel extends Panel {
         .addChangeListener((event) => this.world.chooseBackground(event.element.value))
         .setId("background")
         .appendTo(this.content);
+
+    public readonly controlsGuide = new Component("div")
+        .addClass(ProjectPanelClasses.ControlsGuide)
+        .appendTo(this.content);
+
+    public readonly controlsHeading = new Component("h2")
+        .addClass(ProjectPanelClasses.ControlsHeading)
+        .setText("CONTROLS")
+        .appendTo(this.controlsGuide);
+
+    public readonly controlsText = new Component("p")
+        .addClass(ProjectPanelClasses.ControlsText)
+        .setText("WASD - Movement\nSpace - Fly Up\nShift - Fly Down\nLeft Click - Move Star (drag)\nMiddle Click - Delete Starpath\nRight Click - Place/Inspect Star")
+        .appendTo(this.controlsGuide);
 
     // public readonly exportButton = new Button()
     //     .addClass(ProjectPanelClasses.Button)
