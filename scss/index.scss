@@ -27,6 +27,16 @@ body {
 }
 
 .panel {
+    position: absolute;
+    inset: 0;
+    width: 400px;
+    background-color: #222c;
+    padding: 20px;
+    gap: 20px;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    z-index: 99999;
+
     &-header {
         display: grid;
         grid-template-columns: 1fr auto;
@@ -80,15 +90,7 @@ body {
         border-top: 1px solid;
     }
 
-    position: absolute;
-    inset: 0;
-    width: 400px;
-    background-color: #222c;
-    padding: 20px;
-    gap: 20px;
-    display: grid;
-    grid-template-rows: auto 1fr;
-    z-index: 1;
+
 
     &::after {
         content: "";

@@ -1,10 +1,11 @@
-import { Color, Mesh, MeshBasicMaterial, Object3D, Scene, SphereGeometry, Vector3 } from "three";
+import { Color, Mesh, MeshBasicMaterial, MeshLambertMaterial, MeshPhysicalMaterial, Object3D, Scene, SphereGeometry, Vector3 } from "three";
 import Collider from "./Collider.js";
 import { CSS3DObject } from "three/examples/jsm/renderers/CSS3DRenderer.js";
 import { CSS2DObject } from "three/examples/jsm/renderers/CSS2DRenderer.js";
 import StarPath from "./StarPath.js";
 import World from "../World.js";
 import Faction from "./Faction.js";
+import Math2 from "../utility/Math2.js";
 
 export default class Star {
 
@@ -99,7 +100,6 @@ export default class Star {
         container.append(starDiv);
         starDiv.className = 'label';
         starDiv.textContent = this._name.toString();
-        // this.starLabel = new CSS3DObject(starDiv);
         this.starLabel = new CSS2DObject(container);
         (this.starLabel.element.firstElementChild as HTMLElement).style.transform = `scale(1)`;
         this.starLabel.position.set(0, 0.8, 0);
@@ -113,8 +113,13 @@ export default class Star {
     }
 
     public updateLabelScale (position: Vector3) {
-        // this.starLabel.element.style.transform = `scale(${})`;
-        console.log(new Vector3().subVectors(this.position, position).length());
+        if (!this.starLabel) {
+            return;
+        }
+        const distance = new Vector3().subVectors(this.position, position).length();
+        const scale = Math2.clamp(0.5, 3, 4 - (distance / 5));
+        (this.starLabel.element.firstElementChild as HTMLElement).style.transform = `scale(${scale})`;
+        // console.log("distance:", distance, "\nscale:", scale);
     }
 
     public addStarPath (path: StarPath) {

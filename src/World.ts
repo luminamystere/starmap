@@ -444,9 +444,11 @@ export default class World {
             this.hovering = [];
         }
 
-        for (const i in this.stars) {
-            this.stars[i].rotateLabel(this._camera.getWorldPosition(new Vector3));
+        for (const star of this.stars) {
+            star.rotateLabel(this._camera.getWorldPosition(new Vector3));
+            star.updateLabelScale(this._camera.getWorldPosition(new Vector3));
         }
+        // this.stars[0].updateLabelScale(this._camera.getWorldPosition(new Vector3));
 
         if (this.toMove.length == 1 && this.savedCursorPosition) {
             const movedLength = new Vector3().subVectors(this.savedCursorPosition, this.getCursorPosition()).length();
@@ -473,7 +475,6 @@ export default class World {
             this.lineObject?.geometry.setFromPoints(this.linePoints);
 
         }
-        this.stars[0].updateLabelScale(this._camera.getWorldPosition(new Vector3));
     }
 
     public render () {
