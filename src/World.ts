@@ -173,21 +173,7 @@ export default class World {
             if (event.code === "Escape") {
                 document.exitPointerLock();
             }
-            if (event.code === "KeyT") {
-                this.loadLocalStorage();
-            }
-            if (event.code === "KeyQ") {
-                this.showProjectPanel();
-            }
-            if (event.code === "KeyY") {
-                this.saveLocalStorage();
-            }
-            if (event.code === "KeyU") {
-                console.log("localstorage", localStorage);
-                console.log("stars", this.stars);
-                console.log("starpaths", this.starPaths);
-                console.log("factions", this.factions);
-            }
+
             this.keyboard[event.code] ??= Date.now();
         });
         document.body.addEventListener("keyup", event => {
@@ -263,7 +249,7 @@ export default class World {
         this.movementControls = new FlyMovement(this);
 
         const renderScene = new RenderPass(this._scene, this._camera);
-        const bloomPass = new UnrealBloomPass(new Vector2(window.innerWidth, window.innerHeight), 1.2, 0.1, 0.8);
+        const bloomPass = new UnrealBloomPass(new Vector2(window.innerWidth, window.innerHeight), 0.4, 0.2, 0.3);
         bloomPass.renderToScreen = true;
 
 
