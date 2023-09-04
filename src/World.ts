@@ -77,7 +77,7 @@ export default class World {
 
     public constructor () {
 
-        this._threejs = new WebGLRenderer();
+        this._threejs = new WebGLRenderer({ antialias: true });
         this._threejs.shadowMap.enabled = true;
         this._threejs.shadowMap.type = PCFSoftShadowMap;
         this._threejs.setPixelRatio(window.devicePixelRatio);
