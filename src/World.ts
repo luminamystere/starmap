@@ -241,11 +241,6 @@ export default class World {
         let light = new AmbientLight(0xFFFFFF);
         this._scene.add(light);
 
-        const floor = new BoxGeometry(1, 1, 1);
-        const ground = new Mesh(floor, new MeshBasicMaterial({ color: 0xAAAAAA }));
-        ground.position.set(0, 0, -2);
-        this._scene.add(ground);
-
         this.movementControls = new FlyMovement(this);
 
         const renderScene = new RenderPass(this._scene, this._camera);
