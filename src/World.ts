@@ -537,7 +537,6 @@ export default class World {
         }
 
         for (const star of this.stars) {
-            star.rotateLabel(this._camera.getWorldPosition(new Vector3));
             star.updateLabelScale(this._camera.getWorldPosition(new Vector3));
         }
 

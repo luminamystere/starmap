@@ -110,7 +110,7 @@ export default class Star {
 
     public updateLabel () {
         if (this.starLabel) {
-            this.starLabel.element.textContent = this._name;
+            this.starLabel.element.firstElementChild!.textContent = this._name;
         }
     }
 
@@ -119,20 +119,16 @@ export default class Star {
             return;
         }
         const distance = new Vector3().subVectors(this.position, position).length();
-        const scale = Math2.clamp(0.5, 3, 4 - (distance / 5));
+        const distanceScaleValue = 50;
+        const minSize = 0.05;
+        const maxSize = 0.4;
+        const scale = Math2.clamp(minSize, maxSize, minSize + (1 - (distance / distanceScaleValue)) * (maxSize - minSize));
         (this.starLabel.element.firstElementChild as HTMLElement).style.transform = `scale(${scale})`;
         // console.log("distance:", distance, "\nscale:", scale);
     }
 
     public addStarPath (path: StarPath) {
         this.starPaths.push(path);
-    }
-
-    public rotateLabel (camera: Vector3) {
-        if (!this.starLabel) {
-            return;
-        }
-        this.starLabel.lookAt(camera);
     }
 
     public updatePosition () {
