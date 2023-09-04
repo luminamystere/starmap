@@ -28,6 +28,10 @@ interface SavedData {
         description: string;
         colour: string;
     }[];
+    world: {
+        starpathColour: string;
+        background: string;
+    };
 }
 
 export default class World {
@@ -61,6 +65,7 @@ export default class World {
     public factions: Faction[] = [];
 
     public backgrounds: CubeTexture[] = [];
+    public backgroundName?: string;
 
     public hovering: Star[] = [];
 
@@ -248,6 +253,7 @@ export default class World {
 
 
         this._scene.background = this.backgrounds[2];
+        this.backgroundName = this.backgrounds[2].name;
 
         this.movementControls = new FlyMovement(this);
 
@@ -281,6 +287,10 @@ export default class World {
                 description: faction.description,
                 colour: faction.colour,
             })),
+            world: {
+                starpathColour: this.starpathColour,
+                background: this.backgroundName || "None",
+            }
         } satisfies SavedData);
     }
 
@@ -291,7 +301,8 @@ export default class World {
 
     public loadLocalStorage () {
         console.log("loading local storage");
-        const saved: SavedData = JSON.parse(localStorage.getItem("save") ?? '{"starPaths": [], "stars": [], "factions": []}');
+        const saved: SavedData = JSON.parse(localStorage.getItem("save") ?? '{"starPaths": [], "stars": [], "factions": [], "world": []}');
+        console.log(saved);
         this.factions = saved.factions.map(saved => new Faction(saved.name, saved.description, new Color(saved.colour))) as Faction[];
         for (const savedStar of saved.stars) {
             const star = new Star(savedStar.name,
@@ -312,6 +323,19 @@ export default class World {
                 const starPath = new StarPath(star1, star2, this._scene, this);
                 this.starPaths.push(starPath);
             }
+        }
+        if (saved.world) {
+            console.log("saved.world exists");
+            if (saved.world.starpathColour) {
+                this._starpathDefaultColor = new Color(saved.world.starpathColour);
+                for (const starpath of this.starPaths) {
+                    starpath.updateColour();
+                }
+            } else {
+                this._starpathDefaultColor = new Color(0xCCCCCC)
+            }
+            this.backgroundName = saved.world.background || "None";
+            this.chooseBackground(this.backgroundName);
         }
 
     }
@@ -456,6 +480,7 @@ export default class World {
             }
             this._scene.background = chosenBackground;
         }
+        this.backgroundName = background;
     }
 
     public _Update () {
