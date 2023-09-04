@@ -8,6 +8,7 @@ import TextInput from "./TextInput.js";
 import TextArea from "./TextArea.js";
 import ColourInput from "./ColourInput.js";
 import Label from "./Label.js";
+import SelectInput from "./SelectInput.js";
 
 export enum ProjectPanelClasses {
     Main = "projectpanel",
@@ -22,6 +23,7 @@ export enum ProjectPanelClasses {
     FactionDesc = "projectpanel-faction-description",
     FactionColour = "projectpanel-faction-colour",
     FactionDelete = "projectpanel-faction-delete",
+    Background = "projectpanel-background-select",
     Button = "projectpanel-button",
 }
 
@@ -35,6 +37,17 @@ export default class ProjectPanel extends Panel {
 
     public readonly factionBox = new Component("div")
         .addClass(ProjectPanelClasses.FactionBox)
+        .appendTo(this.content);
+
+    public readonly backgroundLabel = new Label("background")
+        .addClass(ProjectPanelClasses.Label)
+        .setText("Select Background")
+        .appendTo(this.content);
+
+    public readonly backgroundSelect = new SelectInput()
+        .addClass(ProjectPanelClasses.Background)
+        .addChangeListener((event) => this.world.chooseBackground(event.element.value))
+        .setId("background")
         .appendTo(this.content);
 
     // public readonly exportButton = new Button()
@@ -57,6 +70,10 @@ export default class ProjectPanel extends Panel {
         this.addClass(ProjectPanelClasses.Main);
         for (const i in this.world.factions) {
             this.displayFaction(world.factions[i]);
+        }
+        this.backgroundSelect.addEntry("None");
+        for (const background of this.world.backgrounds) {
+            this.backgroundSelect.addEntry(background.name);
         }
     }
 

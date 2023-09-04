@@ -2,13 +2,11 @@
 // import * as THREE from "three";
 import { createScene } from "./components/scene.js";
 import MouseControls from "./systems/MouseControls.js"
-import Math2 from "./utility/Math2.js";
 import FlyMovement from "./systems/FlyMovement.js";
 import Star from "./components/Star.js";
 import Collider from "./components/Collider.js";
-import { CSS3DRenderer, CSS3DObject } from "three/examples/jsm/renderers/CSS3DRenderer.js"
 import { CSS2DRenderer, CSS2DObject } from "three/examples/jsm/renderers/CSS2DRenderer.js"
-import { WebGLRenderer, PerspectiveCamera, Raycaster, Scene, Object3D, Vector3, PCFSoftShadowMap, DirectionalLight, BoxGeometry, Mesh, MeshBasicMaterial, Color, Vector2, BufferGeometry, Line, LineBasicMaterial, CubeTextureLoader } from "three";
+import { WebGLRenderer, PerspectiveCamera, Raycaster, Scene, Object3D, Vector3, PCFSoftShadowMap, DirectionalLight, BoxGeometry, Mesh, MeshBasicMaterial, Color, Vector2, BufferGeometry, Line, LineBasicMaterial, CubeTextureLoader, CubeTexture } from "three";
 import StarPath from "./components/StarPath.js";
 import StarPanel from "./ui/StarPanel.js";
 import ProjectPanel from "./ui/ProjectPanel.js";
@@ -61,6 +59,8 @@ export default class World {
     public movingLine: StarPath[] = [];
     public interacting: Star[] = [];
     public factions: Faction[] = [];
+
+    public backgrounds: CubeTexture[] = [];
 
     public hovering: Star[] = [];
 
@@ -218,9 +218,24 @@ export default class World {
         this._scene.add(ground);
 
         const loader = new CubeTextureLoader();
+
+        loader.setPath('./src/textures/skybox01/');
+        let textureCube = loader.load(['skybox_right1.png', 'skybox_left2.png', 'skybox_top3.png', 'skybox_bottom4.png', 'skybox_front5.png', 'skybox_back6.png']);
+        textureCube.name = "01"
+        this.backgrounds.push(textureCube);
+
+        loader.setPath('./src/textures/skybox02/');
+        textureCube = loader.load(['skybox_right1.png', 'skybox_left2.png', 'skybox_top3.png', 'skybox_bottom4.png', 'skybox_front5.png', 'skybox_back6.png']);
+        textureCube.name = "02"
+        this.backgrounds.push(textureCube);
+
         loader.setPath('./src/textures/skybox03/');
-        const textureCube = loader.load(['skybox_right1.png', 'skybox_left2.png', 'skybox_top3.png', 'skybox_bottom4.png', 'skybox_front5.png', 'skybox_back6.png']);
-        this._scene.background = textureCube;
+        textureCube = loader.load(['skybox_right1.png', 'skybox_left2.png', 'skybox_top3.png', 'skybox_bottom4.png', 'skybox_front5.png', 'skybox_back6.png']);
+        textureCube.name = "03"
+        this.backgrounds.push(textureCube);
+
+
+        this._scene.background = this.backgrounds[2];
 
         this.movementControls = new FlyMovement(this);
 
@@ -416,6 +431,19 @@ export default class World {
             return;
         }
         this.starPaths.push(new StarPath(star1, star2, this._scene, this));
+    }
+
+    public chooseBackground (background: string) {
+        console.log(background);
+        if (background == "None") {
+            this._scene.background = null;
+        } else {
+            const chosenBackground = this.backgrounds.find((element) => element.name == background);
+            if (chosenBackground == null) {
+                return;
+            }
+            this._scene.background = chosenBackground;
+        }
     }
 
     public _Update () {
