@@ -7,7 +7,7 @@ export default class Collider extends Mesh {
     //public position: Vector3;
 
     public constructor (star: Star) {
-        const geometry = new SphereGeometry(1, 16, 16);
+        const geometry = new SphereGeometry(0.4, 16, 16);
         const material = new MeshBasicMaterial({ color: 0x000000, opacity: 0 });
         material.transparent = true;
         super(geometry, material);
