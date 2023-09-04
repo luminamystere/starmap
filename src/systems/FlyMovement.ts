@@ -26,16 +26,16 @@ export default class FlyMovement {
             return;
         }
 
-        if (this.world.keyboard["KeyE"]) {
+        if (this.world.keyboard["KeyW"]) {
             forwardBackInput++;
         }
-        if (this.world.keyboard["KeyD"]) {
+        if (this.world.keyboard["KeyS"]) {
             forwardBackInput--;
         }
-        if (this.world.keyboard["KeyS"]) {
+        if (this.world.keyboard["KeyA"]) {
             leftRightInput--;
         }
-        if (this.world.keyboard["KeyF"]) {
+        if (this.world.keyboard["KeyD"]) {
             leftRightInput++;
         }
         if (this.world.keyboard["Space"]) {
