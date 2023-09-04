@@ -207,7 +207,7 @@ export default class World {
 
             } else if (this.mouse[2]) {
                 this.createLine();
-                if (this.starPanel) {
+                if (this.starPanel || this.projectPanel) {
                     return;
                 }
                 if (this.raycastForStar() == this.interacting[0]) {
