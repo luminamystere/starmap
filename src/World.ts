@@ -9,7 +9,8 @@ import { CSS2DRenderer } from "three/examples/jsm/renderers/CSS2DRenderer.js";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
-import { WebGLRenderer, PerspectiveCamera, Raycaster, Scene, Object3D, Vector3, PCFSoftShadowMap, DirectionalLight, BoxGeometry, Mesh, MeshBasicMaterial, Color, Vector2, BufferGeometry, Line, LineBasicMaterial, CubeTextureLoader, CubeTexture, AmbientLight, BackSide, RGBAFormat, ShaderMaterial, ACESFilmicToneMapping, LinearToneMapping, ReinhardToneMapping, SRGBColorSpace } from "three";
+import { FXAAShader } from "three/examples/jsm/shaders/FXAAShader.js";
+import { WebGLRenderer, PerspectiveCamera, Raycaster, Scene, Object3D, Vector3, BoxGeometry, Mesh, MeshBasicMaterial, Color, Vector2, BufferGeometry, Line, LineBasicMaterial, CubeTextureLoader, CubeTexture, AmbientLight, ReinhardToneMapping, SRGBColorSpace } from "three";
 import StarPath from "./components/StarPath.js";
 import StarPanel from "./ui/StarPanel.js";
 import ProjectPanel from "./ui/ProjectPanel.js";
@@ -44,6 +45,7 @@ export default class World {
     public mouse: Record<string, number> = {};
     public _threejs: WebGLRenderer;
     public bloomRenderer: EffectComposer;
+    public antialiasPass: ShaderPass;
     public _labelRender: CSS2DRenderer;
     public _camera: PerspectiveCamera;
     public _raycaster: Raycaster;
@@ -99,7 +101,7 @@ export default class World {
 
     public constructor () {
 
-        this._threejs = new WebGLRenderer({ antialias: true });
+        this._threejs = new WebGLRenderer();
         this._threejs.shadowMap.enabled = false;
         this._threejs.setPixelRatio(window.devicePixelRatio);
         this._threejs.setSize(window.innerWidth, window.innerHeight);
@@ -134,6 +136,8 @@ export default class World {
         this.bloomRenderer = new EffectComposer(this._threejs);
         this.bloomRenderer.setSize(window.innerWidth, window.innerHeight);
         this.bloomRenderer.renderToScreen = true;
+
+        this.antialiasPass = new ShaderPass(FXAAShader);
 
         const loader = new CubeTextureLoader();
 
@@ -263,8 +267,15 @@ export default class World {
         bloomPass.renderToScreen = true;
 
 
+        const pixelRatio = this._threejs.getPixelRatio();
+        this.antialiasPass.material.uniforms['resolution'].value.x = 1 / (window.innerWidth * pixelRatio);
+        this.antialiasPass.material.uniforms['resolution'].value.y = 1 / (window.innerHeight * pixelRatio);
+
+
+
         this.bloomRenderer.addPass(renderScene);
         this.bloomRenderer.addPass(bloomPass);
+        this.bloomRenderer.addPass(this.antialiasPass);
 
         this.cameraControls = new MouseControls(this);
         this.cameraControls.setCamera(this._camera);
@@ -276,7 +287,12 @@ export default class World {
         this._camera.aspect = window.innerWidth / window.innerHeight;
         this._camera.updateProjectionMatrix();
         this._threejs.setSize(window.innerWidth, window.innerHeight);
+        this.bloomRenderer.setSize(window.innerWidth, window.innerHeight);
         this._labelRender.setSize(window.innerWidth, window.innerHeight);
+
+        const pixelRatio = this._threejs.getPixelRatio();
+        this.antialiasPass.material.uniforms['resolution'].value.x = 1 / (window.innerWidth * pixelRatio);
+        this.antialiasPass.material.uniforms['resolution'].value.y = 1 / (window.innerHeight * pixelRatio);
     }
 
     public serialiseJSON () {
