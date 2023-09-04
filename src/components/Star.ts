@@ -41,7 +41,7 @@ export default class Star {
         this._colour = colour;
         this.position = position;
         this._name = name;
-        this.description = "this is star no. " + name;
+        this.description = "Add text here!";
         this.world = world;
         this.createStar(scene);
         this.collider = this.createCollider(scene);
