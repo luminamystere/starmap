@@ -143,7 +143,7 @@ class FactionEditor extends Component<"div"> {
         .addClass(ProjectPanelClasses.FactionName)
         .setInputText(this.faction.name)
         .setId("factionName")
-        .setMaxLength(30)
+        .setMaxLength(256)
         .addChangeListener(input => this.faction.name = input.element.value)
         .appendTo(this);
 

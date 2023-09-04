@@ -1,3 +1,6 @@
+// @import url('https://fonts.googleapis.com/css2?family=Overlock+SC&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Prompt:wght@300&display=swap');
+
 :root {
     color-scheme: dark;
     font-family: Arial, Helvetica, sans-serif;
@@ -24,7 +27,17 @@ body {
     font-size: 96px;
     color: white;
     background: #0006;
-    padding: 10px 40px 30px;
+    padding: 10px 40px 10px;
+    font-family: "Prompt";
+    font-variant: small-caps;
+    letter-spacing: 0.05em;
+    max-width: 1100px;
+    text-align: center;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    text-overflow: ellipsis;
 
     &:empty {
         display: none;
