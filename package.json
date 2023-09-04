@@ -13,7 +13,8 @@
     "three": "^0.154.0"
   },
   "scripts": {
-    "build": "concurrently \"npx tsc --watch\" \"npx sass scss/index.scss out/index.css --watch\""
+    "watch": "concurrently \"npx tsc --watch\" \"npx sass scss/index.scss out/index.css --watch\"",
+    "build": "concurrently \"npx tsc\" \"npx sass scss/index.scss out/index.css\""
   },
   "author": "",
   "license": "ISC",
