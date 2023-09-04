@@ -141,17 +141,17 @@ export default class World {
 
         const loader = new CubeTextureLoader();
 
-        loader.setPath('./src/textures/skybox01/');
+        loader.setPath('./static/textures/skybox01/');
         let textureCube = loader.load(['skybox_right1.png', 'skybox_left2.png', 'skybox_top3.png', 'skybox_bottom4.png', 'skybox_front5.png', 'skybox_back6.png']);
         textureCube.name = "01"
         this.backgrounds.push(textureCube);
 
-        loader.setPath('./src/textures/skybox02/');
+        loader.setPath('./static/textures/skybox02/');
         textureCube = loader.load(['skybox_right1.png', 'skybox_left2.png', 'skybox_top3.png', 'skybox_bottom4.png', 'skybox_front5.png', 'skybox_back6.png']);
         textureCube.name = "02"
         this.backgrounds.push(textureCube);
 
-        loader.setPath('./src/textures/skybox03/');
+        loader.setPath('./static/textures/skybox03/');
         textureCube = loader.load(['skybox_right1.png', 'skybox_left2.png', 'skybox_top3.png', 'skybox_bottom4.png', 'skybox_front5.png', 'skybox_back6.png']);
         textureCube.name = "03"
         this.backgrounds.push(textureCube);
