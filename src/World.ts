@@ -68,6 +68,17 @@ export default class World {
     public lineGeometry?: BufferGeometry;
     public lineObject?: Line;
 
+    public _starpathDefaultColor: Color;
+    public get starpathColour () {
+        return `#${this._starpathDefaultColor.getHexString()}`
+    }
+    public set starpathColour (input: `#${string}`) {
+        this._starpathDefaultColor = new Color(input);
+        for (const starpaths of this.starPaths) {
+            starpaths.updateColour();
+        }
+    }
+
     public playerVelocity = new Vector3();
     public playerDirection = new Vector3();
     public playerPosition = new Vector3();
@@ -98,6 +109,7 @@ export default class World {
         this._camera = new PerspectiveCamera(fov, aspect, near, far);
         this._camera.position.set(0, 1, 0);
         this._camera.rotation.order = 'YXZ';
+        this._starpathDefaultColor = new Color(0xCCCCCC);
 
         this._raycaster = new Raycaster();
         this._raycaster.camera = this._camera;

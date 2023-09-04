@@ -13,6 +13,8 @@ import SelectInput from "./SelectInput.js";
 export enum ProjectPanelClasses {
     Main = "projectpanel",
     Name = "projectpanel-name",
+    Label = "projectpanel-label",
+    Select = "projectpanel-select",
     Description = "projectpanel-description",
     FactionBox = "projectpanel-faction-box",
     Faction = "projectpanel-faction",
@@ -40,6 +42,18 @@ export default class ProjectPanel extends Panel {
 
     public readonly factionBox = new Component("div")
         .addClass(ProjectPanelClasses.FactionBox)
+        .appendTo(this.content);
+
+    public readonly starpathColourLabel = new Label("starpathColour")
+        .addClass(ProjectPanelClasses.Label)
+        .setText("Select Starpath Colour")
+        .appendTo(this.content);
+
+    public readonly starpathColourSelect = new ColourInput()
+        .addClass(ProjectPanelClasses.Select)
+        .setInputColour(this.world.starpathColour)
+        .setId("starpathColour")
+        .addChangeListener(input => this.world.starpathColour = input.element.value as `#${string}`)
         .appendTo(this.content);
 
     public readonly backgroundLabel = new Label("background")
