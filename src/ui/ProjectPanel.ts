@@ -37,17 +37,17 @@ export default class ProjectPanel extends Panel {
         .addClass(ProjectPanelClasses.FactionBox)
         .appendTo(this.content);
 
-    public readonly exportButton = new Button()
-        .addClass(ProjectPanelClasses.Button)
-        .setText("EXPORT")
-        .addEventListener("click", () => this.exportData())
-        .appendTo(this.footer);
+    // public readonly exportButton = new Button()
+    //     .addClass(ProjectPanelClasses.Button)
+    //     .setText("EXPORT")
+    //     .addEventListener("click", () => this.exportData())
+    //     .appendTo(this.footer);
 
-    public readonly importButton = new Button()
-        .addClass(ProjectPanelClasses.Button)
-        .setText("IMPORT")
-        .addEventListener("click", () => this.importData())
-        .appendTo(this.footer);
+    // public readonly importButton = new Button()
+    //     .addClass(ProjectPanelClasses.Button)
+    //     .setText("IMPORT")
+    //     .addEventListener("click", () => this.importData())
+    //     .appendTo(this.footer);
 
 
 
