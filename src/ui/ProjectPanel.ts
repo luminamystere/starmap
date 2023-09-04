@@ -57,12 +57,12 @@ export default class ProjectPanel extends Panel {
         .appendTo(this.content);
 
     public readonly backgroundLabel = new Label("background")
-        .addClass(ProjectPanelClasses.BackgroundLabel)
+        .addClass(ProjectPanelClasses.Label)
         .setText("Select Background")
         .appendTo(this.content);
 
     public readonly backgroundSelect = new SelectInput()
-        .addClass(ProjectPanelClasses.Background)
+        .addClass(ProjectPanelClasses.Select)
         .addChangeListener((event) => this.world.chooseBackground(event.element.value))
         .setId("background")
         .appendTo(this.content);
