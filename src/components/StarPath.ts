@@ -83,6 +83,7 @@ export default class StarPath extends Mesh {
         }
         this.line.computeLineDistances();
         this.line.geometry.setFromPoints(this.linePoints);
+        this.line.geometry.computeBoundingSphere();
         if (this.geometry) {
             this.geometry.dispose();
             const distance = this.getDistance();

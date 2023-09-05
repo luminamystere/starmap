@@ -546,9 +546,10 @@ export default class World {
 
         }
         //right click dragging lines
-        if (this.mouse[2] && this.interacting.length == 1) {
+        if (this.mouse[2] && this.interacting.length == 1 && this.lineObject) {
             this.linePoints[1] = this.getCursorPosition();
-            this.lineObject?.geometry.setFromPoints(this.linePoints);
+            this.lineObject.geometry.setFromPoints(this.linePoints);
+            this.lineObject.geometry.computeBoundingSphere();
 
         }
     }
