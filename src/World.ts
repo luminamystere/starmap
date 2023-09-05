@@ -377,11 +377,11 @@ export default class World {
         if (intersects.length == 0) {
             return;
         } else {
-            const starPath = intersects[0]?.object as StarPath;
-            if (!(starPath instanceof StarPath)) {
-                return;
+            for (const object of intersects) {
+                if (object.object instanceof StarPath) {
+                    return object.object;
+                }
             }
-            return starPath;
         }
     }
 
