@@ -156,7 +156,8 @@ export default class World {
         textureCube.name = "03"
         this.backgrounds.push(textureCube);
 
-        this.currentBackground = this.backgrounds[1];
+        this.backgroundName = "03";
+        this.chooseBackground(this.backgroundName);
 
         this._Initialise();
     }
@@ -340,8 +341,10 @@ export default class World {
             } else {
                 this._starpathDefaultColor = new Color(0xCCCCCC)
             }
-            this.backgroundName = saved.world.background || "None";
-            this.chooseBackground(this.backgroundName);
+            if (saved.world.background) {
+                this.backgroundName = saved.world.background || "None";
+                this.chooseBackground(this.backgroundName);
+            }
         }
 
     }
