@@ -162,7 +162,7 @@ export default class World {
         this.chooseBackground(this.backgroundName);
 
         this.starMesh = new InstancedMesh(new SphereGeometry(0.2, 12, 12),
-            new MeshStandardMaterial({ emissive: new Color(0x555555), emissiveIntensity: 1, toneMapped: false }), 1000);
+            new MeshStandardMaterial({ emissive: new Color(0x555555), emissiveIntensity: 1, toneMapped: false }), 1024);
         this.starMesh.count = 0;
         this.starMesh.setColorAt(0, this.defaultStarColour);
         this._scene.add(this.starMesh);
@@ -220,7 +220,6 @@ export default class World {
                     return;
                 }
                 if (this.raycastForStar() == this.interacting[0]) {
-                    console.log(this.interacting[0]);
                     this.showStarPanel(this.interacting[0]);
                     lastStarPanelShown = Date.now();
                 }
@@ -341,7 +340,6 @@ export default class World {
             }
         }
         if (saved.world) {
-            console.log("saved.world exists");
             if (saved.world.starpathColour) {
                 this._starpathDefaultColor = new Color(saved.world.starpathColour);
                 for (const starpath of this.starPaths) {
@@ -359,6 +357,9 @@ export default class World {
     }
 
     public spawnOrb () {
+        if (this.starMesh.count = 1024) {
+            return;
+        }
         const star = new Star("", this.defaultStarColour,
             this.getCursorPosition() || new Vector3(0, 0, 0),
             this._scene, this);
@@ -381,11 +382,8 @@ export default class World {
     }
 
     public raycastForStarpath () {
-        console.log("raycasting!");
         this._raycaster.setFromCamera(new Vector2(0, 0), this._camera);
         const intersects = this._raycaster.intersectObjects(this.starPaths, true);
-        console.log("starpaths array", this.starPaths);
-        console.log("intersects: ", intersects);
         if (intersects.length == 0) {
             return;
         } else {
@@ -421,7 +419,6 @@ export default class World {
         if (this.projectPanel) {
             this.projectPanel.remove();
             delete this.projectPanel;
-            console.log("deleting project panel");
         } else {
             this.projectPanel = new ProjectPanel(this)
                 .addEventListener("closePanel", () => {
@@ -430,13 +427,11 @@ export default class World {
                 });
             document.body.append(this.projectPanel.element);
             document.exitPointerLock();
-            console.log("showing project panel");
         }
     }
 
     public showStarPanel (star: Star) {
         if (star == undefined) {
-            console.log("no star yet");
             return;
         }
         this.starPanel = new StarPanel(star)
@@ -455,7 +450,6 @@ export default class World {
     }
 
     public moveStar () {
-        console.log("move star is executing");
         if (this.moving.length == 1) {
             return;
         }
@@ -488,7 +482,6 @@ export default class World {
     }
 
     public chooseBackground (background: string) {
-        console.log(background);
         if (background == "None") {
             this._scene.background = null;
             delete this.currentBackground;
