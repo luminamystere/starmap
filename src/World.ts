@@ -357,7 +357,7 @@ export default class World {
     }
 
     public spawnOrb () {
-        if (this.starMesh.count = 1024) {
+        if (this.starMesh.count === 1024) {
             return;
         }
         const star = new Star("", this.defaultStarColour,
