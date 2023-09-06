@@ -54,7 +54,7 @@ export default class Star {
         this.collider = this.createCollider(scene);
         this.factionMaterial = this.createFactionMaterial();
         this.factionMesh = this.createFactionSphere(scene);
-        this.createLabel();
+        this.updateLabel();
         this.updatePosition();
         this.unHoverStar();
         this.updateColour();
@@ -107,8 +107,18 @@ export default class Star {
     }
 
     public updateLabel () {
-        if (this.starLabel) {
+        if (!this.starLabel && this._name !== "") {
+            this.createLabel();
+            this.updateLabelScale(this.world._camera.getWorldPosition(new Vector3));
+        } else if (this.starLabel && this._name !== "") {
             this.starLabel.element.firstElementChild!.textContent = this._name;
+            this.updateLabelScale(this.world._camera.getWorldPosition(new Vector3));
+        } else if (this.starLabel && this._name == "") {
+            while (this.starLabel.element.lastElementChild) {
+                this.starLabel.element.removeChild(this.starLabel.element.lastElementChild);
+            }
+            this.starLabel.removeFromParent();
+            delete this.starLabel;
         }
     }
 
