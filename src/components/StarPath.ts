@@ -23,8 +23,7 @@ export default class StarPath extends Mesh {
 
     public constructor (star1: Star, star2: Star, scene: Scene, world: World) {
         const material = new MeshBasicMaterial({ color: 0xCCCCCC });
-        material.transparent = true;
-        material.opacity = 0;
+        material.visible = false;
         const direction = new Vector3().subVectors(star1.position, star2.position);
         const distance = direction.length();
         const geometry = new CylinderGeometry(0.05, 0.05, distance, 3, 4, true)

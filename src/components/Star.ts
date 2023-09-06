@@ -95,7 +95,6 @@ export default class Star {
     }
 
     public createLabel () {
-        console.log("creating label");
         const container = document.createElement('div');
         const starDiv = document.createElement('div');
         container.append(starDiv);
@@ -235,7 +234,4 @@ export default class Star {
 
     }
 
-    public showDetails () {
-        console.log("got here successfully");
-    }
 }

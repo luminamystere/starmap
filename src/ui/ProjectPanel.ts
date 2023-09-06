@@ -109,7 +109,6 @@ export default class ProjectPanel extends Panel {
     }
 
     public addFaction () {
-        console.log("add faction");
         const name = "faction no " + this.world.factions.length;
         const colour = new Color(0xffffff);
         colour.setHex(Math.random() * 0xffffff);
@@ -193,7 +192,6 @@ class FactionEditor extends Component<"div"> {
     }
 
     public deleteFaction () {
-        console.log("ouchies!");
         for (const star of this.world.stars) {
             if (star.faction == this.faction) {
                 star.updateFaction("None");
