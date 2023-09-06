@@ -2,8 +2,8 @@ import { Vector3 } from "three";
 import World from "../World.js";
 
 export default class FlyMovement {
-    public SPEED_HORIZONTAL = 1.5;
-    public SPEED_VERTICAL = 0.6;
+    public SPEED_HORIZONTAL = 0.05;
+    public SPEED_VERTICAL = 0.03;
     public FRICTION = 0.8;
     public world: World;
 
@@ -17,6 +17,7 @@ export default class FlyMovement {
     }
 
     public update (delta: number) {
+        this.playerVelocity.multiplyScalar(this.FRICTION ** delta);
 
         let forwardBackInput = 0;
         let leftRightInput = 0;
@@ -66,12 +67,7 @@ export default class FlyMovement {
         return this.playerDirection;
     }
 
-    public updatePlayer (delta: number) {
-        let damping = Math.exp(-4 * delta) - 1;
-        this.playerVelocity.addScaledVector(this.playerVelocity, damping);
-        const deltaPosition = this.playerVelocity.clone().multiplyScalar(delta);
-        //this.world.playerPosition.add(deltaPosition);
-        return deltaPosition;
-
+    public getMovementVector (delta: number) {
+        return this.playerVelocity.clone().multiplyScalar(delta);
     }
 }

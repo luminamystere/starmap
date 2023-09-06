@@ -97,7 +97,6 @@ export default class World {
 
     public playerVelocity = new Vector3();
     public playerDirection = new Vector3();
-    public playerPosition = new Vector3();
 
     public starPanel?: StarPanel;
     public projectPanel?: ProjectPanel;
@@ -511,7 +510,7 @@ export default class World {
         }
 
         this.movementControls?.update(delta);
-        this.cameraControls?.getObject().position.add(this.movementControls.updatePlayer(delta))
+        this.cameraControls?.getObject().position.add(this.movementControls.getMovementVector(delta));
 
         const star = this.raycastForStar();
         if (star !== undefined) {
