@@ -1,4 +1,4 @@
-import { Color, Mesh, MeshBasicMaterial, MeshLambertMaterial, MeshPhysicalMaterial, MeshStandardMaterial, Object3D, Scene, SphereGeometry, Vector3 } from "three";
+import { Color, Matrix4, Mesh, MeshBasicMaterial, MeshLambertMaterial, MeshPhysicalMaterial, MeshStandardMaterial, Object3D, Scene, SphereGeometry, Vector3 } from "three";
 import Collider from "./Collider.js";
 import { CSS3DObject } from "three/examples/jsm/renderers/CSS3DRenderer.js";
 import { CSS2DObject } from "three/examples/jsm/renderers/CSS2DRenderer.js";
@@ -18,12 +18,13 @@ export default class Star {
         this.updateColour();
     }
     public position: Vector3;
-    public mesh?: Mesh;
+    public starHolder: Object3D;
     public starMaterial?: MeshStandardMaterial;
     public collider: Collider;
     public faction?: Faction;
     public factionMesh: Mesh;
     public factionMaterial: MeshBasicMaterial;
+    public index: number;
     private _name: string;
     public get name () {
         return this._name;
@@ -43,22 +44,28 @@ export default class Star {
         this._name = name;
         this.description = "Add text here!";
         this.world = world;
-        this.createStar(scene);
+        this.starHolder = new Object3D();
+        this.starHolder.position.set(this.position.x, this.position.y, this.position.z);
+        this.starHolder.scale.set(1, 1, 1);
+        this.starHolder.updateMatrix();
+        scene.add(this.starHolder);
+        this.index = this.world.starMesh.count;
+        this.createStar();
         this.collider = this.createCollider(scene);
         this.factionMaterial = this.createFactionMaterial();
         this.factionMesh = this.createFactionSphere(scene);
         this.createLabel();
+        this.updatePosition();
         this.unHoverStar();
+        this.updateColour();
     }
 
 
-    public createStar (scene: Scene) {
-        const geometry = new SphereGeometry(0.2, 8, 8);
-        this.starMaterial = new MeshStandardMaterial({ color: this._colour, emissive: this._colour, emissiveIntensity: 1, toneMapped: false });
-        this.mesh = new Mesh(geometry, this.starMaterial);
-        this.mesh.position.set(this.position.x || 0, this.position.y || 0, this.position.z || 0);
-        this.mesh.name = this.name.toString();
-        scene.add(this.mesh);
+    public createStar () {
+        this.world.starMesh.setMatrixAt(this.index, this.starHolder.matrix);
+        this.world.starMesh.instanceMatrix.needsUpdate = true;
+        this.world.starMesh.computeBoundingSphere();
+        this.world.starMesh.count += 1;
     }
 
     public createCollider (scene: Scene) {
@@ -83,15 +90,12 @@ export default class Star {
         return this.factionMaterial;
     }
 
-    public get currentMesh () {
-        return this.mesh;
-    }
-
     public get currentCollider () {
         return this.collider;
     }
 
     public createLabel () {
+        console.log("creating label");
         const container = document.createElement('div');
         const starDiv = document.createElement('div');
         container.append(starDiv);
@@ -99,8 +103,8 @@ export default class Star {
         starDiv.textContent = this._name.toString();
         this.starLabel = new CSS2DObject(container);
         (this.starLabel.element.firstElementChild as HTMLElement).style.transform = `scale(1)`;
-        this.starLabel.position.set(0, 0.8, 0);
-        this.mesh?.add(this.starLabel);
+        this.starLabel.position.set(0, 0.5, 0);
+        this.starHolder.add(this.starLabel);
     }
 
     public updateLabel () {
@@ -127,9 +131,11 @@ export default class Star {
     }
 
     public updatePosition () {
-        if (this.mesh) {
-            this.mesh.position.set(this.position.x, this.position.y, this.position.z);
-        }
+        this.starHolder.position.set(this.position.x, this.position.y, this.position.z);
+        this.starHolder.updateMatrix();
+        this.world.starMesh.setMatrixAt(this.index, this.starHolder.matrix);
+        this.world.starMesh.instanceMatrix.needsUpdate = true;
+        this.world.starMesh.computeBoundingSphere();
         this.collider.position.set(this.position.x, this.position.y, this.position.z);
         if (this.factionMesh) {
             this.factionMesh.position.set(this.position.x, this.position.y, this.position.z);
@@ -182,15 +188,9 @@ export default class Star {
     }
 
     public updateColour () {
-        if (this.mesh) {
-            if (this.mesh.material instanceof Array) {
-                this.mesh.material.forEach(material => material.dispose());
-            } else {
-                this.mesh.material.dispose();
-            }
-            this.starMaterial = new MeshStandardMaterial({ color: this._colour, emissive: this._colour, emissiveIntensity: 1, toneMapped: false });
-            this.mesh.material = this.starMaterial;
-
+        this.world.starMesh.setColorAt(this.index, this._colour);
+        if (this.world.starMesh.instanceColor) {
+            this.world.starMesh.instanceColor.needsUpdate = true;
         }
     }
 
@@ -214,17 +214,25 @@ export default class Star {
             }
             this.collider.removeFromParent();
         }
-        if (this.mesh) {
-            if (this.mesh.geometry) {
-                this.mesh.geometry.dispose();
-            }
-            if (this.mesh.material instanceof Array) {
-                this.mesh.material.forEach(material => material.dispose());
-            } else {
-                this.mesh.material.dispose();
-            }
-            this.mesh.removeFromParent();
+        this.factionMesh.geometry.dispose();
+        if (this.factionMaterial instanceof Array) {
+            this.factionMaterial.forEach(material => material.dispose());
+        } else {
+            this.factionMaterial.dispose();
         }
+        this.factionMesh.removeFromParent();
+
+        const replacementStar = this.world.stars.find((element) => element.index == (this.world.starMesh.count - 1));
+        if (replacementStar == null) {
+            return;
+        }
+        replacementStar.index = this.index;
+        this.world.starMesh.setMatrixAt(replacementStar.index, replacementStar.starHolder.matrix);
+        this.world.starMesh.instanceMatrix.needsUpdate = true;
+        this.world.starMesh.computeBoundingSphere();
+        this.world.starMesh.count -= 1;
+        replacementStar.updatePosition();
+
     }
 
     public showDetails () {

@@ -10,7 +10,7 @@ import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
 import { FXAAShader } from "three/examples/jsm/shaders/FXAAShader.js";
-import { WebGLRenderer, PerspectiveCamera, Raycaster, Scene, Object3D, Vector3, Color, Vector2, BufferGeometry, Line, LineBasicMaterial, CubeTextureLoader, CubeTexture, AmbientLight, ReinhardToneMapping, SRGBColorSpace } from "three";
+import { WebGLRenderer, PerspectiveCamera, Raycaster, Scene, Object3D, Vector3, Color, Vector2, BufferGeometry, Line, LineBasicMaterial, CubeTextureLoader, CubeTexture, AmbientLight, ReinhardToneMapping, SRGBColorSpace, InstancedMesh, SphereGeometry, MeshStandardMaterial } from "three";
 import StarPath from "./components/StarPath.js";
 import StarPanel from "./ui/StarPanel.js";
 import ProjectPanel from "./ui/ProjectPanel.js";
@@ -60,6 +60,9 @@ export default class World {
     public TICKRATE = 1000 / 60;
     public SENSITIVITY = 500;
     public savedCursorPosition?: Vector3;
+
+    public starMesh: InstancedMesh;
+    public defaultStarColour: Color = new Color(0xFFFFFF);
 
     public stars: Star[] = [];
     public colliders: Object3D[] = [];
@@ -124,7 +127,6 @@ export default class World {
         this._camera = new PerspectiveCamera(fov, aspect, near, far);
         this._camera.position.set(0, 1, 0);
         this._camera.rotation.order = 'YXZ';
-        // this._camera.layers.enableAll();
         this._starpathDefaultColor = new Color(0xCCCCCC);
 
         this._raycaster = new Raycaster();
@@ -158,6 +160,12 @@ export default class World {
 
         this.backgroundName = "03";
         this.chooseBackground(this.backgroundName);
+
+        this.starMesh = new InstancedMesh(new SphereGeometry(0.2, 12, 12),
+            new MeshStandardMaterial({ emissive: new Color(0x555555), emissiveIntensity: 1, toneMapped: false }), 1000);
+        this.starMesh.count = 0;
+        this.starMesh.setColorAt(0, this.defaultStarColour);
+        this._scene.add(this.starMesh);
 
         this._Initialise();
     }
@@ -212,6 +220,7 @@ export default class World {
                     return;
                 }
                 if (this.raycastForStar() == this.interacting[0]) {
+                    console.log(this.interacting[0]);
                     this.showStarPanel(this.interacting[0]);
                     lastStarPanelShown = Date.now();
                 }
@@ -245,7 +254,7 @@ export default class World {
         this.movementControls = new FlyMovement(this);
 
         const renderScene = new RenderPass(this._scene, this._camera);
-        const bloomPass = new UnrealBloomPass(new Vector2(window.innerWidth, window.innerHeight), 0.4, 0.2, 0.3);
+        const bloomPass = new UnrealBloomPass(new Vector2(window.innerWidth, window.innerHeight), 0.6, 0.1, 0.3);
         bloomPass.renderToScreen = true;
 
 
@@ -350,7 +359,7 @@ export default class World {
     }
 
     public spawnOrb () {
-        const star = new Star("", new Color(0xFFFFFF),
+        const star = new Star("", this.defaultStarColour,
             this.getCursorPosition() || new Vector3(0, 0, 0),
             this._scene, this);
         this.stars.push(star);
