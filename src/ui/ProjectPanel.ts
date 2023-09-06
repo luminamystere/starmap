@@ -189,6 +189,7 @@ class FactionEditor extends Component<"div"> {
                 star.updateFaction(this.faction.name);
             }
         }
+        this.world.saveLocalStorage();
     }
 
     public deleteFaction () {
@@ -198,6 +199,7 @@ class FactionEditor extends Component<"div"> {
             }
         }
         this.world.factions.filter(faction => faction !== this.faction);
+        this.world.saveLocalStorage();
         this.remove();
     }
 }

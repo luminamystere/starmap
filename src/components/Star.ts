@@ -120,6 +120,7 @@ export default class Star {
             this.starLabel.removeFromParent();
             delete this.starLabel;
         }
+        this.world.saveLocalStorage();
     }
 
     public updateLabelScale (position: Vector3) {
@@ -201,6 +202,7 @@ export default class Star {
         if (this.world.starMesh.instanceColor) {
             this.world.starMesh.instanceColor.needsUpdate = true;
         }
+        this.world.saveLocalStorage();
     }
 
     public delete () {

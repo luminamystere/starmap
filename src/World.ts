@@ -60,6 +60,7 @@ export default class World {
     public TICKRATE = 1000 / 60;
     public SENSITIVITY = 500;
     public savedCursorPosition?: Vector3;
+    public isLoading: Boolean = false;
 
     public starMesh: InstancedMesh;
     public defaultStarColour: Color = new Color(0xFFFFFF);
@@ -202,16 +203,18 @@ export default class World {
         let lastStarPanelShown = 0;
         document.body.addEventListener("mouseup", event => {
             if (this.mouse[0]) {
+                if (this.moving.length > 0) {
+                    this.saveLocalStorage();
+                }
                 this.moving = [];
                 this.toMove = [];
                 delete this.savedCursorPosition;
-                this.saveLocalStorage();
             } else if (this.mouse[1]) {
                 const starpath = this.raycastForStarpath();
                 if (starpath instanceof StarPath) {
                     starpath.deleteStarPath();
+                    this.saveLocalStorage();
                 }
-                this.saveLocalStorage();
 
             } else if (this.mouse[2]) {
                 this.createLine();
@@ -229,7 +232,6 @@ export default class World {
                     this._scene.remove(this.lineObject);
                 }
                 this.movingLine = [];
-                this.saveLocalStorage();
             }
             delete this.mouse[event.button];
         });
@@ -309,12 +311,16 @@ export default class World {
     }
 
     public saveLocalStorage () {
+        if (this.isLoading) {
+            return;
+        }
         console.log("saving local storage");
         localStorage.setItem("save", this.serialiseJSON());
     }
 
     public loadLocalStorage () {
         console.log("loading local storage");
+        this.isLoading = true;
         const saved: SavedData = JSON.parse(localStorage.getItem("save") ?? '{"starPaths": [], "stars": [], "factions": [], "world": []}');
         console.log(saved);
         this.factions = saved.factions.map(saved => new Faction(saved.name, saved.description, new Color(saved.colour))) as Faction[];
@@ -352,6 +358,7 @@ export default class World {
                 this.chooseBackground(this.backgroundName);
             }
         }
+        this.isLoading = false;
 
     }
 
@@ -401,6 +408,7 @@ export default class World {
         const star = this.raycastForStar();
         if (star == undefined) {
             this.spawnOrb();
+            this.saveLocalStorage();
             return;
         } else {
             this.interacting.push(star);
@@ -478,6 +486,7 @@ export default class World {
             return;
         }
         this.starPaths.push(new StarPath(star1, star2, this._scene, this));
+        this.saveLocalStorage();
     }
 
     public chooseBackground (background: string) {
