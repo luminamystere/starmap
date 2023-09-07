@@ -36,6 +36,8 @@ interface SavedData {
     world: {
         starpathColour: string;
         background: string;
+        cameraLocation: [number, number, number];
+        cameraDirection: [number, number, number];
     };
 }
 
@@ -318,6 +320,12 @@ export default class World {
             world: {
                 starpathColour: this.starpathColour,
                 background: this.backgroundName || "None",
+                cameraLocation: [this._camera.getWorldPosition(new Vector3).x || 0,
+                this._camera.getWorldPosition(new Vector3).y || 0,
+                this._camera.getWorldPosition(new Vector3).z || 0],
+                cameraDirection: [this._camera.getWorldDirection(new Vector3).x || 0,
+                this._camera.getWorldDirection(new Vector3).y || 0,
+                this._camera.getWorldDirection(new Vector3).z || 0],
             }
         } satisfies SavedData);
     }
@@ -368,6 +376,24 @@ export default class World {
             if (saved.world.background) {
                 this.backgroundName = saved.world.background || "None";
                 this.chooseBackground(this.backgroundName);
+            }
+            if (saved.world.cameraLocation) {
+                const savedLocation = new Vector3(saved.world.cameraLocation[0] || 0,
+                    saved.world.cameraLocation[1] || 0,
+                    saved.world.cameraLocation[2] || 0);
+                if (this.cameraControls && this.movementControls) {
+                    this.cameraControls.getObject().position.add(savedLocation);
+                }
+
+            }
+            if (saved.world.cameraDirection) {
+                if (this.cameraControls) {
+                    // this._camera.rotation.set(saved.world.cameraDirection[0] || 0, saved.world.cameraDirection[1] || 0, saved.world.cameraDirection[2] || 0);
+                    // if (this.cameraControls) {
+                    //     this.cameraControls.
+                    // }
+                    console.log("still figuring this out");
+                }
             }
         }
         this.isLoading = false;
@@ -537,7 +563,12 @@ export default class World {
         if (star !== undefined) {
             star.hoverStar();
             this.hovering.push(star);
+            if (this.hovering.length > 0 && star !== this.hovering[0]) {
+                this.hovering[0].unHoverStar();
+                this.hovering.splice(0, 1);
+            }
         } else if (this.hovering.length > 0) {
+
             for (const star of this.hovering) {
                 star.unHoverStar();
             }

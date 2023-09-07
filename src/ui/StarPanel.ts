@@ -39,7 +39,7 @@ export default class StarPanel extends Panel {
 
     public readonly starDescription = new TextArea()
         .addClass(StarPanelClasses.Description)
-        .addChangeListener(input => this.star.name = input.element.value)
+        .addChangeListener(input => this.star.description = input.element.value)
         .setInputText(this.star.description)
         .setId("starDescription")
         .appendTo(this.content);
