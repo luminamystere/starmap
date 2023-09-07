@@ -190,6 +190,15 @@ export default class World {
         })
         document.body.addEventListener("mousedown", event => {
             this.mouse[event.button] ??= Date.now();
+            if (!(event.target as Element)?.closest(".panel") && (this.projectPanel || this.starPanel)) {
+                if (this.projectPanel) {
+                    this.projectPanel.remove();
+                    return;
+                } else if (this.starPanel) {
+                    this.starPanel.remove();
+                    return;
+                }
+            }
             if (this.starPanel) {
                 return;
             }
@@ -199,6 +208,8 @@ export default class World {
             else if (this.mouse[2]) {
                 this.showDetails();
             }
+
+
         });
         let lastStarPanelShown = 0;
         document.body.addEventListener("mouseup", event => {
@@ -272,6 +283,7 @@ export default class World {
         this.cameraControls.setCamera(this._camera);
         this._scene.add(this.cameraControls.getObject());
         this.loadLocalStorage();
+        this.showProjectPanel();
     }
 
     _OnWindowResize () {
