@@ -3,7 +3,7 @@ import World from "../World.js";
 
 export default class FlyMovement {
     public SPEED_HORIZONTAL = 0.05;
-    public SPEED_VERTICAL = 0.03;
+    public SPEED_VERTICAL = 0.05;
     public FRICTION = 0.8;
     public world: World;
 
