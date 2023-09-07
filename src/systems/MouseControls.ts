@@ -1,10 +1,14 @@
-//import { InScene } from "game/object/Feature";
 import { Camera, Euler, Object3D, Scene, Vector2, Vector3 } from "three";
 //import Bound from "util/Bound";
 //import Configurable from "util/config/Configurable";
 import World from "../World.js";
 
 const PI_2 = Math.PI / 2;
+
+export interface SerialisedCameraAngle {
+    pitch: number;
+    yaw: number;
+}
 
 //@InScene
 export default class MouseControls {
@@ -48,10 +52,8 @@ export default class MouseControls {
 
     private camera: Camera;
 
-    private readonly pitchObject: Object3D;
-    private readonly yawObject: Object3D;
-    private direction: Vector3;
-    private rotation: Euler;
+    public readonly pitchObject: Object3D;
+    public readonly yawObject: Object3D;
 
     private enabled = false;
 
@@ -63,16 +65,9 @@ export default class MouseControls {
         this.yawObject = new Object3D()
             .add(this.pitchObject);
 
-        this.direction = new Vector3(0, 0, -1);
-        this.rotation = new Euler(0, 0, 0, "YXZ");
+
 
         document.addEventListener("mousemove", this.onMouseMove, false);
-        // document.addEventListener("mousemove", (event) => {
-        //     if (document.pointerLockElement === document.body) {
-        //         this.camera.rotation.y -= event.movementX / this.LISTENER_SENS;
-        //         this.camera.rotation.x -= event.movementY / this.LISTENER_SENS;
-        //     }
-        // });
         document.body.addEventListener("click", () => this.lockMouse());
         document.addEventListener("pointerlockchange", () => {
             this.enabled = document.pointerLockElement === document.body;
@@ -104,12 +99,6 @@ export default class MouseControls {
 
     public getObject () {
         return this.yawObject;
-    }
-
-    public getDirection (v: Vector3) {
-        this.rotation.set(this.pitchObject.rotation.x, this.yawObject.rotation.y, 0);
-        v.copy(this.direction).applyEuler(this.rotation);
-        return v;
     }
 
     public dispose () {
@@ -149,6 +138,18 @@ export default class MouseControls {
             this.delayedMovement.splice(0, Infinity);
 
         this.applyMovement(movementX, movementY);
+    }
+
+    public serialise (): SerialisedCameraAngle {
+        return {
+            pitch: this.pitchObject.rotation.x,
+            yaw: this.yawObject.rotation.y
+        }
+    }
+
+    public deserialise (angle: SerialisedCameraAngle) {
+        this.pitchObject.rotation.x = angle.pitch;
+        this.yawObject.rotation.y = angle.yaw;
     }
 
     private applyMovement (movementX: number, movementY: number) {

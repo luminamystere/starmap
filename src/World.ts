@@ -1,7 +1,7 @@
 //@ts-check
 // import * as THREE from "three";
 import { createScene } from "./components/scene.js";
-import MouseControls from "./systems/MouseControls.js"
+import MouseControls, { SerialisedCameraAngle } from "./systems/MouseControls.js"
 import FlyMovement from "./systems/FlyMovement.js";
 import Star from "./components/Star.js";
 import Collider from "./components/Collider.js";
@@ -16,6 +16,7 @@ import StarPanel from "./ui/StarPanel.js";
 import ProjectPanel from "./ui/ProjectPanel.js";
 import Faction from "./components/Faction.js";
 import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
+import { debounce } from "./utility/Async.js";
 
 interface SavedData {
     starPaths: {
@@ -37,7 +38,7 @@ interface SavedData {
         starpathColour: string;
         background: string;
         cameraLocation: [number, number, number];
-        cameraDirection: [number, number, number];
+        cameraDirection?: SerialisedCameraAngle;
     };
 }
 
@@ -53,7 +54,7 @@ export default class World {
     public _raycaster: Raycaster;
 
     public _scene: Scene;
-    public cameraControls?: MouseControls;
+    public cameraControls: MouseControls;
     public movementControls?: FlyMovement;
     public time = Date.now();
     public TIME_DILATION = 1;
@@ -106,6 +107,8 @@ export default class World {
 
     public constructor () {
 
+        this.saveInternal = this.saveInternal.bind(this);
+
         this._threejs = new WebGLRenderer();
         this._threejs.shadowMap.enabled = false;
         this._threejs.setPixelRatio(window.devicePixelRatio);
@@ -127,7 +130,7 @@ export default class World {
         const near = 1.0;
         const far = 1000;
         this._camera = new PerspectiveCamera(fov, aspect, near, far);
-        this._camera.position.set(0, 1, 0);
+        this._camera.position.set(0, 0, 0);
         this._camera.rotation.order = 'YXZ';
         this._starpathDefaultColor = new Color(0xCCCCCC);
 
@@ -168,6 +171,9 @@ export default class World {
         this.starMesh.count = 0;
         this.starMesh.setColorAt(0, this.defaultStarColour);
         this._scene.add(this.starMesh);
+
+        this.cameraControls = new MouseControls(this);
+        this.cameraControls.setCamera(this._camera);
 
         this._Initialise();
     }
@@ -281,8 +287,7 @@ export default class World {
         this.bloomRenderer.addPass(bloomPass);
         this.bloomRenderer.addPass(this.antialiasPass);
 
-        this.cameraControls = new MouseControls(this);
-        this.cameraControls.setCamera(this._camera);
+
         this._scene.add(this.cameraControls.getObject());
         this.loadLocalStorage();
         this.showProjectPanel();
@@ -323,9 +328,7 @@ export default class World {
                 cameraLocation: [this._camera.getWorldPosition(new Vector3).x || 0,
                 this._camera.getWorldPosition(new Vector3).y || 0,
                 this._camera.getWorldPosition(new Vector3).z || 0],
-                cameraDirection: [this._camera.getWorldDirection(new Vector3).x || 0,
-                this._camera.getWorldDirection(new Vector3).y || 0,
-                this._camera.getWorldDirection(new Vector3).z || 0],
+                cameraDirection: this.cameraControls.serialise(),
             }
         } satisfies SavedData);
     }
@@ -334,6 +337,11 @@ export default class World {
         if (this.isLoading) {
             return;
         }
+        debounce(1000, this.saveInternal);
+    }
+
+    private saveInternal () {
+
         console.log("saving local storage");
         localStorage.setItem("save", this.serialiseJSON());
     }
@@ -387,13 +395,7 @@ export default class World {
 
             }
             if (saved.world.cameraDirection) {
-                if (this.cameraControls) {
-                    // this._camera.rotation.set(saved.world.cameraDirection[0] || 0, saved.world.cameraDirection[1] || 0, saved.world.cameraDirection[2] || 0);
-                    // if (this.cameraControls) {
-                    //     this.cameraControls.
-                    // }
-                    console.log("still figuring this out");
-                }
+                this.cameraControls.deserialise(saved.world.cameraDirection);
             }
         }
         this.isLoading = false;
@@ -467,7 +469,7 @@ export default class World {
         } else {
             this.projectPanel = new ProjectPanel(this)
                 .addEventListener("closePanel", () => {
-                    this.cameraControls?.lockMouse();
+                    this.cameraControls.lockMouse();
                     delete this.projectPanel;
                 });
             document.body.append(this.projectPanel.element);
@@ -481,7 +483,7 @@ export default class World {
         }
         this.starPanel = new StarPanel(star)
             .addEventListener("closePanel", () => {
-                this.cameraControls?.lockMouse();
+                this.cameraControls.lockMouse();
                 delete this.starPanel;
             });
         document.body.append(this.starPanel.element);
@@ -557,7 +559,7 @@ export default class World {
         }
 
         this.movementControls?.update(delta);
-        this.cameraControls?.getObject().position.add(this.movementControls.getMovementVector(delta));
+        this.cameraControls.getObject().position.add(this.movementControls.getMovementVector(delta));
 
         const star = this.raycastForStar();
         if (star !== undefined) {
