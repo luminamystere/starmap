@@ -127,7 +127,7 @@ export default class World {
 
         const fov = 90;
         const aspect = 1920 / 1080;
-        const near = 1.0;
+        const near = 0.05;
         const far = 1000;
         this._camera = new PerspectiveCamera(fov, aspect, near, far);
         this._camera.position.set(0, 0, 0);
