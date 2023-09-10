@@ -11,12 +11,12 @@ export default class TextArea extends Component<"textarea"> {
     }
 
     public addChangeListener (handler: (input: this, event: InputEvent) => any) {
-        this.addEventListener("change", handler as any);
+        this.addEventListener("input", handler as any);
         return this;
     }
 
     public removeChangeListener (handler: (input: this, event: InputEvent) => any) {
-        this.removeEventListener("change", handler as any);
+        this.removeEventListener("input", handler as any);
         return this;
     }
 }

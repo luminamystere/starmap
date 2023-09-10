@@ -19,14 +19,19 @@ import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
 import { debounce } from "./utility/Async.js";
 import Math2 from "./utility/Math2.js";
 import Component from "./ui/Component.js";
+import StarPathPanel from "./ui/StarPathPanel.js";
 
 interface SavedData {
     starPaths: {
+        name: string;
+        description: string;
         star1: number;
         star2: number;
+        colour: string;
     }[];
     stars: {
         name: string;
+        description: string;
         faction: number;
         colour: string;
         position: [number, number, number];
@@ -66,7 +71,8 @@ export default class World {
     public SENSITIVITY = 500;
     public savedCursorPosition?: Vector3;
     public isLoading: Boolean = false;
-    public raycastDistance: number = 0;
+    public raycastStarDistance: number = 0;
+    public raycastStarpathDistance: number = 0;
     public cursorDistance: number = 0;
 
     public _projectName: string;
@@ -109,15 +115,16 @@ export default class World {
     }
     public set starpathColour (input: `#${string}`) {
         this._starpathDefaultColor = new Color(input);
-        for (const starpaths of this.starPaths) {
-            starpaths.updateColour();
-        }
+        // for (const starpaths of this.starPaths) {
+        //     starpaths.updateColour();
+        // }
     }
 
     public playerVelocity = new Vector3();
     public playerDirection = new Vector3();
 
     public starPanel?: StarPanel;
+    public starpathPanel?: StarPathPanel;
     public projectPanel?: ProjectPanel;
 
     public constructor () {
@@ -236,12 +243,15 @@ export default class World {
         })
         document.body.addEventListener("mousedown", event => {
             this.mouse[event.button] ??= Date.now();
-            if (!(event.target as Element)?.closest(".panel") && (this.projectPanel || this.starPanel)) {
+            if (!(event.target as Element)?.closest(".panel") && (this.projectPanel || this.starPanel || this.starpathPanel)) {
                 if (this.projectPanel) {
                     this.projectPanel.remove();
                     return;
                 } else if (this.starPanel) {
                     this.starPanel.remove();
+                    return;
+                } else if (this.starpathPanel) {
+                    this.starpathPanel.remove();
                     return;
                 }
             }
@@ -269,37 +279,49 @@ export default class World {
             } else if (this.mouse[1]) {
                 const starpath = this.raycastForStarpath();
                 if (starpath instanceof StarPath) {
-                    starpath.deleteStarPath();
+                    this.showStarpathPanel(starpath);
                     this.saveLocalStorage();
                 }
 
             } else if (this.mouse[2]) {
-                this.createLine();
-                if (this.starPanel || this.projectPanel) {
+                if (this.starPanel || this.projectPanel || this.starpathPanel) {
                     return;
                 }
-                if (this.raycastForStar() == this.interacting[0]) {
-                    this.showStarPanel(this.interacting[0]);
-                    lastStarPanelShown = Date.now();
-                }
-                this.interacting = [];
+                this.createLine();
                 this.linePoints = [];
                 if (this.lineObject) {
                     this.lineObject.geometry.dispose();
                     this._scene.remove(this.lineObject);
                 }
                 this.movingLine = [];
+                console.log(this.raycastStarDistance, this.raycastStarpathDistance);
+                const starpath = this.raycastForStarpath();
+                if (starpath instanceof StarPath) {
+                    this.showStarpathPanel(starpath);
+                    this.saveLocalStorage();
+                    return;
+                }
+                if (this.raycastForStar() == this.interacting[0] && this.interacting[0] !== undefined) {
+                    this.showStarPanel(this.interacting[0]);
+                    lastStarPanelShown = Date.now();
+                    this.interacting = [];
+                    return;
+                }
+                if (this.raycastForStar() == undefined) {
+                    this.spawnOrb();
+                }
+
             }
             delete this.mouse[event.button];
         });
         document.body.addEventListener("contextmenu", event => {
-            if (Date.now() - lastStarPanelShown < 10) {
+            if (Date.now() - lastStarPanelShown < 10 || this.starpathPanel) {
                 event.preventDefault();
             }
         });
         document.addEventListener("pointerlockchange", () => {
             setTimeout(() => {
-                if (!document.pointerLockElement && !this.projectPanel && !this.starPanel) {
+                if (!document.pointerLockElement && !this.projectPanel && !this.starPanel && !this.starpathPanel) {
                     this.showProjectPanel();
                 }
             }, 100);
@@ -347,11 +369,15 @@ export default class World {
     public serialiseJSON () {
         return JSON.stringify({
             starPaths: this.starPaths.map(starPath => ({
+                name: starPath.starpathName,
+                description: starPath.description,
                 star1: this.stars.indexOf(starPath.star1),
                 star2: this.stars.indexOf(starPath.star2),
+                colour: starPath.starpathColour,
             })),
             stars: this.stars.map(star => ({
                 name: star.name,
+                description: star.description,
                 faction: this.factions.indexOf(star.faction!),
                 colour: star.starColour,
                 position: [star.position.x, star.position.y, star.position.z],
@@ -394,6 +420,7 @@ export default class World {
         this.factions = saved.factions.map(saved => new Faction(saved.name, saved.description, new Color(saved.colour))) as Faction[];
         for (const savedStar of saved.stars) {
             const star = new Star(savedStar.name,
+                savedStar.description,
                 new Color(savedStar.colour),
                 new Vector3(savedStar.position[0], savedStar.position[1], savedStar.position[2]),
                 this._scene, this);
@@ -408,7 +435,7 @@ export default class World {
             const star1 = this.stars[savedStarPath.star1];
             const star2 = this.stars[savedStarPath.star2];
             if (star1 && star2) {
-                const starPath = new StarPath(star1, star2, this._scene, this);
+                const starPath = new StarPath(savedStarPath.name || "", savedStarPath.description || "Add text here!", star1, star2, new Color(savedStarPath.colour) || this.defaultStarColour, this._scene, this);
                 this.starPaths.push(starPath);
             }
         }
@@ -456,7 +483,7 @@ export default class World {
         if (this.starMesh.count === 1024) {
             return;
         }
-        const star = new Star("", this.defaultStarColour,
+        const star = new Star("", "Add text here!", this.defaultStarColour,
             this.getCursorPosition() || new Vector3(0, 0, 0),
             this._scene, this);
         this.stars.push(star);
@@ -467,13 +494,14 @@ export default class World {
         this._raycaster.setFromCamera(new Vector2(0, 0), this._camera);
         const intersects = this._raycaster.intersectObjects(this.colliders, true);
         if (intersects.length == 0) {
+            this.raycastStarDistance = 0;
             return;
         } else {
             const collider = intersects[0]?.object as Collider;
             if (!(collider instanceof Collider)) {
                 return;
             }
-            this.raycastDistance = intersects[0].distance;
+            this.raycastStarDistance = intersects[0].distance;
             return collider.relatedStar;
         }
     }
@@ -482,10 +510,12 @@ export default class World {
         this._raycaster.setFromCamera(new Vector2(0, 0), this._camera);
         const intersects = this._raycaster.intersectObjects(this.starPaths, true);
         if (intersects.length == 0) {
+            this.raycastStarpathDistance = 0;
             return;
         } else {
             for (const object of intersects) {
                 if (object.object instanceof StarPath) {
+                    this.raycastStarpathDistance = object.distance;
                     return object.object;
                 }
             }
@@ -498,11 +528,9 @@ export default class World {
         }
         const star = this.raycastForStar();
         if (star == undefined) {
-            this.spawnOrb();
-            this.saveLocalStorage();
             return;
         } else {
-            this.cursorDistance = this.raycastDistance;
+            this.cursorDistance = this.raycastStarDistance;
             this.interacting.push(star);
             this.linePoints.push(new Vector3(star.position.x, star.position.y, star.position.z));
             const cursorPos = this.getCursorPosition(this.cursorDistance);
@@ -522,7 +550,7 @@ export default class World {
             this.projectPanel = new ProjectPanel(this)
                 .addEventListener("closePanel", () => {
                     this.cameraControls.lockMouse();
-                    debounce(1000, this.saveInternal);
+                    this.saveLocalStorage();
                     delete this.projectPanel;
                 });
             document.body.append(this.projectPanel.element);
@@ -537,10 +565,24 @@ export default class World {
         this.starPanel = new StarPanel(star)
             .addEventListener("closePanel", () => {
                 this.cameraControls.lockMouse();
-                debounce(1000, this.saveInternal);
+                this.saveLocalStorage();
                 delete this.starPanel;
             });
         document.body.append(this.starPanel.element);
+        document.exitPointerLock();
+    }
+
+    public showStarpathPanel (starpath: StarPath) {
+        if (starpath == undefined) {
+            return;
+        }
+        this.starpathPanel = new StarPathPanel(starpath)
+            .addEventListener("closePanel", () => {
+                this.cameraControls.lockMouse();
+                this.saveLocalStorage();
+                delete this.starpathPanel;
+            });
+        document.body.append(this.starpathPanel.element);
         document.exitPointerLock();
     }
 
@@ -555,7 +597,7 @@ export default class World {
             return;
         }
         if (!this.savedCursorPosition) {
-            this.cursorDistance = this.raycastDistance;
+            this.cursorDistance = this.raycastStarDistance;
             this.savedCursorPosition = this.getCursorPosition(this.cursorDistance);
         }
         const star = this.raycastForStar();
@@ -580,7 +622,7 @@ export default class World {
         if (star1 == star2) {
             return;
         }
-        this.starPaths.push(new StarPath(star1, star2, this._scene, this));
+        this.starPaths.push(new StarPath("", "Add text here!", star1, star2, this._starpathDefaultColor, this._scene, this));
         this.saveLocalStorage();
     }
 
@@ -617,6 +659,7 @@ export default class World {
         this.cameraControls.getObject().position.add(this.movementControls.getMovementVector(delta));
 
         const star = this.raycastForStar();
+        const starpath = this.raycastForStarpath();
         if (star !== undefined) {
             star.hoverStar();
             this.hovering.push(star);

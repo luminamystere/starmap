@@ -6,10 +6,11 @@ import StarPath from "./StarPath.js";
 import World from "../World.js";
 import Faction from "./Faction.js";
 import Math2 from "../utility/Math2.js";
+import { debounce } from "../utility/Async.js";
 
 export default class Star {
 
-    public _colour: Color;
+    private _colour: Color;
     public get starColour () {
         return `#${this._colour.getHexString()}`;
     }
@@ -33,16 +34,22 @@ export default class Star {
         this._name = input;
         this.updateLabel();
     }
-    public description: string;
+    private _description: string;
+    public get description () {
+        return this._description;
+    }
+    public set description (input: string) {
+        this._description = input;
+    }
     public starLabel?: CSS2DObject;
     public starPaths: StarPath[] = [];
     public world: World;
 
-    public constructor (name: string, colour: Color, position: Vector3, scene: Scene, world: World) {
+    public constructor (name: string, description: string, colour: Color, position: Vector3, scene: Scene, world: World) {
         this._colour = colour;
         this.position = position;
         this._name = name;
-        this.description = "Add text here!";
+        this._description = description;
         this.world = world;
         this.starHolder = new Object3D();
         this.starHolder.position.set(this.position.x, this.position.y, this.position.z);
@@ -202,7 +209,7 @@ export default class Star {
         if (this.world.starMesh.instanceColor) {
             this.world.starMesh.instanceColor.needsUpdate = true;
         }
-        this.world.saveLocalStorage();
+        // debounce(1000, this.world.saveLocalStorage);
     }
 
     public delete () {

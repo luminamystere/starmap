@@ -7,13 +7,28 @@ export default class StarPath extends Mesh {
     public star1: Star;
     public star2: Star;
     public starpathMaterial?: MeshBasicMaterial;
-    public _colour: Color;
+    private _colour: Color;
     public get starpathColour () {
         return `#${this._colour.getHexString()}`;
     }
-    public set starColour (input: `#${string}`) {
+    public set starpathColour (input: `#${string}`) {
         this._colour = new Color(input);
         this.updateColour();
+    }
+    private _starpathName: string;
+    public get starpathName () {
+        return this._starpathName;
+    }
+    public set starpathName (input: string) {
+        this._starpathName = input;
+        // this.updateLabel();
+    }
+    private _description: string;
+    public get description () {
+        return this._description;
+    }
+    public set description (input: string) {
+        this._description = input;
     }
     public linePoints: Vector3[] = [];
     public line: Line;
@@ -21,7 +36,7 @@ export default class StarPath extends Mesh {
     public world: World;
     public timeCreated: number;
 
-    public constructor (star1: Star, star2: Star, scene: Scene, world: World) {
+    public constructor (starpathName: string, starpathDescription: string, star1: Star, star2: Star, colour: Color, scene: Scene, world: World) {
         const material = new MeshBasicMaterial({ color: 0xCCCCCC });
         material.visible = false;
         const direction = new Vector3().subVectors(star1.position, star2.position);
@@ -30,13 +45,16 @@ export default class StarPath extends Mesh {
         geometry.applyMatrix4(new Matrix4().makeTranslation(0, distance / 2, 0));
         geometry.applyMatrix4(new Matrix4().makeRotationX(MathUtils.degToRad(90)));
         super(geometry, material);
+        this._starpathName = starpathName;
+        this._description = starpathDescription;
+        this._colour = colour;
         scene.add(this);
         this.position.copy(star1.position);
         this.lookAt(star2.position);
         this.star1 = star1;
         this.star2 = star2;
         this.world = world;
-        this._colour = new Color(0xCCCCCC);
+        // this._colour = new Color(0xCCCCCC);
         this.starpathMaterial = material;
         this.timeCreated = Date.now();
         this.isDashed = false;
@@ -96,7 +114,7 @@ export default class StarPath extends Mesh {
     }
 
     public updateColour () {
-        this._colour = this.world._starpathDefaultColor;
+        // this._colour = this.world._starpathDefaultColor;
         if (this.line.material instanceof LineBasicMaterial) {
             this.line.material.color.set(this._colour);
         } else if (this.line.material instanceof LineDashedMaterial) {
