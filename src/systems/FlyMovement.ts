@@ -1,8 +1,11 @@
 import { Vector3 } from "three";
 import World from "../World.js";
+import Math2 from "../utility/Math2.js";
 
 export default class FlyMovement {
-    public SPEED_HORIZONTAL = 0.05;
+    public SPEED_HORIZONTAL = 0.01;
+    public SPEED_MINIMUM = 0.01;
+    public SPEED_MULTIPLIER: number;
     public SPEED_VERTICAL = 0.05;
     public FRICTION = 0.8;
     public world: World;
@@ -10,10 +13,17 @@ export default class FlyMovement {
     public playerVelocity: Vector3;
     public playerDirection: Vector3;
 
-    public constructor (world: World) {
+    public constructor (world: World, speedMultiplier: number) {
         this.world = world;
         this.playerVelocity = world.playerVelocity;
         this.playerDirection = world.playerDirection;
+        this.SPEED_MULTIPLIER = speedMultiplier;
+        this.changeSpeed(speedMultiplier);
+    }
+
+    public changeSpeed (diff: number) {
+        this.SPEED_HORIZONTAL = this.SPEED_MINIMUM * diff;
+        this.SPEED_HORIZONTAL = Math2.clamp(0.01, 0.1, this.SPEED_HORIZONTAL);
     }
 
     public update (delta: number) {

@@ -28,7 +28,7 @@ export default class StarPanel extends Panel {
         .addClass(StarPanelClasses.Name)
         .setInputText(this.star.name)
         .setId("starName")
-        .setMaxLength(256)
+        .setMaxLength(128)
         .addChangeListener(input => this.star.name = input.element.value)
         .appendTo(this.content);
 

@@ -17,6 +17,8 @@ import ProjectPanel from "./ui/ProjectPanel.js";
 import Faction from "./components/Faction.js";
 import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
 import { debounce } from "./utility/Async.js";
+import Math2 from "./utility/Math2.js";
+import Component from "./ui/Component.js";
 
 interface SavedData {
     starPaths: {
@@ -39,6 +41,7 @@ interface SavedData {
         background: string;
         cameraLocation: [number, number, number];
         cameraDirection?: SerialisedCameraAngle;
+        projectName: string;
     };
 }
 
@@ -58,12 +61,24 @@ export default class World {
     public movementControls?: FlyMovement;
     public time = Date.now();
     public TIME_DILATION = 1;
-    public SPEED_HORIZONTAL = 2;
-    public SPEED_VERTICAL = 0.2;
+    public SPEED_MULTIPLIER = 5;
     public TICKRATE = 1000 / 60;
     public SENSITIVITY = 500;
     public savedCursorPosition?: Vector3;
     public isLoading: Boolean = false;
+    public raycastDistance: number = 0;
+    public cursorDistance: number = 0;
+
+    public _projectName: string;
+    public get projectName () {
+        return this._projectName;
+    }
+    public set projectName (input: string) {
+        this._projectName = input;
+        this.updateProjectName(this._projectName);
+    }
+    public readonly projectNameElement = new Component("div")
+        .addClass("project-name");
 
     public starMesh: InstancedMesh;
     public defaultStarColour: Color = new Color(0xFFFFFF);
@@ -134,6 +149,11 @@ export default class World {
         this._camera.rotation.order = 'YXZ';
         this._starpathDefaultColor = new Color(0xCCCCCC);
 
+        this._projectName = "untitled project";
+        document.body.appendChild(this.projectNameElement.element);
+        this.updateProjectName(this.projectName);
+
+
         this._raycaster = new Raycaster();
         this._raycaster.camera = this._camera;
 
@@ -195,6 +215,24 @@ export default class World {
         });
         document.body.addEventListener("keyup", event => {
             delete this.keyboard[event.code];
+        })
+        document.body.addEventListener("wheel", event => {
+            if (this.moving.length > 0) {
+                this.cursorDistance -= event.deltaY * 0.01;
+                this.cursorDistance = Math2.clamp(5, 10000, this.cursorDistance);
+            } else if (this.keyboard["KeyZ"] && this.movementControls) {
+                if (event.deltaY < 1) {
+                    this.SPEED_MULTIPLIER += 1;
+                    this.SPEED_MULTIPLIER = Math2.clamp(1, 10, this.SPEED_MULTIPLIER);
+                    this.movementControls.changeSpeed(this.SPEED_MULTIPLIER);
+                    this.updateProjectName(this._projectName);
+                } else {
+                    this.SPEED_MULTIPLIER -= 1;
+                    this.SPEED_MULTIPLIER = Math2.clamp(1, 10, this.SPEED_MULTIPLIER);
+                    this.movementControls.changeSpeed(this.SPEED_MULTIPLIER);
+                    this.updateProjectName(this._projectName);
+                }
+            }
         })
         document.body.addEventListener("mousedown", event => {
             this.mouse[event.button] ??= Date.now();
@@ -270,7 +308,7 @@ export default class World {
         let light = new AmbientLight(0xFFFFFF);
         this._scene.add(light);
 
-        this.movementControls = new FlyMovement(this);
+        this.movementControls = new FlyMovement(this, this.SPEED_MULTIPLIER);
 
         const renderScene = new RenderPass(this._scene, this._camera);
         const bloomPass = new UnrealBloomPass(new Vector2(window.innerWidth, window.innerHeight), 0.6, 0.1, 0.3);
@@ -290,6 +328,7 @@ export default class World {
 
         this._scene.add(this.cameraControls.getObject());
         this.loadLocalStorage();
+        this._Update();
         this.showProjectPanel();
     }
 
@@ -329,6 +368,7 @@ export default class World {
                 this._camera.getWorldPosition(new Vector3).y || 0,
                 this._camera.getWorldPosition(new Vector3).z || 0],
                 cameraDirection: this.cameraControls.serialise(),
+                projectName: this.projectName,
             }
         } satisfies SavedData);
     }
@@ -397,9 +437,19 @@ export default class World {
             if (saved.world.cameraDirection) {
                 this.cameraControls.deserialise(saved.world.cameraDirection);
             }
+            if (saved.world.projectName) {
+                this._projectName = saved.world.projectName;
+                this.updateProjectName(saved.world.projectName);
+            }
         }
         this.isLoading = false;
 
+    }
+
+    public updateProjectName (name: string) {
+        const speedText = " - " + this.SPEED_MULTIPLIER.toString() + "x";
+        const elementText = name + speedText;
+        this.projectNameElement.setText(elementText);
     }
 
     public spawnOrb () {
@@ -423,6 +473,7 @@ export default class World {
             if (!(collider instanceof Collider)) {
                 return;
             }
+            this.raycastDistance = intersects[0].distance;
             return collider.relatedStar;
         }
     }
@@ -451,9 +502,10 @@ export default class World {
             this.saveLocalStorage();
             return;
         } else {
+            this.cursorDistance = this.raycastDistance;
             this.interacting.push(star);
             this.linePoints.push(new Vector3(star.position.x, star.position.y, star.position.z));
-            const cursorPos = this.getCursorPosition();
+            const cursorPos = this.getCursorPosition(this.cursorDistance);
             this.linePoints.push(new Vector3(cursorPos.x, cursorPos.y, cursorPos.z));
             this.lineGeometry = new BufferGeometry().setFromPoints(this.linePoints);
             this.lineObject = new Line(this.lineGeometry, new LineBasicMaterial({ color: 0xFFFFFF, linewidth: 1 }));
@@ -470,6 +522,7 @@ export default class World {
             this.projectPanel = new ProjectPanel(this)
                 .addEventListener("closePanel", () => {
                     this.cameraControls.lockMouse();
+                    debounce(1000, this.saveInternal);
                     delete this.projectPanel;
                 });
             document.body.append(this.projectPanel.element);
@@ -484,16 +537,17 @@ export default class World {
         this.starPanel = new StarPanel(star)
             .addEventListener("closePanel", () => {
                 this.cameraControls.lockMouse();
+                debounce(1000, this.saveInternal);
                 delete this.starPanel;
             });
         document.body.append(this.starPanel.element);
         document.exitPointerLock();
     }
 
-    private getCursorPosition () {
+    private getCursorPosition (distance?: number) {
         return this._camera.getWorldPosition(new Vector3())
             .add(this._camera.getWorldDirection(new Vector3())
-                .multiplyScalar(5));
+                .multiplyScalar(distance || 5));
     }
 
     public moveStar () {
@@ -501,7 +555,8 @@ export default class World {
             return;
         }
         if (!this.savedCursorPosition) {
-            this.savedCursorPosition = this.getCursorPosition();
+            this.cursorDistance = this.raycastDistance;
+            this.savedCursorPosition = this.getCursorPosition(this.cursorDistance);
         }
         const star = this.raycastForStar();
         if (star == undefined) {
@@ -582,7 +637,7 @@ export default class World {
         }
 
         if (this.toMove.length == 1 && this.savedCursorPosition) {
-            const movedLength = new Vector3().subVectors(this.savedCursorPosition, this.getCursorPosition()).length();
+            const movedLength = new Vector3().subVectors(this.savedCursorPosition, this.getCursorPosition(this.cursorDistance)).length();
             if (movedLength > 1) {
                 this.moving.push(this.toMove[0]);
                 this.toMove = [];
@@ -592,7 +647,7 @@ export default class World {
 
         //left click moving star
         if (this.mouse[0] && this.moving.length == 1) {
-            const cursorPos = this.getCursorPosition();
+            const cursorPos = this.getCursorPosition(this.cursorDistance);
             this.moving[0].position.set(cursorPos.x, cursorPos.y, cursorPos.z)
             this.moving[0].updatePosition();
             for (const i in this.movingLine) {
@@ -602,7 +657,7 @@ export default class World {
         }
         //right click dragging lines
         if (this.mouse[2] && this.interacting.length == 1 && this.lineObject) {
-            this.linePoints[1] = this.getCursorPosition();
+            this.linePoints[1] = this.getCursorPosition(this.cursorDistance);
             this.lineObject.geometry.setFromPoints(this.linePoints);
             this.lineObject.geometry.computeBoundingSphere();
 

@@ -34,6 +34,19 @@ export enum ProjectPanelClasses {
 
 export default class ProjectPanel extends Panel {
 
+    public readonly projNameLabel = new Label("projectName")
+        .addClass(ProjectPanelClasses.Label)
+        .setText("Name: ")
+        .appendTo(this.content);
+
+    public readonly projName = new TextInput()
+        .addClass(ProjectPanelClasses.Name)
+        .setInputText(this.world.projectName)
+        .setId("projectName")
+        .setMaxLength(64)
+        .addChangeListener(input => this.world.projectName = input.element.value)
+        .appendTo(this.content);
+
     public readonly newFaction = new Button()
         .addClass(ProjectPanelClasses.Button)
         .setText("Add Faction")
@@ -97,6 +110,7 @@ export default class ProjectPanel extends Panel {
 
     public constructor (public readonly world: World) {
         super();
+        this.title.element.textContent = world.projectName;
         this.element.setAttribute("id", "projectPanel");
         this.addClass(ProjectPanelClasses.Main);
         for (const i in this.world.factions) {

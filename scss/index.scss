@@ -23,6 +23,22 @@ body {
     align-content: center;
 }
 
+.project {
+    &-name {
+        position: absolute;
+        color: white;
+        font-size: 32px;
+        font-family: "Prompt";
+        font-variant: small-caps;
+        opacity: 60%;
+        right: 10px;
+        bottom: 10px;
+        z-index: 99999;
+        text-align: right;
+        text-overflow: clip;
+    }
+}
+
 .label {
     font-size: 96px;
     color: white;
@@ -58,9 +74,10 @@ body {
 
         &-title {
             color: white;
-            font-size: 40px;
+            font-size: 36px;
             margin-top: 0;
             margin-bottom: 0;
+            word-break: break-word;
         }
 
         &-closeButton {
