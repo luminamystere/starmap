@@ -38,10 +38,11 @@ export default class StarPath extends Mesh {
 
     public constructor (starpathName: string, starpathDescription: string, star1: Star, star2: Star, colour: Color, scene: Scene, world: World) {
         const material = new MeshBasicMaterial({ color: 0xCCCCCC });
-        material.visible = false;
+        material.transparent = true;
+        material.opacity = 0;
         const direction = new Vector3().subVectors(star1.position, star2.position);
         const distance = direction.length();
-        const geometry = new CylinderGeometry(0.05, 0.05, distance, 3, 4, true)
+        const geometry = new CylinderGeometry(0.08, 0.08, distance, 3, 4, true)
         geometry.applyMatrix4(new Matrix4().makeTranslation(0, distance / 2, 0));
         geometry.applyMatrix4(new Matrix4().makeRotationX(MathUtils.degToRad(90)));
         super(geometry, material);
@@ -119,6 +120,26 @@ export default class StarPath extends Mesh {
             this.line.material.color.set(this._colour);
         } else if (this.line.material instanceof LineDashedMaterial) {
             this.line.material.color.set(this._colour);
+        }
+    }
+
+    public hoverStarpath () {
+        if (this.material instanceof Array) {
+            this.material.forEach(material => material.opacity = 0.6);
+            this.material.forEach(material => material.visible = true);
+        } else {
+            this.material.opacity = 0.6;
+            this.material.visible = true;
+        }
+    }
+
+    public unhoverStarpath () {
+        if (this.material instanceof Array) {
+            this.material.forEach(material => material.opacity = 0);
+            this.material.forEach(material => material.visible = false);
+        } else {
+            this.material.opacity = 0;
+            this.material.visible = false;
         }
     }
 

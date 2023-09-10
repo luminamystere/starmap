@@ -62,7 +62,7 @@ export default class StarPathPanel extends Panel {
 
     public constructor (public readonly starpath: StarPath) {
         super();
-        this.title.element.textContent = this.starpath.name;
+        this.title.element.textContent = "Starpath";
         this.element.setAttribute("id", "starpathPanel");
         this.addClass(StarPathPanelClasses.Main);
     }

@@ -110,7 +110,7 @@ export default class ProjectPanel extends Panel {
 
     public constructor (public readonly world: World) {
         super();
-        this.title.element.textContent = world.projectName;
+        this.title.element.textContent = "Project";
         this.element.setAttribute("id", "projectPanel");
         this.addClass(ProjectPanelClasses.Main);
         for (const i in this.world.factions) {
@@ -212,7 +212,7 @@ class FactionEditor extends Component<"div"> {
                 star.updateFaction("None");
             }
         }
-        this.world.factions.filter(faction => faction !== this.faction);
+        this.world.factions = this.world.factions.filter(faction => faction !== this.faction);
         this.world.saveLocalStorage();
         this.remove();
     }

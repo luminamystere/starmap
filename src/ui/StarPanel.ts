@@ -75,7 +75,7 @@ export default class StarPanel extends Panel {
 
     public constructor (public readonly star: Star) {
         super();
-        this.title.element.textContent = star.name;
+        this.title.element.textContent = "Star";
         this.element.setAttribute("id", "starPanel");
         this.addClass(StarPanelClasses.Main);
 

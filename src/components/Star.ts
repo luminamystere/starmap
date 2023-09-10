@@ -1,4 +1,4 @@
-import { Color, Matrix4, Mesh, MeshBasicMaterial, MeshLambertMaterial, MeshPhysicalMaterial, MeshStandardMaterial, Object3D, Scene, SphereGeometry, Vector3 } from "three";
+import { Color, DoubleSide, Matrix4, Mesh, MeshBasicMaterial, MeshLambertMaterial, MeshPhysicalMaterial, MeshStandardMaterial, Object3D, Scene, SphereGeometry, Vector3 } from "three";
 import Collider from "./Collider.js";
 import { CSS3DObject } from "three/examples/jsm/renderers/CSS3DRenderer.js";
 import { CSS2DObject } from "three/examples/jsm/renderers/CSS2DRenderer.js";
@@ -161,6 +161,7 @@ export default class Star {
 
     public hoverStar () {
         this.factionMaterial.opacity = 0.4;
+        this.factionMaterial.visible = true;
         if (this.factionMesh.material instanceof Array) {
             this.factionMesh.material.forEach(material => material.dispose());
         } else {
@@ -172,6 +173,7 @@ export default class Star {
 
     public unHoverStar () {
         this.factionMaterial.opacity = 0;
+        this.factionMaterial.visible = false;
         if (this.factionMesh.material instanceof Array) {
             this.factionMesh.material.forEach(material => material.dispose());
         } else {

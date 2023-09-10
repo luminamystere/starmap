@@ -104,6 +104,7 @@ export default class World {
     public blackBackground: Color = new Color(0x000000);
 
     public hovering: Star[] = [];
+    public hoveringPath: StarPath[] = [];
 
     public linePoints: Vector3[] = [];
     public lineGeometry?: BufferGeometry;
@@ -222,7 +223,7 @@ export default class World {
         });
         document.body.addEventListener("keyup", event => {
             delete this.keyboard[event.code];
-        })
+        });
         document.body.addEventListener("wheel", event => {
             if (this.moving.length > 0) {
                 this.cursorDistance -= event.deltaY * 0.01;
@@ -240,7 +241,7 @@ export default class World {
                     this.updateProjectName(this._projectName);
                 }
             }
-        })
+        });
         document.body.addEventListener("mousedown", event => {
             this.mouse[event.button] ??= Date.now();
             if (!(event.target as Element)?.closest(".panel") && (this.projectPanel || this.starPanel || this.starpathPanel)) {
@@ -326,6 +327,11 @@ export default class World {
                 }
             }, 100);
         });
+        document.addEventListener("wheel", event => {
+            if (this.keyboard["KeyCRTL"]) {
+                event.preventDefault();
+            }
+        }, { passive: false });
 
         let light = new AmbientLight(0xFFFFFF);
         this._scene.add(light);
@@ -668,11 +674,23 @@ export default class World {
                 this.hovering.splice(0, 1);
             }
         } else if (this.hovering.length > 0) {
-
             for (const star of this.hovering) {
                 star.unHoverStar();
             }
             this.hovering = [];
+        }
+        if (starpath !== undefined) {
+            starpath.hoverStarpath();
+            this.hoveringPath.push(starpath);
+            if (this.hoveringPath.length > 0 && starpath !== this.hoveringPath[0]) {
+                this.hoveringPath[0].unhoverStarpath();
+                this.hoveringPath.splice(0, 1);
+            }
+        } else if (this.hoveringPath.length > 0) {
+            for (const starpath of this.hoveringPath) {
+                starpath.unhoverStarpath();
+            }
+            this.hoveringPath = [];
         }
 
         for (const star of this.stars) {
