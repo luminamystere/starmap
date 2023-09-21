@@ -2,7 +2,7 @@ import StarPath from "../components/StarPath.js";
 import Button from "./Button.js";
 import ColourInput from "./ColourInput.js";
 import Label from "./Label.js";
-import Panel from "./Panel.js";
+import Panel, { PanelClasses } from "./Panel.js";
 import TextArea from "./TextArea.js";
 import TextInput from "./TextInput.js";
 
@@ -12,7 +12,7 @@ export enum StarPathPanelClasses {
     Name = "starpathpanel-input-name",
     Description = "starpathpanel-input-description",
     Colour = "starpathpanel-input-colour",
-    Delete = "starpathpanel-input-delete"
+    Button = "starpathpanel-input-button",
 }
 
 export default class StarPathPanel extends Panel {
@@ -55,7 +55,7 @@ export default class StarPathPanel extends Panel {
         .appendTo(this.content);
 
     public readonly deleteButton = new Button()
-        .addClass(StarPathPanelClasses.Delete)
+        .addClass(PanelClasses.Wide)
         .setText("DELETE")
         .addEventListener("click", () => this.deleteStarpath())
         .appendTo(this.footer);

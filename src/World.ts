@@ -65,6 +65,7 @@ export default class World {
     public cameraControls: MouseControls;
     public movementControls?: FlyMovement;
     public time = Date.now();
+    public interacted = false;
     public TIME_DILATION = 1;
     public SPEED_MULTIPLIER = 5;
     public TICKRATE = 1000 / 60;
@@ -95,7 +96,7 @@ export default class World {
     public toMove: Star[] = [];
     public moving: Star[] = [];
     public movingLine: StarPath[] = [];
-    public interacting: Star[] = [];
+    public starpathStart?: Star;
     public factions: Faction[] = [];
 
     public backgrounds: CubeTexture[] = [];
@@ -106,7 +107,7 @@ export default class World {
     public hovering: Star[] = [];
     public hoveringPath: StarPath[] = [];
 
-    public linePoints: Vector3[] = [];
+    public linePoints?: [Vector3, Vector3];
     public lineGeometry?: BufferGeometry;
     public lineObject?: Line;
 
@@ -116,9 +117,6 @@ export default class World {
     }
     public set starpathColour (input: `#${string}`) {
         this._starpathDefaultColor = new Color(input);
-        // for (const starpaths of this.starPaths) {
-        //     starpaths.updateColour();
-        // }
     }
 
     public playerVelocity = new Vector3();
@@ -215,15 +213,13 @@ export default class World {
         this._OnWindowResize();
 
         document.body.addEventListener("keydown", (event: KeyboardEvent) => {
-            if (event.code === "Escape") {
-                document.exitPointerLock();
-            }
-
             this.keyboard[event.code] ??= Date.now();
         });
+
         document.body.addEventListener("keyup", event => {
             delete this.keyboard[event.code];
         });
+
         document.body.addEventListener("wheel", event => {
             if (this.moving.length > 0) {
                 this.cursorDistance -= event.deltaY * 0.01;
@@ -263,12 +259,11 @@ export default class World {
                 this.moveStar();
             }
             else if (this.mouse[2]) {
-                this.showDetails();
+                this.showDetails(event);
             }
 
 
         });
-        let lastStarPanelShown = 0;
         document.body.addEventListener("mouseup", event => {
             if (this.mouse[0]) {
                 if (this.moving.length > 0) {
@@ -277,47 +272,29 @@ export default class World {
                 this.moving = [];
                 this.toMove = [];
                 delete this.savedCursorPosition;
-            } else if (this.mouse[1]) {
-                const starpath = this.raycastForStarpath();
-                if (starpath instanceof StarPath) {
-                    this.showStarpathPanel(starpath);
-                    this.saveLocalStorage();
-                }
 
             } else if (this.mouse[2]) {
                 if (this.starPanel || this.projectPanel || this.starpathPanel) {
                     return;
                 }
                 this.createLine();
-                this.linePoints = [];
+                delete this.linePoints;
                 if (this.lineObject) {
                     this.lineObject.geometry.dispose();
                     this._scene.remove(this.lineObject);
                 }
                 this.movingLine = [];
-                console.log(this.raycastStarDistance, this.raycastStarpathDistance);
-                const starpath = this.raycastForStarpath();
-                if (starpath instanceof StarPath) {
-                    this.showStarpathPanel(starpath);
-                    this.saveLocalStorage();
-                    return;
-                }
-                if (this.raycastForStar() == this.interacting[0] && this.interacting[0] !== undefined) {
-                    this.showStarPanel(this.interacting[0]);
-                    lastStarPanelShown = Date.now();
-                    this.interacting = [];
-                    return;
-                }
-                if (this.raycastForStar() == undefined) {
-                    this.spawnOrb();
-                }
+                // console.log(this.raycastStarDistance, this.raycastStarpathDistance);
+
+
 
             }
             delete this.mouse[event.button];
         });
         document.body.addEventListener("contextmenu", event => {
-            if (Date.now() - lastStarPanelShown < 10 || this.starpathPanel) {
+            if (this.interacted) {
                 event.preventDefault();
+                this.interacted = false;
             }
         });
         document.addEventListener("pointerlockchange", () => {
@@ -358,6 +335,21 @@ export default class World {
         this.loadLocalStorage();
         this._Update();
         this.showProjectPanel();
+    }
+
+    public resetWorld () {
+        console.log("ouchies!");
+        for (let i = this.stars.length - 1; i >= 0; i--) {
+            this.stars[i].delete();
+        }
+        this.starMesh.count = 0;
+        this.factions = [];
+        this.projectName = "untitled project";
+
+        this.cameraControls = new MouseControls(this);
+        this.cameraControls.setCamera(this._camera);
+        this.cameraControls.getObject().position.set(0, 0, 0);
+        this._Update();
     }
 
     _OnWindowResize () {
@@ -420,9 +412,17 @@ export default class World {
 
     public loadLocalStorage () {
         console.log("loading local storage");
+        const localStorageDataString = localStorage.getItem("save") ?? '{"starPaths": [], "stars": [], "factions": [], "world": []}';
+        this.deserialiseJSON(localStorageDataString);
+
+
+    }
+
+    public deserialiseJSON (input: string) {
+        this.resetWorld();
+        const saved: SavedData = JSON.parse(input);
         this.isLoading = true;
-        const saved: SavedData = JSON.parse(localStorage.getItem("save") ?? '{"starPaths": [], "stars": [], "factions": [], "world": []}');
-        console.log(saved);
+        // console.log(saved);
         this.factions = saved.factions.map(saved => new Faction(saved.name, saved.description, new Color(saved.colour))) as Faction[];
         for (const savedStar of saved.stars) {
             const star = new Star(savedStar.name,
@@ -476,6 +476,11 @@ export default class World {
             }
         }
         this.isLoading = false;
+        if (this.projectPanel) {
+            this.projectPanel.refreshPanel();
+        }
+        this._Update();
+
 
     }
 
@@ -528,23 +533,36 @@ export default class World {
         }
     }
 
-    public showDetails () {
-        if (this.interacting.length == 1) {
-            return;
-        }
+    public showDetails (event: MouseEvent) {
+        this.interacted = true;
+
         const star = this.raycastForStar();
-        if (star == undefined) {
-            return;
-        } else {
+        if (star && event.ctrlKey) {
             this.cursorDistance = this.raycastStarDistance;
-            this.interacting.push(star);
-            this.linePoints.push(new Vector3(star.position.x, star.position.y, star.position.z));
+            this.starpathStart = star;
             const cursorPos = this.getCursorPosition(this.cursorDistance);
-            this.linePoints.push(new Vector3(cursorPos.x, cursorPos.y, cursorPos.z));
+            this.linePoints = [new Vector3(star.position.x, star.position.y, star.position.z),
+            new Vector3(cursorPos.x, cursorPos.y, cursorPos.z)];
+
             this.lineGeometry = new BufferGeometry().setFromPoints(this.linePoints);
             this.lineObject = new Line(this.lineGeometry, new LineBasicMaterial({ color: 0xFFFFFF, linewidth: 1 }));
             this._scene.add(this.lineObject);
+            return;
         }
+
+        if (star) {
+            this.showStarPanel(star);
+            return;
+        }
+
+        const starpath = this.raycastForStarpath();
+        if (starpath) {
+            this.showStarpathPanel(starpath);
+            this.saveLocalStorage();
+            return;
+        }
+
+        this.spawnOrb();
 
     }
 
@@ -619,15 +637,14 @@ export default class World {
     }
 
     public createLine () {
-        const star = this.raycastForStar();
-        if (star == undefined || this.interacting.length == 0) {
+        const star1 = this.starpathStart;
+        delete this.starpathStart;
+        const star2 = this.raycastForStar();
+
+        if (!star2 || !star1 || star1 == star2) {
             return;
         }
-        const star1 = this.interacting[0];
-        const star2 = star;
-        if (star1 == star2) {
-            return;
-        }
+
         this.starPaths.push(new StarPath("", "Add text here!", star1, star2, this._starpathDefaultColor, this._scene, this));
         this.saveLocalStorage();
     }
@@ -649,20 +666,24 @@ export default class World {
 
     public _Update () {
 
-        if (!this.movementControls) {
-            return;
-        }
-
         const elapsed = Date.now() - this.time;
         this.time = Date.now();
         const delta = elapsed / this.TICKRATE;
+
+
+        if (this.movementControls) {
+            this.movementControls.update(delta);
+            this.cameraControls.getObject().position.add(this.movementControls.getMovementVector(delta));
+        }
+
+        for (const star of this.stars) {
+            star.updateLabelScale(this._camera.getWorldPosition(new Vector3));
+        }
 
         if (this.starPanel || this.projectPanel) {
             return;
         }
 
-        this.movementControls?.update(delta);
-        this.cameraControls.getObject().position.add(this.movementControls.getMovementVector(delta));
 
         const star = this.raycastForStar();
         const starpath = this.raycastForStarpath();
@@ -693,10 +714,6 @@ export default class World {
             this.hoveringPath = [];
         }
 
-        for (const star of this.stars) {
-            star.updateLabelScale(this._camera.getWorldPosition(new Vector3));
-        }
-
         if (this.toMove.length == 1 && this.savedCursorPosition) {
             const movedLength = new Vector3().subVectors(this.savedCursorPosition, this.getCursorPosition(this.cursorDistance)).length();
             if (movedLength > 1) {
@@ -717,7 +734,7 @@ export default class World {
 
         }
         //right click dragging lines
-        if (this.mouse[2] && this.interacting.length == 1 && this.lineObject) {
+        if (this.mouse[2] && this.lineObject && this.linePoints) {
             this.linePoints[1] = this.getCursorPosition(this.cursorDistance);
             this.lineObject.geometry.setFromPoints(this.linePoints);
             this.lineObject.geometry.computeBoundingSphere();

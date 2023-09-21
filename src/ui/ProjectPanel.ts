@@ -3,15 +3,19 @@ import World from "../World.js";
 import Faction from "../components/Faction.js";
 import Button from "./Button.js";
 import Component from "./Component.js";
-import Panel from "./Panel.js";
+import Panel, { PanelClasses } from "./Panel.js";
 import TextInput from "./TextInput.js";
 import TextArea from "./TextArea.js";
 import ColourInput from "./ColourInput.js";
 import Label from "./Label.js";
 import SelectInput from "./SelectInput.js";
+import Files from "../systems/Files.js";
 
 export enum ProjectPanelClasses {
     Main = "projectpanel",
+    Popup = "projectpanel-popup",
+    PopupText = "projectpanel-popup-text",
+    PopupButton = "projectpanel-popup-button",
     Name = "projectpanel-name",
     Label = "projectpanel-label",
     Select = "projectpanel-select",
@@ -27,6 +31,8 @@ export enum ProjectPanelClasses {
     BackgroundLabel = "projectpanel-background-label",
     Background = "projectpanel-background-select",
     Button = "projectpanel-button",
+    FakeButton = "projectpanel-fakebutton",
+    HiddenButton = "projectpanel-hiddenbutton",
     ControlsGuide = "projectpanel-controls",
     ControlsHeading = "projectpanel-controls-heading",
     ControlsText = "projectpanel-controls-text",
@@ -48,7 +54,7 @@ export default class ProjectPanel extends Panel {
         .appendTo(this.content);
 
     public readonly newFaction = new Button()
-        .addClass(ProjectPanelClasses.Button)
+        .addClass(PanelClasses.Wide)
         .setText("Add Faction")
         .addEventListener("click", () => this.addFaction())
         .appendTo(this.content);
@@ -59,7 +65,7 @@ export default class ProjectPanel extends Panel {
 
     public readonly starpathColourLabel = new Label("starpathColour")
         .addClass(ProjectPanelClasses.Label)
-        .setText("Select Starpath Colour")
+        .setText("Default Starpath Colour:")
         .appendTo(this.content);
 
     public readonly starpathColourSelect = new ColourInput()
@@ -71,7 +77,7 @@ export default class ProjectPanel extends Panel {
 
     public readonly backgroundLabel = new Label("background")
         .addClass(ProjectPanelClasses.Label)
-        .setText("Select Background")
+        .setText("Select Background:")
         .appendTo(this.content);
 
     public readonly backgroundSelect = new SelectInput()
@@ -91,20 +97,43 @@ export default class ProjectPanel extends Panel {
 
     public readonly controlsText = new Component("p")
         .addClass(ProjectPanelClasses.ControlsText)
-        .setText("WASD - Movement\nSpace - Fly Up\nShift - Fly Down\nLeft Click - Move Star (drag)\nMiddle Click - Delete Starpath\nRight Click - Place/Inspect Star")
+        .setText("WASD - Movement\nSpace - Fly Up\nShift - Fly Down\nLeft Click - Move Star (drag)\nCtrl + Left Click - Create Starpath (drag)\nMiddle Click - Delete Starpath\nRight Click - Place/Inspect Star")
         .appendTo(this.controlsGuide);
 
-    // public readonly exportButton = new Button()
-    //     .addClass(ProjectPanelClasses.Button)
-    //     .setText("EXPORT")
-    //     .addEventListener("click", () => this.exportData())
-    //     .appendTo(this.footer);
 
-    // public readonly importButton = new Button()
-    //     .addClass(ProjectPanelClasses.Button)
-    //     .setText("IMPORT")
-    //     .addEventListener("click", () => this.importData())
-    //     .appendTo(this.footer);
+    public readonly newStarmapButton = new Button()
+        .addClass(ProjectPanelClasses.Button)
+        .setText("NEW")
+        .addEventListener("click", () => this.newStarmap())
+        .appendTo(this.footer);
+
+    public readonly exportButton = new Button()
+        .addClass(ProjectPanelClasses.Button)
+        .setText("EXPORT")
+        .addEventListener("click", () => Files.downloadString(
+            `${this.world.projectName.replace(/\W+/g, "-")}.starmap`,
+            this.world.serialiseJSON()
+        ))
+        .appendTo(this.footer);
+
+    public readonly importButton = new Button("label")
+        .setAttribute("for", "starmap_import")
+        .addClass(ProjectPanelClasses.FakeButton)
+        .setText("IMPORT")
+        .appendTo(this.footer);
+
+    public readonly importInput = new Component("input")
+        .setId("starmap_import")
+        .addClass(ProjectPanelClasses.HiddenButton)
+        .setAttribute("type", "file")
+        .setAttribute("accept", ".starmap")
+        .addEventListener("change", async (importInput, event) => {
+            const file = await Files.uploadStringFromEvent(event)
+            if (file) {
+                this.world.deserialiseJSON(file);
+            }
+        })
+        .appendTo(this.importButton);
 
 
 
@@ -113,8 +142,8 @@ export default class ProjectPanel extends Panel {
         this.title.element.textContent = "Project";
         this.element.setAttribute("id", "projectPanel");
         this.addClass(ProjectPanelClasses.Main);
-        for (const i in this.world.factions) {
-            this.displayFaction(world.factions[i]);
+        for (const faction of this.world.factions) {
+            this.displayFaction(faction);
         }
         this.backgroundSelect.addEntry("None");
         for (const background of this.world.backgrounds) {
@@ -136,12 +165,64 @@ export default class ProjectPanel extends Panel {
         return new FactionEditor(faction, this.world).appendTo(this.factionBox);
     }
 
-    public exportData () {
-        console.log("export data");
+    public newStarmap () {
+        const popup = new PopupPanel(this.world);
+        popup.appendTo(this);
+        popup.element.showModal();
+
     }
 
-    public importData () {
-        console.log("import data");
+    public refreshPanel () {
+        while (this.factionBox.element.lastElementChild) {
+            this.factionBox.element.removeChild(this.factionBox.element.lastElementChild);
+        }
+        for (const faction of this.world.factions) {
+            this.displayFaction(faction);
+        }
+        this.projName.setInputText(this.world.projectName);
+        this.starpathColourSelect.setInputColour(this.world.starpathColour);
+    }
+}
+
+class PopupPanel extends Component<"dialog"> {
+
+    public readonly warning = new Component("p")
+        .addClass(ProjectPanelClasses.PopupText)
+        .append(new Component("b").setText("Warning!"))
+        .addText(" Creating a new starmap will clear the existing starmap. ")
+        .appendTo(this)
+
+    public readonly exportbutton = new Button()
+        .addClass(ProjectPanelClasses.PopupButton)
+        .addClass(PanelClasses.Wide)
+        .setText("Export Starmap")
+        .addEventListener("click", () => Files.downloadString(
+            `${this.world.projectName.replace(/\W+/g, "-")}.starmap`,
+            this.world.serialiseJSON()
+        ))
+        .appendTo(this);
+
+    public readonly cancelButton = new Button()
+        .addClass(ProjectPanelClasses.PopupButton)
+        .setText("Cancel")
+        .addEventListener("click", () => this.remove())
+        .appendTo(this);
+
+    public readonly okButton = new Button()
+        .addClass(ProjectPanelClasses.PopupButton)
+        .setText("OK")
+        .addEventListener("click", () => this.resetWorld())
+        .appendTo(this);
+
+    public constructor (public readonly world: World) {
+        super("dialog");
+        this.addClass(ProjectPanelClasses.Popup);
+    }
+
+    public resetWorld () {
+        this.world.resetWorld();
+        this.world.projectPanel?.refreshPanel();
+        this.remove();
     }
 }
 
@@ -186,7 +267,7 @@ class FactionEditor extends Component<"div"> {
         .appendTo(this);
 
     public readonly factionDelete = new Button()
-        .addClass(ProjectPanelClasses.FactionDelete)
+        .addClass(PanelClasses.Wide)
         .setText("DELETE")
         .addEventListener("click", () => this.deleteFaction())
         .appendTo(this);

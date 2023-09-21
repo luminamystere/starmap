@@ -2,7 +2,7 @@ import Star from "../components/Star.js";
 import Button from "./Button.js";
 import ColourInput from "./ColourInput.js";
 import Label from "./Label.js";
-import Panel from "./Panel.js";
+import Panel, { PanelClasses } from "./Panel.js";
 import SelectInput from "./SelectInput.js";
 import TextArea from "./TextArea.js";
 import TextInput from "./TextInput.js";
@@ -14,7 +14,6 @@ export enum StarPanelClasses {
     Description = "starpanel-input-description",
     Faction = "starpanel-input-faction",
     Colour = "starpanel-input-colour",
-    Delete = "starpanel-input-delete",
 }
 
 export default class StarPanel extends Panel {
@@ -68,7 +67,7 @@ export default class StarPanel extends Panel {
         .appendTo(this.content);
 
     public readonly deleteButton = new Button()
-        .addClass(StarPanelClasses.Delete)
+        .addClass(PanelClasses.Wide)
         .setText("DELETE")
         .addEventListener("click", () => this.deleteStar())
         .appendTo(this.footer);

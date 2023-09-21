@@ -8,7 +8,8 @@ export enum PanelClasses {
     CloseButton = "panel-header-closeButton",
     Wrapper = "panel-wrapper",
     Content = "panel-content",
-    Footer = "panel-footer"
+    Wide = "panel-content-wide",
+    Footer = "panel-footer",
 }
 
 export default class Panel extends Component<"aside"> {
