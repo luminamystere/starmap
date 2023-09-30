@@ -43,10 +43,11 @@ export enum ProjectPanelClasses {
     ControlsText = "projectpanel-controls-text",
     OptionsInput = "projectpanel-options-input",
     OptionsMenu = "projectpanel-options",
+    OptionsContainer = "projectpanel-options-container",
     OptionsLabel = "projectpanel-options-label",
     OptionsHeading = "projectpanel-options-heading",
     OptionsCheck = "projectpanel-options-check",
-    OptionsButtonsContainer = "projectpanel-options-container",
+    OptionsButtonsContainer = "projectpanel-options-buttoncontainer",
     OptionsButtons = "projectpanel-options-button",
     OptionsRange = "projectpanel-options-range",
 }
@@ -192,7 +193,6 @@ export default class ProjectPanel extends Panel {
     }
 
     public openOptionsPanel () {
-        console.log("a");
         const options = new OptionsMenu()
         options.appendTo(this);
         options.element.showModal();
@@ -254,6 +254,49 @@ class PopupPanel extends Dialog {
 
 class OptionsMenu extends Dialog {
 
+    public readonly optionsContainer = new Component("div")
+        .addClass(PanelClasses.Wide)
+        .appendTo(this);
+
+    public readonly buttonContainer = new Component("div")
+        .addClass(ProjectPanelClasses.OptionsButtonsContainer)
+        .appendTo(this);
+
+    public readonly resetButton = new Button()
+        .addClass(ProjectPanelClasses.OptionsButtons)
+        .setText("Reset to Default")
+        .addEventListener("click", () => this.resetToDefault())
+        .appendTo(this.buttonContainer);
+
+    public readonly closeButton = new Button()
+        .addClass(ProjectPanelClasses.OptionsButtons)
+        .setText("Close")
+        .addEventListener("click", () => this.remove())
+        .appendTo(this.buttonContainer);
+
+    public constructor () {
+        super();
+        this.addClass(ProjectPanelClasses.OptionsMenu);
+        this.appendOptions();
+    }
+
+    public resetToDefault () {
+        for (var i = localStorage.length - 1; i >= 0; i--) {
+            const property = localStorage.key(i)
+            if ((property) && property != "save") {
+                localStorage.removeItem(property);
+            }
+        }
+        this.optionsContainer.element.firstChild?.remove();
+        this.appendOptions();
+    }
+
+    public appendOptions () {
+        return new Options().appendTo(this.optionsContainer);
+    }
+}
+
+class Options extends Component<"div"> {
     public readonly mouseSettingsLabel = new Label()
         .addClass(ProjectPanelClasses.OptionsHeading)
         .addClass(PanelClasses.Wide)
@@ -482,36 +525,10 @@ class OptionsMenu extends Dialog {
         .addChangeListener(input => Store.createStar = input.currentInput)
         .appendTo(this);
 
-    public readonly buttonContainer = new Component("div")
-        .addClass(ProjectPanelClasses.OptionsButtonsContainer)
-        .appendTo(this);
-
-    public readonly resetButton = new Button()
-        .addClass(ProjectPanelClasses.OptionsButtons)
-        .setText("Reset to Default")
-        .addEventListener("click", () => this.resetToDefault())
-        .appendTo(this.buttonContainer);
-
-    public readonly closeButton = new Button()
-        .addClass(ProjectPanelClasses.OptionsButtons)
-        .setText("Close")
-        .addEventListener("click", () => this.remove())
-        .appendTo(this.buttonContainer);
-
     public constructor () {
-        super();
-        this.addClass(ProjectPanelClasses.OptionsMenu);
-    }
-
-    public resetToDefault () {
-        console.log("a");
-        for (var i = localStorage.length - 1; i >= 0; i--) {
-            const property = localStorage.key(i)
-            if ((property) && property != "save") {
-                localStorage.removeItem(property);
-            }
-        }
-
+        super("div");
+        this.addClass(ProjectPanelClasses.OptionsContainer);
+        this.addClass(PanelClasses.Wide);
     }
 }
 
