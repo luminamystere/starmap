@@ -41,8 +41,9 @@ export enum ProjectPanelClasses {
     ControlsGuide = "projectpanel-controls",
     ControlsHeading = "projectpanel-controls-heading",
     ControlsText = "projectpanel-controls-text",
-    ControlsInput = "projectpanel-controls-input",
+    OptionsInput = "projectpanel-options-input",
     OptionsMenu = "projectpanel-options",
+    OptionsLabel = "projectpanel-options-label",
     OptionsHeading = "projectpanel-options-heading",
     OptionsCheck = "projectpanel-options-check",
     OptionsButtonsContainer = "projectpanel-options-container",
@@ -303,81 +304,199 @@ class OptionsMenu extends Dialog {
 
     public readonly forwardLabel = new Label("forwardBind")
         .addClass(ProjectPanelClasses.Label)
+        .addClass(ProjectPanelClasses.OptionsLabel)
         .setText("Forward:")
         .appendTo(this);
 
     public readonly forwardBind = new InputInput()
-        .addClass(ProjectPanelClasses.ControlsInput)
+        .addClass(ProjectPanelClasses.OptionsInput)
         .setInput(Store.forwardKey)
         .addChangeListener(input => Store.forwardKey = input.currentInput)
         .appendTo(this);
 
     public readonly backLabel = new Label("backBind")
         .addClass(ProjectPanelClasses.Label)
+        .addClass(ProjectPanelClasses.OptionsLabel)
         .setText("Back:")
         .appendTo(this);
 
     public readonly backBind = new InputInput()
-        .addClass(ProjectPanelClasses.ControlsInput)
+        .addClass(ProjectPanelClasses.OptionsInput)
         .setInput(Store.backKey)
         .addChangeListener(input => Store.backKey = input.currentInput)
         .appendTo(this);
 
     public readonly leftLabel = new Label("leftBind")
         .addClass(ProjectPanelClasses.Label)
+        .addClass(ProjectPanelClasses.OptionsLabel)
         .setText("Left:")
         .appendTo(this);
 
     public readonly leftBind = new InputInput()
-        .addClass(ProjectPanelClasses.ControlsInput)
+        .addClass(ProjectPanelClasses.OptionsInput)
         .setInput(Store.leftKey)
         .addChangeListener(input => Store.leftKey = input.currentInput)
         .appendTo(this);
 
     public readonly rightLabel = new Label("rightBind")
         .addClass(ProjectPanelClasses.Label)
+        .addClass(ProjectPanelClasses.OptionsLabel)
         .setText("Right:")
         .appendTo(this);
 
     public readonly rightBind = new InputInput()
-        .addClass(ProjectPanelClasses.ControlsInput)
+        .addClass(ProjectPanelClasses.OptionsInput)
         .setInput(Store.rightKey)
         .addChangeListener(input => Store.rightKey = input.currentInput)
         .appendTo(this);
 
     public readonly upLabel = new Label("upBind")
         .addClass(ProjectPanelClasses.Label)
+        .addClass(ProjectPanelClasses.OptionsLabel)
         .setText("Up:")
         .appendTo(this);
 
     public readonly upBind = new InputInput()
-        .addClass(ProjectPanelClasses.ControlsInput)
+        .addClass(ProjectPanelClasses.OptionsInput)
         .setInput(Store.upKey)
         .addChangeListener(input => Store.upKey = input.currentInput)
         .appendTo(this);
 
     public readonly downLabel = new Label("downBind")
         .addClass(ProjectPanelClasses.Label)
+        .addClass(ProjectPanelClasses.OptionsLabel)
         .setText("Down:")
         .appendTo(this);
 
     public readonly downBind = new InputInput()
-        .addClass(ProjectPanelClasses.ControlsInput)
+        .addClass(ProjectPanelClasses.OptionsInput)
         .setInput(Store.downKey)
         .addChangeListener(input => Store.downKey = input.currentInput)
+        .appendTo(this);
+
+    public readonly speedUpLabel = new Label("speedUpBind")
+        .addClass(ProjectPanelClasses.Label)
+        .addClass(ProjectPanelClasses.OptionsLabel)
+        .setText("Speed Up:")
+        .appendTo(this);
+
+    public readonly speedUpBind = new InputInput()
+        .addClass(ProjectPanelClasses.OptionsInput)
+        .setInput(Store.inputSpeedUp)
+        .addChangeListener(input => Store.inputSpeedUp = input.currentInput)
+        .appendTo(this);
+
+    public readonly speedDownLabel = new Label("speedDownBind")
+        .addClass(ProjectPanelClasses.Label)
+        .addClass(ProjectPanelClasses.OptionsLabel)
+        .setText("Slow Down:")
+        .appendTo(this);
+
+    public readonly speedDownBind = new InputInput()
+        .addClass(ProjectPanelClasses.OptionsInput)
+        .setInput(Store.inputSpeedDown)
+        .addChangeListener(input => Store.inputSpeedDown = input.currentInput)
+        .appendTo(this);
+
+    public readonly cursorCloserLabel = new Label("cursorCloserBind")
+        .addClass(ProjectPanelClasses.Label)
+        .addClass(ProjectPanelClasses.OptionsLabel)
+        .setText("Held Object Closer:")
+        .appendTo(this);
+
+    public readonly cursorCloserBind = new InputInput()
+        .addClass(ProjectPanelClasses.OptionsInput)
+        .setInput(Store.cursorCloser)
+        .addChangeListener(input => Store.cursorCloser = input.currentInput)
+        .appendTo(this);
+
+    public readonly cursorFurtherLabel = new Label("cursorFurtherBind")
+        .addClass(ProjectPanelClasses.Label)
+        .addClass(ProjectPanelClasses.OptionsLabel)
+        .setText("Held Object Further:")
+        .appendTo(this);
+
+    public readonly cursorFurtherBind = new InputInput()
+        .addClass(ProjectPanelClasses.OptionsInput)
+        .setInput(Store.cursorFurther)
+        .addChangeListener(input => Store.cursorFurther = input.currentInput)
+        .appendTo(this);
+
+    public readonly moveStarLabel = new Label("moveStarBind")
+        .addClass(ProjectPanelClasses.Label)
+        .addClass(ProjectPanelClasses.OptionsLabel)
+        .setText("Move Star (held):")
+        .appendTo(this);
+
+    public readonly moveStarBind = new InputInput()
+        .addClass(ProjectPanelClasses.OptionsInput)
+        .setInput(Store.moveStar)
+        .addChangeListener(input => Store.moveStar = input.currentInput)
+        .appendTo(this);
+
+    public readonly createStarpathLabel = new Label("createStarpathBind")
+        .addClass(ProjectPanelClasses.Label)
+        .addClass(ProjectPanelClasses.OptionsLabel)
+        .setText("Create Starpath:")
+        .appendTo(this);
+
+    public readonly createStarpathBind = new InputInput()
+        .addClass(ProjectPanelClasses.OptionsInput)
+        .setInput(Store.createStarpath)
+        .addChangeListener(input => Store.createStarpath = input.currentInput)
+        .appendTo(this);
+
+    public readonly openStarPanelLabel = new Label("openStarPanelBind")
+        .addClass(ProjectPanelClasses.Label)
+        .addClass(ProjectPanelClasses.OptionsLabel)
+        .setText("Open Star Panel:")
+        .appendTo(this);
+
+    public readonly openStarPanelBind = new InputInput()
+        .addClass(ProjectPanelClasses.OptionsInput)
+        .setInput(Store.openStarPanel)
+        .addChangeListener(input => Store.openStarPanel = input.currentInput)
+        .appendTo(this);
+
+    public readonly openStarpathPanelLabel = new Label("openStarpathPanelBind")
+        .addClass(ProjectPanelClasses.Label)
+        .addClass(ProjectPanelClasses.OptionsLabel)
+        .setText("Open Starpath Panel:")
+        .appendTo(this);
+
+    public readonly openStarpathPanelBind = new InputInput()
+        .addClass(ProjectPanelClasses.OptionsInput)
+        .setInput(Store.openStarpathPanel)
+        .addChangeListener(input => Store.openStarpathPanel = input.currentInput)
+        .appendTo(this);
+
+    public readonly createStarLabel = new Label("createStarBind")
+        .addClass(ProjectPanelClasses.Label)
+        .addClass(ProjectPanelClasses.OptionsLabel)
+        .setText("Create Star:")
+        .appendTo(this);
+
+    public readonly createStarBind = new InputInput()
+        .addClass(ProjectPanelClasses.OptionsInput)
+        .setInput(Store.createStar)
+        .addChangeListener(input => Store.createStar = input.currentInput)
+        .appendTo(this);
+
+    public readonly buttonContainer = new Component("div")
+        .addClass(ProjectPanelClasses.OptionsButtonsContainer)
         .appendTo(this);
 
     public readonly resetButton = new Button()
         .addClass(ProjectPanelClasses.OptionsButtons)
         .setText("Reset to Default")
         .addEventListener("click", () => this.resetToDefault())
-        .appendTo(this);
+        .appendTo(this.buttonContainer);
 
     public readonly closeButton = new Button()
         .addClass(ProjectPanelClasses.OptionsButtons)
         .setText("Close")
         .addEventListener("click", () => this.remove())
-        .appendTo(this);
+        .appendTo(this.buttonContainer);
 
     public constructor () {
         super();
@@ -386,6 +505,13 @@ class OptionsMenu extends Dialog {
 
     public resetToDefault () {
         console.log("a");
+        for (var i = localStorage.length - 1; i >= 0; i--) {
+            const property = localStorage.key(i)
+            if ((property) && property != "save") {
+                localStorage.removeItem(property);
+            }
+        }
+
     }
 }
 

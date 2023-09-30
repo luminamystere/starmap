@@ -26,9 +26,9 @@ export namespace InputData {
     export function fromEvent (event: KeyboardEvent | MouseEvent | WheelEvent): InputData {
 
         return {
-            ctrl: event.ctrlKey,
-            alt: event.altKey,
-            shift: event.shiftKey,
+            ctrl: event.ctrlKey && (event as KeyboardEvent).code != "ControlLeft" && (event as KeyboardEvent).code != "ControlRight",
+            alt: event.altKey && (event as KeyboardEvent).code != "AltLeft" && (event as KeyboardEvent).code != "AltRight",
+            shift: event.shiftKey && (event as KeyboardEvent).code != "ShiftLeft" && (event as KeyboardEvent).code != "ShiftRight",
             code: event instanceof WheelEvent ? `Scroll ${event.deltaY < 0 ? "Up" : "Down"}`
                 : event instanceof MouseEvent ? mouseNameMap[event.button] ?? `Mouse ${event.button}`
                     : event.code
@@ -49,6 +49,8 @@ export interface InputListener {
 export default class InputManager {
     public static state: Record<string, number> = {};
     public static event = new EventTarget();
+    public static mouseX = 0;
+    public static mouseY = 0;
     private static listeners: InputListener[] = [];
 
     static {
@@ -57,6 +59,11 @@ export default class InputManager {
         document.body.addEventListener("mousedown", InputManager.handleInputDown);
         document.body.addEventListener("mouseup", InputManager.handleInputUp);
         document.body.addEventListener("wheel", InputManager.handleInputDown);
+        document.body.addEventListener("mousemove", event => {
+            InputManager.mouseX = event.clientX;
+            InputManager.mouseY = event.clientY;
+        });
+        (window as any).InputManager = InputManager;
     }
 
     public static isDown (input?: InputData) {
@@ -91,6 +98,12 @@ export default class InputManager {
             return;
         }
         InputManager.listeners.splice(listenerIndex, 1);
+    }
+
+
+
+    public static getHoveredElement () {
+        return document.elementFromPoint(InputManager.mouseX, InputManager.mouseY);
     }
 
     private static handleInputDown (event: KeyboardEvent | MouseEvent | WheelEvent) {

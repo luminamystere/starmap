@@ -214,11 +214,21 @@ export default class World {
         this._OnWindowResize();
 
 
-        InputManager.addListener("down", () => Store.inputSpeedUp, () => {
+        InputManager.addListener("down", () => Store.cursorCloser, () => {
             if (this.moving.length == 0) {
                 return false;
             } else {
                 this.cursorDistance += 0.5;
+                this.cursorDistance = Math2.clamp(5, 10000, this.cursorDistance);
+                return true;
+            }
+        });
+
+        InputManager.addListener("down", () => Store.cursorFurther, () => {
+            if (this.moving.length == 0) {
+                return false;
+            } else {
+                this.cursorDistance -= 0.5;
                 this.cursorDistance = Math2.clamp(5, 10000, this.cursorDistance);
                 return true;
             }
@@ -232,15 +242,7 @@ export default class World {
             return true;
         });
 
-        InputManager.addListener("down", () => Store.inputSpeedDown, () => {
-            if (this.moving.length == 0) {
-                return false;
-            } else {
-                this.cursorDistance -= 0.5;
-                this.cursorDistance = Math2.clamp(5, 10000, this.cursorDistance);
-                return true;
-            }
-        });
+
 
         InputManager.addListener("down", () => Store.inputSpeedDown, () => {
             this.SPEED_MULTIPLIER -= 1;
@@ -250,60 +252,109 @@ export default class World {
             return true;
         });
 
-
-        document.body.addEventListener("mousedown", event => {
-            this.mouse[event.button] ??= Date.now();
-            if (!(event.target as Element)?.closest(".panel") && (this.projectPanel || this.starPanel || this.starpathPanel)) {
+        InputManager.addListener("down", () => Store.closePanel, input => {
+            if (!(input.getHoveredElement()?.closest(".panel")) && (this.projectPanel || this.starPanel || this.starpathPanel)) {
                 if (this.projectPanel) {
                     this.projectPanel.remove();
-                    return;
+                    return true;
                 } else if (this.starPanel) {
                     this.starPanel.remove();
-                    return;
+                    return true;
                 } else if (this.starpathPanel) {
                     this.starpathPanel.remove();
-                    return;
+                    return true;
+                } else {
+                    return false;
                 }
             }
-            if (this.starPanel) {
-                return;
-            }
-            if (this.mouse[0]) {
-                this.moveStar();
-            }
-            else if (this.mouse[2]) {
-                this.showDetails(event);
-            }
-
-
+            return false;
         });
-        document.body.addEventListener("mouseup", event => {
-            if (this.mouse[0]) {
-                if (this.moving.length > 0) {
-                    this.saveLocalStorage();
-                }
-                this.moving = [];
-                this.toMove = [];
-                delete this.savedCursorPosition;
 
-            } else if (this.mouse[2]) {
-                if (this.starPanel || this.projectPanel || this.starpathPanel) {
-                    return;
-                }
-                this.createLine();
-                delete this.linePoints;
-                if (this.lineObject) {
-                    this.lineObject.geometry.dispose();
-                    this._scene.remove(this.lineObject);
-                }
-                this.movingLine = [];
-                // console.log(this.raycastStarDistance, this.raycastStarpathDistance);
-
-
-
+        InputManager.addListener("down", () => Store.moveStar, () => {
+            if (this.starPanel || this.starpathPanel || this.projectPanel) {
+                return false;
             }
-            delete this.mouse[event.button];
+            this.moveStar();
+            return true;
         });
+
+        InputManager.addListener("up", () => Store.moveStar, () => {
+            if (this.moving.length > 0) {
+                this.saveLocalStorage();
+            }
+            this.moving = [];
+            this.toMove = [];
+            delete this.savedCursorPosition;
+            return true;
+        });
+
+        InputManager.addListener("down", () => Store.createStarpath, () => {
+            if (this.starPanel || this.starpathPanel || this.projectPanel) {
+                return false;
+            }
+            const star = this.raycastForStar();
+            if (star) {
+                this.cursorDistance = this.raycastStarDistance;
+                this.starpathStart = star;
+                const cursorPos = this.getCursorPosition(this.cursorDistance);
+                this.linePoints = [new Vector3(star.position.x, star.position.y, star.position.z),
+                new Vector3(cursorPos.x, cursorPos.y, cursorPos.z)];
+
+                this.lineGeometry = new BufferGeometry().setFromPoints(this.linePoints);
+                this.lineObject = new Line(this.lineGeometry, new LineBasicMaterial({ color: 0xFFFFFF, linewidth: 1 }));
+                this._scene.add(this.lineObject);
+                return true;
+            } else {
+                return false;
+            }
+        });
+
+        InputManager.addListener("up", () => Store.createStarpath, () => {
+            this.createLine();
+            delete this.linePoints;
+            if (this.lineObject) {
+                this.lineObject.geometry.dispose();
+                this._scene.remove(this.lineObject);
+            }
+            this.movingLine = [];
+            return true;
+        });
+
+        InputManager.addListener("down", () => Store.openStarPanel, () => {
+            if (this.starPanel || this.starpathPanel || this.projectPanel) {
+                return false;
+            }
+            const star = this.raycastForStar();
+            if (star) {
+                this.interacted = true;
+                this.showStarPanel(star);
+                return true;
+            }
+            return false;
+        });
+
+        InputManager.addListener("down", () => Store.openStarpathPanel, () => {
+            if (this.starPanel || this.starpathPanel || this.projectPanel) {
+                return false;
+            }
+            const starpath = this.raycastForStarpath();
+            if (starpath) {
+                this.interacted = true;
+                this.showStarpathPanel(starpath);
+                this.saveLocalStorage();
+                return true;
+            }
+            return false;
+        });
+
+        InputManager.addListener("down", () => Store.createStar, () => {
+            if (this.starPanel || this.starpathPanel || this.projectPanel) {
+                return false;
+            }
+            this.spawnOrb();
+            return true;
+        });
+
         document.body.addEventListener("contextmenu", event => {
             if (this.interacted) {
                 event.preventDefault();
@@ -546,38 +597,38 @@ export default class World {
         }
     }
 
-    public showDetails (event: MouseEvent) {
-        this.interacted = true;
+    // public showDetails (event: MouseEvent) {
+    //     this.interacted = true;
 
-        const star = this.raycastForStar();
-        if (star && event.ctrlKey) {
-            this.cursorDistance = this.raycastStarDistance;
-            this.starpathStart = star;
-            const cursorPos = this.getCursorPosition(this.cursorDistance);
-            this.linePoints = [new Vector3(star.position.x, star.position.y, star.position.z),
-            new Vector3(cursorPos.x, cursorPos.y, cursorPos.z)];
+    //     const star = this.raycastForStar();
+    //     if (star && event.ctrlKey) {
+    //         this.cursorDistance = this.raycastStarDistance;
+    //         this.starpathStart = star;
+    //         const cursorPos = this.getCursorPosition(this.cursorDistance);
+    //         this.linePoints = [new Vector3(star.position.x, star.position.y, star.position.z),
+    //         new Vector3(cursorPos.x, cursorPos.y, cursorPos.z)];
 
-            this.lineGeometry = new BufferGeometry().setFromPoints(this.linePoints);
-            this.lineObject = new Line(this.lineGeometry, new LineBasicMaterial({ color: 0xFFFFFF, linewidth: 1 }));
-            this._scene.add(this.lineObject);
-            return;
-        }
+    //         this.lineGeometry = new BufferGeometry().setFromPoints(this.linePoints);
+    //         this.lineObject = new Line(this.lineGeometry, new LineBasicMaterial({ color: 0xFFFFFF, linewidth: 1 }));
+    //         this._scene.add(this.lineObject);
+    //         return;
+    //     }
 
-        if (star) {
-            this.showStarPanel(star);
-            return;
-        }
+    //     if (star) {
+    //         this.showStarPanel(star);
+    //         return;
+    //     }
 
-        const starpath = this.raycastForStarpath();
-        if (starpath) {
-            this.showStarpathPanel(starpath);
-            this.saveLocalStorage();
-            return;
-        }
+    //     const starpath = this.raycastForStarpath();
+    //     if (starpath) {
+    //         this.showStarpathPanel(starpath);
+    //         this.saveLocalStorage();
+    //         return;
+    //     }
 
-        this.spawnOrb();
+    //     this.spawnOrb();
 
-    }
+    // }
 
     public showProjectPanel () {
         if (this.projectPanel) {
@@ -737,7 +788,7 @@ export default class World {
         }
 
         //left click moving star
-        if (this.mouse[0] && this.moving.length == 1) {
+        if (this.moving.length == 1) {
             const cursorPos = this.getCursorPosition(this.cursorDistance);
             this.moving[0].position.set(cursorPos.x, cursorPos.y, cursorPos.z)
             this.moving[0].updatePosition();
@@ -747,7 +798,7 @@ export default class World {
 
         }
         //right click dragging lines
-        if (this.mouse[2] && this.lineObject && this.linePoints) {
+        if (this.lineObject && this.linePoints) {
             this.linePoints[1] = this.getCursorPosition(this.cursorDistance);
             this.lineObject.geometry.setFromPoints(this.linePoints);
             this.lineObject.geometry.computeBoundingSphere();

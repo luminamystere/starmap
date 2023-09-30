@@ -12,11 +12,21 @@ export interface StoreData {
     downKey: InputData;
     inputSpeedUp: InputData;
     inputSpeedDown: InputData;
+    cursorCloser: InputData;
+    cursorFurther: InputData;
+    closePanel: InputData;
+    moveStar: InputData;
+    createStarpath: InputData;
+    openStarPanel: InputData;
+    openStarpathPanel: InputData;
+    createStar: InputData;
     // starpathModifier: InputData;
 
 }
 
 const defaults: StoreData = {
+    invertX: false,
+    invertY: false,
     sensitivity: 0.5,
     forwardKey: InputData.create("KeyW"),
     backKey: InputData.create("KeyS"),
@@ -26,6 +36,14 @@ const defaults: StoreData = {
     downKey: InputData.create("ShiftLeft"),
     inputSpeedUp: InputData.create("Scroll Up"),
     inputSpeedDown: InputData.create("Scroll Down"),
+    cursorCloser: InputData.create("Scroll Up"),
+    cursorFurther: InputData.create("Scroll Down"),
+    closePanel: InputData.create("Left Click"),
+    moveStar: InputData.create("Left Click"),
+    createStarpath: InputData.create("Ctrl + Right Click"),
+    openStarPanel: InputData.create("Right Click"),
+    openStarpathPanel: InputData.create("Right Click"),
+    createStar: InputData.create("Right Click")
     // starpathModifier: InputData.create("Right Click", true),
 }
 

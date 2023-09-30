@@ -50,18 +50,24 @@ export default class InputInput extends Component<"button"> {
     private startListening () {
         document.addEventListener("keydown", this.handleInputDown);
         document.addEventListener("keyup", this.handleInputUp);
-        // document.addEventListener("mousedown", this.handleInputDown);
-        // document.addEventListener("mouseup", this.handleInputUp);
-        // document.addEventListener("wheel", this.handleInputUp);
+        document.addEventListener("mousedown", this.handleInputDown);
+        document.addEventListener("mouseup", this.handleInputUp);
+        document.addEventListener("wheel", this.handleInputUp);
+        document.addEventListener("contextmenu", event => {
+            event.preventDefault();
+        });
 
     }
 
     private stopListening () {
         document.removeEventListener("keydown", this.handleInputDown);
         document.removeEventListener("keyup", this.handleInputUp);
-        // document.removeEventListener("mousedown", this.handleInputDown);
-        // document.removeEventListener("mouseup", this.handleInputUp);
-        // document.removeEventListener("wheel", this.handleInputUp);
+        document.removeEventListener("mousedown", this.handleInputDown);
+        document.removeEventListener("mouseup", this.handleInputUp);
+        document.removeEventListener("wheel", this.handleInputUp);
+        document.removeEventListener("contextmenu", event => {
+            event.preventDefault();
+        });
     }
 
     private handleInputDown (event: KeyboardEvent | MouseEvent) {

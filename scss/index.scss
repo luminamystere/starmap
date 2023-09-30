@@ -269,8 +269,6 @@ body {
         opacity: 0.8;
     }
 
-    &-button {}
-
     &-name {
         font-size: 16px;
     }
@@ -368,17 +366,37 @@ body {
     &-options {
         display: grid;
         grid-template-columns: auto 1fr;
+        gap: 10px;
+
+
+        &-label {
+            height: fit-content;
+            align-self: center;
+            text-align: right;
+        }
+
+        &-input {
+            font-size: 16px;
+            width: 80%;
+        }
 
         &-container {
             grid-column: 1 / 3;
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            padding: 8px;
+            border-top: 1px solid;
+
         }
+
 
         &-heading {
             font-weight: bold;
             font-size: 18px;
             text-align: center;
+            border-bottom: 1px solid;
+            padding-bottom: 6px;
         }
     }
 }
