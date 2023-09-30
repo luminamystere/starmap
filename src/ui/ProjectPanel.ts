@@ -10,6 +10,11 @@ import ColourInput from "./ColourInput.js";
 import Label from "./Label.js";
 import SelectInput from "./SelectInput.js";
 import Files from "../systems/Files.js";
+import Dialog from "./Dialog.js";
+import CheckboxInput from "./CheckboxInput.js";
+import Store from "../utility/Store.js";
+import RangeInput from "./RangeInput.js";
+import InputInput from "./InputInput.js";
 
 export enum ProjectPanelClasses {
     Main = "projectpanel",
@@ -36,6 +41,13 @@ export enum ProjectPanelClasses {
     ControlsGuide = "projectpanel-controls",
     ControlsHeading = "projectpanel-controls-heading",
     ControlsText = "projectpanel-controls-text",
+    ControlsInput = "projectpanel-controls-input",
+    OptionsMenu = "projectpanel-options",
+    OptionsHeading = "projectpanel-options-heading",
+    OptionsCheck = "projectpanel-options-check",
+    OptionsButtonsContainer = "projectpanel-options-container",
+    OptionsButtons = "projectpanel-options-button",
+    OptionsRange = "projectpanel-options-range",
 }
 
 export default class ProjectPanel extends Panel {
@@ -135,6 +147,12 @@ export default class ProjectPanel extends Panel {
         })
         .appendTo(this.importButton);
 
+    public readonly optionsButton = new Button()
+        .addClass(PanelClasses.FooterWide)
+        .setText("OPTIONS")
+        .addEventListener("click", () => this.openOptionsPanel())
+        .appendTo(this.footer);
+
 
 
     public constructor (public readonly world: World) {
@@ -172,6 +190,13 @@ export default class ProjectPanel extends Panel {
 
     }
 
+    public openOptionsPanel () {
+        console.log("a");
+        const options = new OptionsMenu()
+        options.appendTo(this);
+        options.element.showModal();
+    }
+
     public refreshPanel () {
         while (this.factionBox.element.lastElementChild) {
             this.factionBox.element.removeChild(this.factionBox.element.lastElementChild);
@@ -184,13 +209,13 @@ export default class ProjectPanel extends Panel {
     }
 }
 
-class PopupPanel extends Component<"dialog"> {
+class PopupPanel extends Dialog {
 
     public readonly warning = new Component("p")
         .addClass(ProjectPanelClasses.PopupText)
         .append(new Component("b").setText("Warning!"))
         .addText(" Creating a new starmap will clear the existing starmap. ")
-        .appendTo(this)
+        .appendTo(this);
 
     public readonly exportbutton = new Button()
         .addClass(ProjectPanelClasses.PopupButton)
@@ -215,7 +240,7 @@ class PopupPanel extends Component<"dialog"> {
         .appendTo(this);
 
     public constructor (public readonly world: World) {
-        super("dialog");
+        super();
         this.addClass(ProjectPanelClasses.Popup);
     }
 
@@ -223,6 +248,144 @@ class PopupPanel extends Component<"dialog"> {
         this.world.resetWorld();
         this.world.projectPanel?.refreshPanel();
         this.remove();
+    }
+}
+
+class OptionsMenu extends Dialog {
+
+    public readonly mouseSettingsLabel = new Label()
+        .addClass(ProjectPanelClasses.OptionsHeading)
+        .addClass(PanelClasses.Wide)
+        .setText("Mouse Settings")
+        .appendTo(this);
+
+    public readonly invertXLabel = new Label("invertX")
+        .addClass(ProjectPanelClasses.Label)
+        .setText("Invert X: ")
+        .appendTo(this);
+
+    public readonly invertX = new CheckboxInput()
+        .addClass(ProjectPanelClasses.OptionsCheck)
+        .setId("invertX")
+        .setChecked(Store.invertX || false)
+        .addChangeListener(input => Store.invertX = input.element.checked)
+        .appendTo(this)
+
+    public readonly invertYLabel = new Label("invertY")
+        .addClass(ProjectPanelClasses.Label)
+        .setText("Invert Y: ")
+        .appendTo(this);
+
+    public readonly invertY = new CheckboxInput()
+        .addClass(ProjectPanelClasses.OptionsCheck)
+        .setId("invertY")
+        .setChecked(Store.invertY || false)
+        .addChangeListener(input => Store.invertY = input.element.checked)
+        .appendTo(this);
+
+    public readonly sensitivityLabel = new Label("sensitivity")
+        .addClass(ProjectPanelClasses.Label)
+        .setText("Mouse Sensitivity:")
+        .appendTo(this);
+
+    public readonly sensitivityInput = new RangeInput(0, 1, 0.01)
+        .addClass(ProjectPanelClasses.OptionsRange)
+        .setId("sensitivity")
+        .setValue(Store.sensitivity ?? 0.5)
+        .addChangeListener(input => Store.sensitivity = input.element.valueAsNumber)
+        .appendTo(this);
+
+    public readonly keybindLabel = new Label()
+        .addClass(ProjectPanelClasses.OptionsHeading)
+        .addClass(PanelClasses.Wide)
+        .setText("Keybindings")
+        .appendTo(this);
+
+    public readonly forwardLabel = new Label("forwardBind")
+        .addClass(ProjectPanelClasses.Label)
+        .setText("Forward:")
+        .appendTo(this);
+
+    public readonly forwardBind = new InputInput()
+        .addClass(ProjectPanelClasses.ControlsInput)
+        .setInput(Store.forwardKey)
+        .addChangeListener(input => Store.forwardKey = input.currentInput)
+        .appendTo(this);
+
+    public readonly backLabel = new Label("backBind")
+        .addClass(ProjectPanelClasses.Label)
+        .setText("Back:")
+        .appendTo(this);
+
+    public readonly backBind = new InputInput()
+        .addClass(ProjectPanelClasses.ControlsInput)
+        .setInput(Store.backKey)
+        .addChangeListener(input => Store.backKey = input.currentInput)
+        .appendTo(this);
+
+    public readonly leftLabel = new Label("leftBind")
+        .addClass(ProjectPanelClasses.Label)
+        .setText("Left:")
+        .appendTo(this);
+
+    public readonly leftBind = new InputInput()
+        .addClass(ProjectPanelClasses.ControlsInput)
+        .setInput(Store.leftKey)
+        .addChangeListener(input => Store.leftKey = input.currentInput)
+        .appendTo(this);
+
+    public readonly rightLabel = new Label("rightBind")
+        .addClass(ProjectPanelClasses.Label)
+        .setText("Right:")
+        .appendTo(this);
+
+    public readonly rightBind = new InputInput()
+        .addClass(ProjectPanelClasses.ControlsInput)
+        .setInput(Store.rightKey)
+        .addChangeListener(input => Store.rightKey = input.currentInput)
+        .appendTo(this);
+
+    public readonly upLabel = new Label("upBind")
+        .addClass(ProjectPanelClasses.Label)
+        .setText("Up:")
+        .appendTo(this);
+
+    public readonly upBind = new InputInput()
+        .addClass(ProjectPanelClasses.ControlsInput)
+        .setInput(Store.upKey)
+        .addChangeListener(input => Store.upKey = input.currentInput)
+        .appendTo(this);
+
+    public readonly downLabel = new Label("downBind")
+        .addClass(ProjectPanelClasses.Label)
+        .setText("Down:")
+        .appendTo(this);
+
+    public readonly downBind = new InputInput()
+        .addClass(ProjectPanelClasses.ControlsInput)
+        .setInput(Store.downKey)
+        .addChangeListener(input => Store.downKey = input.currentInput)
+        .appendTo(this);
+
+    public readonly resetButton = new Button()
+        .addClass(ProjectPanelClasses.OptionsButtons)
+        .setText("Reset to Default")
+        .addEventListener("click", () => this.resetToDefault())
+        .appendTo(this);
+
+    public readonly closeButton = new Button()
+        .addClass(ProjectPanelClasses.OptionsButtons)
+        .setText("Close")
+        .addEventListener("click", () => this.remove())
+        .appendTo(this);
+
+    public constructor () {
+        super();
+        this.addClass(ProjectPanelClasses.OptionsMenu);
+    }
+
+    public resetToDefault () {
+        console.log("a");
     }
 }
 

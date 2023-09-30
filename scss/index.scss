@@ -74,6 +74,34 @@ body {
     word-break: break-word;
 }
 
+.dialog {
+    position: absolute;
+    width: 400px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border: none;
+    z-index: 999999;
+
+    &::before {
+        position: fixed;
+        content: "";
+        inset: 0;
+        background: #222a;
+        z-index: -2;
+        backdrop-filter: blur(10px);
+    }
+
+    &::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: rgba(34, 34, 34, 0.8);
+        z-index: -1;
+        border: 1px solid #555;
+        border-radius: 4px;
+    }
+}
+
 .panel {
     position: absolute;
     inset: 0;
@@ -143,6 +171,11 @@ body {
         border-top: 1px solid;
         display: grid;
         grid-template-columns: 1fr 1fr 1fr;
+        gap: 12px;
+
+        &-wide {
+            grid-column: 1 / 4;
+        }
     }
 
 
@@ -217,8 +250,6 @@ body {
     &-fakebutton {
         text-align: center;
         vertical-align: middle;
-        margin-left: 2px;
-        margin-right: 2px;
     }
 
     &-fakebutton:hover {
@@ -238,6 +269,8 @@ body {
         opacity: 0.8;
     }
 
+    &-button {}
+
     &-name {
         font-size: 16px;
     }
@@ -247,31 +280,6 @@ body {
     }
 
     &-popup {
-        position: absolute;
-        width: 400px;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        border: none;
-        z-index: 999999;
-
-        &::before {
-            position: fixed;
-            content: "";
-            inset: 0;
-            background: #222a;
-            z-index: -2;
-            backdrop-filter: blur(10px);
-        }
-
-        &::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: rgba(34, 34, 34, 0.8);
-            z-index: -1;
-            border: 1px solid #555;
-            border-radius: 4px;
-        }
 
         &-text {
             grid-column: 1 / 3;
@@ -354,6 +362,23 @@ body {
             font-size: 18px;
             white-space: pre;
             line-height: 1.4;
+        }
+    }
+
+    &-options {
+        display: grid;
+        grid-template-columns: auto 1fr;
+
+        &-container {
+            grid-column: 1 / 3;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+        }
+
+        &-heading {
+            font-weight: bold;
+            font-size: 18px;
+            text-align: center;
         }
     }
 }

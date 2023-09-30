@@ -10,6 +10,7 @@ export enum PanelClasses {
     Content = "panel-content",
     Wide = "panel-content-wide",
     Footer = "panel-footer",
+    FooterWide = "panel-footer-wide",
 }
 
 export default class Panel extends Component<"aside"> {

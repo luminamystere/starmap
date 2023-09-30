@@ -1,0 +1,1 @@
+export type SupplierOr<T> = T | (() => T);

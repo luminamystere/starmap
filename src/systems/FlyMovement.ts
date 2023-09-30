@@ -1,6 +1,8 @@
 import { Vector3 } from "three";
 import World from "../World.js";
 import Math2 from "../utility/Math2.js";
+import Store from "../utility/Store.js";
+import InputManager from "./InputManager.js";
 
 export default class FlyMovement {
     public SPEED_HORIZONTAL = 0.01;
@@ -37,22 +39,22 @@ export default class FlyMovement {
             return;
         }
 
-        if (this.world.keyboard["KeyW"]) {
+        if (InputManager.isDown(Store.forwardKey)) {
             forwardBackInput++;
         }
-        if (this.world.keyboard["KeyS"]) {
+        if (InputManager.isDown(Store.backKey)) {
             forwardBackInput--;
         }
-        if (this.world.keyboard["KeyA"]) {
+        if (InputManager.isDown(Store.leftKey)) {
             leftRightInput--;
         }
-        if (this.world.keyboard["KeyD"]) {
+        if (InputManager.isDown(Store.rightKey)) {
             leftRightInput++;
         }
-        if (this.world.keyboard["Space"]) {
+        if (InputManager.isDown(Store.upKey)) {
             upDownInput++;
         }
-        if (this.world.keyboard["ShiftLeft"]) {
+        if (InputManager.isDown(Store.downKey)) {
             upDownInput--;
         }
         this.playerVelocity.add(this.getForwardVector().multiplyScalar(this.SPEED_HORIZONTAL * delta).multiplyScalar(forwardBackInput));

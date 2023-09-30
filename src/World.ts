@@ -20,6 +20,8 @@ import { debounce } from "./utility/Async.js";
 import Math2 from "./utility/Math2.js";
 import Component from "./ui/Component.js";
 import StarPathPanel from "./ui/StarPathPanel.js";
+import Store from "./utility/Store.js";
+import InputManager from "./systems/InputManager.js";
 
 interface SavedData {
     starPaths: {
@@ -52,7 +54,6 @@ interface SavedData {
 
 export default class World {
 
-    public keyboard: Record<string, number> = {};
     public mouse: Record<string, number> = {};
     public _threejs: WebGLRenderer;
     public bloomRenderer: EffectComposer;
@@ -212,32 +213,44 @@ export default class World {
         }, false);
         this._OnWindowResize();
 
-        document.body.addEventListener("keydown", (event: KeyboardEvent) => {
-            this.keyboard[event.code] ??= Date.now();
-        });
 
-        document.body.addEventListener("keyup", event => {
-            delete this.keyboard[event.code];
-        });
-
-        document.body.addEventListener("wheel", event => {
-            if (this.moving.length > 0) {
-                this.cursorDistance -= event.deltaY * 0.01;
+        InputManager.addListener("down", () => Store.inputSpeedUp, () => {
+            if (this.moving.length == 0) {
+                return false;
+            } else {
+                this.cursorDistance += 0.5;
                 this.cursorDistance = Math2.clamp(5, 10000, this.cursorDistance);
-            } else if (this.keyboard["KeyZ"] && this.movementControls) {
-                if (event.deltaY < 1) {
-                    this.SPEED_MULTIPLIER += 1;
-                    this.SPEED_MULTIPLIER = Math2.clamp(1, 10, this.SPEED_MULTIPLIER);
-                    this.movementControls.changeSpeed(this.SPEED_MULTIPLIER);
-                    this.updateProjectName(this._projectName);
-                } else {
-                    this.SPEED_MULTIPLIER -= 1;
-                    this.SPEED_MULTIPLIER = Math2.clamp(1, 10, this.SPEED_MULTIPLIER);
-                    this.movementControls.changeSpeed(this.SPEED_MULTIPLIER);
-                    this.updateProjectName(this._projectName);
-                }
+                return true;
             }
         });
+
+        InputManager.addListener("down", () => Store.inputSpeedUp, () => {
+            this.SPEED_MULTIPLIER += 1;
+            this.SPEED_MULTIPLIER = Math2.clamp(1, 10, this.SPEED_MULTIPLIER);
+            this.movementControls?.changeSpeed(this.SPEED_MULTIPLIER);
+            this.updateProjectName(this._projectName);
+            return true;
+        });
+
+        InputManager.addListener("down", () => Store.inputSpeedDown, () => {
+            if (this.moving.length == 0) {
+                return false;
+            } else {
+                this.cursorDistance -= 0.5;
+                this.cursorDistance = Math2.clamp(5, 10000, this.cursorDistance);
+                return true;
+            }
+        });
+
+        InputManager.addListener("down", () => Store.inputSpeedDown, () => {
+            this.SPEED_MULTIPLIER -= 1;
+            this.SPEED_MULTIPLIER = Math2.clamp(1, 10, this.SPEED_MULTIPLIER);
+            this.movementControls?.changeSpeed(this.SPEED_MULTIPLIER);
+            this.updateProjectName(this._projectName);
+            return true;
+        });
+
+
         document.body.addEventListener("mousedown", event => {
             this.mouse[event.button] ??= Date.now();
             if (!(event.target as Element)?.closest(".panel") && (this.projectPanel || this.starPanel || this.starpathPanel)) {
@@ -305,9 +318,7 @@ export default class World {
             }, 100);
         });
         document.addEventListener("wheel", event => {
-            if (this.keyboard["KeyCRTL"]) {
-                event.preventDefault();
-            }
+            event.preventDefault();
         }, { passive: false });
 
         let light = new AmbientLight(0xFFFFFF);
@@ -329,6 +340,8 @@ export default class World {
         this.bloomRenderer.addPass(renderScene);
         this.bloomRenderer.addPass(bloomPass);
         this.bloomRenderer.addPass(this.antialiasPass);
+
+
 
 
         this._scene.add(this.cameraControls.getObject());

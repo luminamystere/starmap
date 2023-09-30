@@ -1,7 +1,6 @@
 import { Camera, Euler, Object3D, Scene, Vector2, Vector3 } from "three";
-//import Bound from "util/Bound";
-//import Configurable from "util/config/Configurable";
 import World from "../World.js";
+import Store from "../utility/Store.js";
 
 const PI_2 = Math.PI / 2;
 
@@ -10,45 +9,12 @@ export interface SerialisedCameraAngle {
     yaw: number;
 }
 
-//@InScene
 export default class MouseControls {
 
-    // @Configurable("controls", {
-    //     label: "settings/controls/mouse/sensitivity",
-    //     value: Configurable.number({ min: 0.01, max: 2, default: 1 }),
-    // })
     public SENSITIVITY = 0.5;
     public LISTENER_SENS = 500;
-
-    // @Configurable("controls", {
-    //     label: "settings/controls/mouse/skipThreshold",
-    //     description: "settings/controls/mouse/skipThreshold/description",
-    //     order: -1,
-    //     value: Configurable.number({ min: 50, max: 700, step: 5, default: 300 }),
-    // })
     public SKIP_THRESHOLD = 1;
-
-    // @Configurable("controls", {
-    //     label: "settings/controls/mouse/skipDelay",
-    //     description: "settings/controls/mouse/skipDelay/description",
-    //     order: -1,
-    //     value: Configurable.number({ min: 0, max: 5, step: 1, default: 1 }),
-    // })
     public SKIP_DELAY = 1;
-
-    // @Configurable("controls", {
-    //     label: "settings/controls/mouse/invertY",
-    //     value: Configurable.boolean({ default: false }),
-    // })
-    // public INVERT_Y: boolean;
-
-    // @Configurable("controls", {
-    //     display: false,
-    //     value: Configurable.boolean({ default: false }),
-    // })
-    // public INVERT_X: boolean;
-
-    ////////////////////////////////////
 
     private camera: Camera;
 
@@ -113,8 +79,8 @@ export default class MouseControls {
         if (this.enabled === false)
             return;
 
-        const movementX = (event.movementX || 0);
-        const movementY = (event.movementY || 0);
+        const movementX = (event.movementX || 0) * (Store.invertX ? -1 : 1);
+        const movementY = (event.movementY || 0) * (Store.invertY ? -1 : 1);
 
         if (!movementX && !movementY)
             return;
@@ -155,8 +121,8 @@ export default class MouseControls {
     private applyMovement (movementX: number, movementY: number) {
         this.lastAppliedMovementX = movementX;
 
-        this.yawObject.rotation.y -= movementX * 0.002 * this.SENSITIVITY;
-        this.pitchObject.rotation.x -= movementY * 0.002 * this.SENSITIVITY;
+        this.yawObject.rotation.y -= movementX * 0.002 * (Store.sensitivity ?? this.SENSITIVITY);
+        this.pitchObject.rotation.x -= movementY * 0.002 * (Store.sensitivity ?? this.SENSITIVITY);
 
         this.pitchObject.rotation.x = Math.max(- PI_2, Math.min(PI_2, this.pitchObject.rotation.x));
     }
