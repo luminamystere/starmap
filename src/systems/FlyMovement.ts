@@ -5,10 +5,10 @@ import Store from "../utility/Store.js";
 import InputManager from "./InputManager.js";
 
 export default class FlyMovement {
-    public SPEED_HORIZONTAL = 0.01;
+    public SPEED_HORIZONTAL = 0.8;
     public SPEED_MINIMUM = 0.01;
     public SPEED_MULTIPLIER: number;
-    public SPEED_VERTICAL = 0.05;
+    public SPEED_VERTICAL = 0.6;
     public FRICTION = 0.8;
     public world: World;
 
@@ -24,8 +24,8 @@ export default class FlyMovement {
     }
 
     public changeSpeed (diff: number) {
-        this.SPEED_HORIZONTAL = this.SPEED_MINIMUM * diff;
-        this.SPEED_HORIZONTAL = Math2.clamp(0.01, 0.1, this.SPEED_HORIZONTAL);
+        this.SPEED_MULTIPLIER = this.SPEED_MINIMUM * diff;
+        this.SPEED_MULTIPLIER = Math2.clamp(0.01, 0.1, this.SPEED_MULTIPLIER);
     }
 
     public update (delta: number) {
@@ -57,9 +57,9 @@ export default class FlyMovement {
         if (InputManager.isDown(Store.downKey)) {
             upDownInput--;
         }
-        this.playerVelocity.add(this.getForwardVector().multiplyScalar(this.SPEED_HORIZONTAL * delta).multiplyScalar(forwardBackInput));
-        this.playerVelocity.add(this.getSideVector().multiplyScalar(this.SPEED_HORIZONTAL * delta).multiplyScalar(leftRightInput));
-        this.playerVelocity.y += (this.SPEED_VERTICAL * delta) * upDownInput;
+        this.playerVelocity.add(this.getForwardVector().multiplyScalar((this.SPEED_HORIZONTAL * this.SPEED_MULTIPLIER) * delta).multiplyScalar(forwardBackInput));
+        this.playerVelocity.add(this.getSideVector().multiplyScalar((this.SPEED_HORIZONTAL * this.SPEED_MULTIPLIER) * delta).multiplyScalar(leftRightInput));
+        this.playerVelocity.y += ((this.SPEED_VERTICAL * this.SPEED_MULTIPLIER) * delta) * upDownInput;
     }
 
     public getForwardVector () {
