@@ -35,6 +35,8 @@ export enum ProjectPanelClasses {
     FactionDelete = "projectpanel-faction-delete",
     BackgroundLabel = "projectpanel-background-label",
     Background = "projectpanel-background-select",
+    ButtonContainer = "projectpanel-container",
+    ButtonThreeWide = "projectpanel-container-wide",
     Button = "projectpanel-button",
     FakeButton = "projectpanel-fakebutton",
     HiddenButton = "projectpanel-hiddenbutton",
@@ -50,6 +52,7 @@ export enum ProjectPanelClasses {
     OptionsButtonsContainer = "projectpanel-options-buttoncontainer",
     OptionsButtons = "projectpanel-options-button",
     OptionsRange = "projectpanel-options-range",
+    FooterText = "projectpanel-footer-text"
 }
 
 export default class ProjectPanel extends Panel {
@@ -100,26 +103,16 @@ export default class ProjectPanel extends Panel {
         .setId("background")
         .appendTo(this.content);
 
-    public readonly controlsGuide = new Component("div")
-        .addClass(ProjectPanelClasses.ControlsGuide)
-        .appendTo(this.content);
-
-    public readonly controlsHeading = new Component("h2")
-        .addClass(ProjectPanelClasses.ControlsHeading)
-        .setText("CONTROLS")
-        .appendTo(this.controlsGuide);
-
-    public readonly controlsText = new Component("p")
-        .addClass(ProjectPanelClasses.ControlsText)
-        .setText("WASD - Movement\nSpace - Fly Up\nShift - Fly Down\nLeft Click - Move Star (drag)\nCtrl + Left Click - Create Starpath (drag)\nMiddle Click - Delete Starpath\nRight Click - Place/Inspect Star")
-        .appendTo(this.controlsGuide);
+    public readonly buttonContainer = new Component("div")
+        .addClass(ProjectPanelClasses.ButtonContainer)
+        .appendTo(this.footer);
 
 
     public readonly newStarmapButton = new Button()
         .addClass(ProjectPanelClasses.Button)
         .setText("NEW")
         .addEventListener("click", () => this.newStarmap())
-        .appendTo(this.footer);
+        .appendTo(this.buttonContainer);
 
     public readonly exportButton = new Button()
         .addClass(ProjectPanelClasses.Button)
@@ -128,13 +121,13 @@ export default class ProjectPanel extends Panel {
             `${this.world.projectName.replace(/\W+/g, "-")}.starmap`,
             this.world.serialiseJSON()
         ))
-        .appendTo(this.footer);
+        .appendTo(this.buttonContainer);
 
     public readonly importButton = new Button("label")
         .setAttribute("for", "starmap_import")
         .addClass(ProjectPanelClasses.FakeButton)
         .setText("IMPORT")
-        .appendTo(this.footer);
+        .appendTo(this.buttonContainer);
 
     public readonly importInput = new Component("input")
         .setId("starmap_import")
@@ -150,9 +143,15 @@ export default class ProjectPanel extends Panel {
         .appendTo(this.importButton);
 
     public readonly optionsButton = new Button()
-        .addClass(PanelClasses.FooterWide)
+        .addClass(ProjectPanelClasses.Button)
+        .addClass(ProjectPanelClasses.ButtonThreeWide)
         .setText("OPTIONS")
         .addEventListener("click", () => this.openOptionsPanel())
+        .appendTo(this.buttonContainer);
+
+    public readonly footerText = new Component("p")
+        .addClass(ProjectPanelClasses.FooterText)
+        .setText("Here's some text for the footer!")
         .appendTo(this.footer);
 
 
@@ -193,7 +192,7 @@ export default class ProjectPanel extends Panel {
     }
 
     public openOptionsPanel () {
-        const options = new OptionsMenu()
+        const options = new OptionsMenu(this.world)
         options.appendTo(this);
         options.element.showModal();
     }
@@ -240,9 +239,13 @@ class PopupPanel extends Dialog {
         .addEventListener("click", () => this.resetWorld())
         .appendTo(this);
 
-    public constructor (public readonly world: World) {
-        super();
+    public constructor (world: World) {
+        super(world);
         this.addClass(ProjectPanelClasses.Popup);
+        this.world.popup = true;
+        this.element.addEventListener("cancel", (event) => {
+            event.preventDefault();
+        });
     }
 
     public resetWorld () {
@@ -250,6 +253,8 @@ class PopupPanel extends Dialog {
         this.world.projectPanel?.refreshPanel();
         this.remove();
     }
+
+
 }
 
 class OptionsMenu extends Dialog {
@@ -274,10 +279,14 @@ class OptionsMenu extends Dialog {
         .addEventListener("click", () => this.remove())
         .appendTo(this.buttonContainer);
 
-    public constructor () {
-        super();
+    public constructor (world: World) {
+        super(world);
         this.addClass(ProjectPanelClasses.OptionsMenu);
         this.appendOptions();
+        this.world.popup = true;
+        this.element.addEventListener("cancel", (event) => {
+            event.preventDefault();
+        });
     }
 
     public resetToDefault () {

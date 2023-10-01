@@ -73,6 +73,7 @@ export default class World {
     public SENSITIVITY = 500;
     public savedCursorPosition?: Vector3;
     public isLoading: Boolean = false;
+    public popup: Boolean = false;
     public raycastStarDistance: number = 0;
     public raycastStarpathDistance: number = 0;
     public cursorDistance: number = 0;
@@ -252,7 +253,7 @@ export default class World {
             return true;
         });
 
-        InputManager.addListener("down", () => Store.closePanel, input => {
+        InputManager.addListener("down", () => Store.closePanelMouse, input => {
             if (!(input.getHoveredElement()?.closest(".panel")) && (this.projectPanel || this.starPanel || this.starpathPanel)) {
                 if (this.projectPanel) {
                     this.projectPanel.remove();
@@ -262,6 +263,27 @@ export default class World {
                     return true;
                 } else if (this.starpathPanel) {
                     this.starpathPanel.remove();
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+            return false;
+        });
+
+        InputManager.addListener("down", () => Store.closePanel, input => {
+            if ((this.projectPanel || this.starPanel || this.starpathPanel) && this.popup == false) {
+                if (this.projectPanel) {
+                    this.projectPanel.remove();
+                    // this.cameraControls.lockMouse();
+                    return true;
+                } else if (this.starPanel) {
+                    this.starPanel.remove();
+                    // this.cameraControls.lockMouse();
+                    return true;
+                } else if (this.starpathPanel) {
+                    this.starpathPanel.remove();
+                    // this.cameraControls.lockMouse();
                     return true;
                 } else {
                     return false;
@@ -366,10 +388,11 @@ export default class World {
                 if (!document.pointerLockElement && !this.projectPanel && !this.starPanel && !this.starpathPanel) {
                     this.showProjectPanel();
                 }
-            }, 100);
+            }, 300);
         });
         document.addEventListener("wheel", event => {
-            event.preventDefault();
+            if (event.ctrlKey)
+                event.preventDefault();
         }, { passive: false });
 
         let light = new AmbientLight(0xFFFFFF);

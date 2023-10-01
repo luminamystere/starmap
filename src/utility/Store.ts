@@ -14,12 +14,13 @@ export interface StoreData {
     inputSpeedDown: InputData;
     cursorCloser: InputData;
     cursorFurther: InputData;
-    closePanel: InputData;
+    closePanelMouse: InputData;
     moveStar: InputData;
     createStarpath: InputData;
     openStarPanel: InputData;
     openStarpathPanel: InputData;
     createStar: InputData;
+    closePanel: InputData;
     // starpathModifier: InputData;
 
 }
@@ -38,12 +39,13 @@ const defaults: StoreData = {
     inputSpeedDown: InputData.create("Scroll Down"),
     cursorCloser: InputData.create("Scroll Up"),
     cursorFurther: InputData.create("Scroll Down"),
-    closePanel: InputData.create("Left Click"),
+    closePanelMouse: InputData.create("Left Click"),
     moveStar: InputData.create("Left Click"),
     createStarpath: InputData.create("Ctrl + Right Click"),
     openStarPanel: InputData.create("Right Click"),
     openStarpathPanel: InputData.create("Right Click"),
-    createStar: InputData.create("Right Click")
+    createStar: InputData.create("Right Click"),
+    closePanel: InputData.create("Escape"),
     // starpathModifier: InputData.create("Right Click", true),
 }
 

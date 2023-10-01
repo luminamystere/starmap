@@ -76,7 +76,7 @@ export default class InputInput extends Component<"button"> {
     }
 
     private handleInputUp (event: KeyboardEvent | MouseEvent | WheelEvent) {
-        this.currentInput = InputData.fromEvent(event);
+        this.setInput(InputData.fromEvent(event));
         event.preventDefault();
         this.stopListening();
         this.emitEvent("change");
