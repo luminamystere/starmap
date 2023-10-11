@@ -253,8 +253,8 @@ export default class World {
             return true;
         });
 
-        InputManager.addListener("down", () => Store.closePanelMouse, input => {
-            if (!(input.getHoveredElement()?.closest(".panel")) && (this.projectPanel || this.starPanel || this.starpathPanel)) {
+        document.addEventListener("mousedown", () => {
+            if (!(InputManager.getHoveredElement()?.closest(".panel")) && (this.projectPanel || this.starPanel || this.starpathPanel)) {
                 if (this.projectPanel) {
                     this.projectPanel.remove();
                     return true;
