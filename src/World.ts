@@ -271,7 +271,7 @@ export default class World {
             return false;
         });
 
-        InputManager.addListener("down", () => Store.closePanel, input => {
+        InputManager.addListener("up", () => Store.closePanel, input => {
             if ((this.projectPanel || this.starPanel || this.starpathPanel) && this.popup == false) {
                 if (this.projectPanel) {
                     this.projectPanel.remove();
