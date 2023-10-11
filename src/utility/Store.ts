@@ -4,23 +4,22 @@ export interface StoreData {
     invertX?: boolean;
     invertY?: boolean;
     sensitivity: number;
-    forwardKey: InputData;
-    backKey: InputData;
-    leftKey: InputData;
-    rightKey: InputData;
-    upKey: InputData;
-    downKey: InputData;
-    inputSpeedUp: InputData;
-    inputSpeedDown: InputData;
-    cursorCloser: InputData;
-    cursorFurther: InputData;
-    closePanelMouse: InputData;
-    moveStar: InputData;
-    createStarpath: InputData;
-    openStarPanel: InputData;
-    openStarpathPanel: InputData;
-    createStar: InputData;
-    closePanel: InputData;
+    keyForward: InputData;
+    keyBack: InputData;
+    keyLeft: InputData;
+    keyRight: InputData;
+    keyUp: InputData;
+    keyDown: InputData;
+    keyInputSpeedUp: InputData;
+    keyInputSpeedDown: InputData;
+    keyCursorCloser: InputData;
+    keyCursorFurther: InputData;
+    keyMoveStar: InputData;
+    keyCreateStarpath: InputData;
+    keyOpenStarPanel: InputData;
+    keyOpenStarpathPanel: InputData;
+    keyCreateStar: InputData;
+    keyClosePanel: InputData;
     // starpathModifier: InputData;
 
 }
@@ -29,24 +28,42 @@ const defaults: StoreData = {
     invertX: false,
     invertY: false,
     sensitivity: 0.5,
-    forwardKey: InputData.create("KeyW"),
-    backKey: InputData.create("KeyS"),
-    leftKey: InputData.create("KeyA"),
-    rightKey: InputData.create("KeyD"),
-    upKey: InputData.create("Space"),
-    downKey: InputData.create("ShiftLeft"),
-    inputSpeedUp: InputData.create("Scroll Up"),
-    inputSpeedDown: InputData.create("Scroll Down"),
-    cursorCloser: InputData.create("Scroll Up"),
-    cursorFurther: InputData.create("Scroll Down"),
-    closePanelMouse: InputData.create("Left Click"),
-    moveStar: InputData.create("Left Click"),
-    createStarpath: InputData.create("Ctrl + Right Click"),
-    openStarPanel: InputData.create("Right Click"),
-    openStarpathPanel: InputData.create("Right Click"),
-    createStar: InputData.create("Right Click"),
-    closePanel: InputData.create("Escape"),
+    keyForward: InputData.create("KeyW"),
+    keyBack: InputData.create("KeyS"),
+    keyLeft: InputData.create("KeyA"),
+    keyRight: InputData.create("KeyD"),
+    keyUp: InputData.create("Space"),
+    keyDown: InputData.create("ShiftLeft"),
+    keyInputSpeedUp: InputData.create("Scroll Up"),
+    keyInputSpeedDown: InputData.create("Scroll Down"),
+    keyCursorCloser: InputData.create("Scroll Up"),
+    keyCursorFurther: InputData.create("Scroll Down"),
+    keyMoveStar: InputData.create("Left Click"),
+    keyCreateStarpath: InputData.create("Ctrl + Right Click"),
+    keyOpenStarPanel: InputData.create("Right Click"),
+    keyOpenStarpathPanel: InputData.create("Right Click"),
+    keyCreateStar: InputData.create("Right Click"),
+    keyClosePanel: InputData.create("Escape"),
     // starpathModifier: InputData.create("Right Click", true),
+}
+
+export const rebindableKeyDefinitions: { [KEY in keyof StoreData as KEY extends `key${string}` ? KEY : never]: string } = {
+    keyForward: "Forward",
+    keyBack: "Back",
+    keyLeft: "Left",
+    keyRight: "Right",
+    keyUp: "Up",
+    keyDown: "Down",
+    keyInputSpeedUp: "Increase Movement Speed",
+    keyInputSpeedDown: "Decrease Movement Speed",
+    keyMoveStar: "Hold & Move Star",
+    keyCursorCloser: "Held Object Closer",
+    keyCursorFurther: "Held Object Further",
+    keyCreateStar: "Create Star",
+    keyCreateStarpath: "Create Starpath",
+    keyOpenStarPanel: "Open Star Panel",
+    keyOpenStarpathPanel: "Open Starpath Panel",
+    keyClosePanel: "Close Panel",
 }
 
 const Store = new Proxy({} as Partial<StoreData>, {

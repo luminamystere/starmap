@@ -215,7 +215,7 @@ export default class World {
         this._OnWindowResize();
 
 
-        InputManager.addListener("down", () => Store.cursorCloser, () => {
+        InputManager.addListener("down", () => Store.keyCursorCloser, () => {
             if (this.moving.length == 0) {
                 return false;
             } else {
@@ -225,7 +225,7 @@ export default class World {
             }
         });
 
-        InputManager.addListener("down", () => Store.cursorFurther, () => {
+        InputManager.addListener("down", () => Store.keyCursorFurther, () => {
             if (this.moving.length == 0) {
                 return false;
             } else {
@@ -235,7 +235,7 @@ export default class World {
             }
         });
 
-        InputManager.addListener("down", () => Store.inputSpeedUp, () => {
+        InputManager.addListener("down", () => Store.keyInputSpeedUp, () => {
             this.SPEED_MULTIPLIER += 1;
             this.SPEED_MULTIPLIER = Math2.clamp(1, 10, this.SPEED_MULTIPLIER);
             this.movementControls?.changeSpeed(this.SPEED_MULTIPLIER);
@@ -245,7 +245,7 @@ export default class World {
 
 
 
-        InputManager.addListener("down", () => Store.inputSpeedDown, () => {
+        InputManager.addListener("down", () => Store.keyInputSpeedDown, () => {
             this.SPEED_MULTIPLIER -= 1;
             this.SPEED_MULTIPLIER = Math2.clamp(1, 10, this.SPEED_MULTIPLIER);
             this.movementControls?.changeSpeed(this.SPEED_MULTIPLIER);
@@ -271,7 +271,7 @@ export default class World {
             return false;
         });
 
-        InputManager.addListener("up", () => Store.closePanel, input => {
+        InputManager.addListener("up", () => Store.keyClosePanel, input => {
             if ((this.projectPanel || this.starPanel || this.starpathPanel) && this.popup == false) {
                 if (this.projectPanel) {
                     this.projectPanel.remove();
@@ -292,7 +292,7 @@ export default class World {
             return false;
         });
 
-        InputManager.addListener("down", () => Store.moveStar, () => {
+        InputManager.addListener("down", () => Store.keyMoveStar, () => {
             if (this.starPanel || this.starpathPanel || this.projectPanel) {
                 return false;
             }
@@ -300,7 +300,7 @@ export default class World {
             return true;
         });
 
-        InputManager.addListener("up", () => Store.moveStar, () => {
+        InputManager.addListener("up", () => Store.keyMoveStar, () => {
             if (this.moving.length > 0) {
                 this.saveLocalStorage();
             }
@@ -310,7 +310,7 @@ export default class World {
             return true;
         });
 
-        InputManager.addListener("down", () => Store.createStarpath, () => {
+        InputManager.addListener("down", () => Store.keyCreateStarpath, () => {
             if (this.starPanel || this.starpathPanel || this.projectPanel) {
                 return false;
             }
@@ -331,7 +331,7 @@ export default class World {
             }
         });
 
-        InputManager.addListener("up", () => Store.createStarpath, () => {
+        InputManager.addListener("up", () => Store.keyCreateStarpath, () => {
             this.createLine();
             delete this.linePoints;
             if (this.lineObject) {
@@ -342,7 +342,7 @@ export default class World {
             return true;
         });
 
-        InputManager.addListener("down", () => Store.openStarPanel, () => {
+        InputManager.addListener("down", () => Store.keyOpenStarPanel, () => {
             if (this.starPanel || this.starpathPanel || this.projectPanel) {
                 return false;
             }
@@ -355,7 +355,7 @@ export default class World {
             return false;
         });
 
-        InputManager.addListener("down", () => Store.openStarpathPanel, () => {
+        InputManager.addListener("down", () => Store.keyOpenStarpathPanel, () => {
             if (this.starPanel || this.starpathPanel || this.projectPanel) {
                 return false;
             }
@@ -369,7 +369,7 @@ export default class World {
             return false;
         });
 
-        InputManager.addListener("down", () => Store.createStar, () => {
+        InputManager.addListener("down", () => Store.keyCreateStar, () => {
             if (this.starPanel || this.starpathPanel || this.projectPanel) {
                 return false;
             }

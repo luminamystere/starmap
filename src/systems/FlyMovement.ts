@@ -39,22 +39,22 @@ export default class FlyMovement {
             return;
         }
 
-        if (InputManager.isDown(Store.forwardKey)) {
+        if (InputManager.isDown(Store.keyForward)) {
             forwardBackInput++;
         }
-        if (InputManager.isDown(Store.backKey)) {
+        if (InputManager.isDown(Store.keyBack)) {
             forwardBackInput--;
         }
-        if (InputManager.isDown(Store.leftKey)) {
+        if (InputManager.isDown(Store.keyLeft)) {
             leftRightInput--;
         }
-        if (InputManager.isDown(Store.rightKey)) {
+        if (InputManager.isDown(Store.keyRight)) {
             leftRightInput++;
         }
-        if (InputManager.isDown(Store.upKey)) {
+        if (InputManager.isDown(Store.keyUp)) {
             upDownInput++;
         }
-        if (InputManager.isDown(Store.downKey)) {
+        if (InputManager.isDown(Store.keyDown)) {
             upDownInput--;
         }
         this.playerVelocity.add(this.getForwardVector().multiplyScalar((this.SPEED_HORIZONTAL * this.SPEED_MULTIPLIER) * delta).multiplyScalar(forwardBackInput));
