@@ -22,6 +22,7 @@ import Component from "./ui/Component.js";
 import StarPathPanel from "./ui/StarPathPanel.js";
 import Store from "./utility/Store.js";
 import InputManager from "./systems/InputManager.js";
+import { PanelClasses } from "./ui/Panel.js";
 
 interface SavedData {
     starPaths: {
@@ -254,21 +255,15 @@ export default class World {
         });
 
         document.addEventListener("mousedown", () => {
-            if (!(InputManager.getHoveredElement()?.closest(".panel")) && (this.projectPanel || this.starPanel || this.starpathPanel)) {
+            if (!(InputManager.getHoveredElement()?.closest(`.${PanelClasses.Main}`)) && (this.projectPanel || this.starPanel || this.starpathPanel)) {
                 if (this.projectPanel) {
                     this.projectPanel.remove();
-                    return true;
                 } else if (this.starPanel) {
                     this.starPanel.remove();
-                    return true;
                 } else if (this.starpathPanel) {
                     this.starpathPanel.remove();
-                    return true;
-                } else {
-                    return false;
                 }
             }
-            return false;
         });
 
         InputManager.addListener("up", () => Store.keyClosePanel, input => {
