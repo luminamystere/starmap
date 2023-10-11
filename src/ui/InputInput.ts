@@ -2,7 +2,10 @@ import { InputData } from "../systems/InputManager.js";
 import { StoreData } from "../utility/Store.js";
 import Component from "./Component.js";
 
-
+export enum InputInputClasses {
+    Main = "input-input",
+    Listening = "input-input-listening",
+}
 
 export default class InputInput extends Component<"button"> {
 
@@ -10,6 +13,7 @@ export default class InputInput extends Component<"button"> {
 
     public constructor () {
         super("button");
+        this.addClass(InputInputClasses.Main);
         this.addEventListener("click", () => this.startListening());
         this.handleInputDown = this.handleInputDown.bind(this);
         this.handleInputUp = this.handleInputUp.bind(this);
@@ -48,6 +52,7 @@ export default class InputInput extends Component<"button"> {
     }
 
     private startListening () {
+        this.addClass(InputInputClasses.Listening);
         document.addEventListener("keydown", this.handleInputDown);
         document.addEventListener("keyup", this.handleInputUp);
         document.addEventListener("mousedown", this.handleInputDown);
@@ -60,6 +65,7 @@ export default class InputInput extends Component<"button"> {
     }
 
     private stopListening () {
+        this.removeClass(InputInputClasses.Listening);
         document.removeEventListener("keydown", this.handleInputDown);
         document.removeEventListener("keyup", this.handleInputUp);
         document.removeEventListener("mousedown", this.handleInputDown);
