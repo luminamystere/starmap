@@ -237,6 +237,9 @@ export default class World {
         });
 
         InputManager.addListener("down", () => Store.keyInputSpeedUp, () => {
+            if (this.projectPanel || this.starPanel || this.starpathPanel) {
+                return false;
+            }
             this.SPEED_MULTIPLIER += 1;
             this.SPEED_MULTIPLIER = Math2.clamp(1, 10, this.SPEED_MULTIPLIER);
             this.movementControls?.changeSpeed(this.SPEED_MULTIPLIER);
@@ -247,6 +250,9 @@ export default class World {
 
 
         InputManager.addListener("down", () => Store.keyInputSpeedDown, () => {
+            if (this.projectPanel || this.starPanel || this.starpathPanel) {
+                return false;
+            }
             this.SPEED_MULTIPLIER -= 1;
             this.SPEED_MULTIPLIER = Math2.clamp(1, 10, this.SPEED_MULTIPLIER);
             this.movementControls?.changeSpeed(this.SPEED_MULTIPLIER);

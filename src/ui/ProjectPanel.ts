@@ -45,12 +45,15 @@ export enum ProjectPanelClasses {
     ControlsText = "projectpanel-controls-text",
     OptionsInput = "projectpanel-options-input",
     OptionsMenu = "projectpanel-options",
+    OptionsContent = "projectpanel-options-content",
     OptionsContainer = "projectpanel-options-container",
     OptionsLabel = "projectpanel-options-label",
     OptionsHeading = "projectpanel-options-heading",
     OptionsCheck = "projectpanel-options-check",
     OptionsButtonsContainer = "projectpanel-options-buttoncontainer",
+    OptionsKeybindsContainer = "projectpanel-options-keybindscontainer",
     OptionsButtons = "projectpanel-options-button",
+    OptionsDefaultButton = "projectpanel-options-defaultbutton",
     OptionsRange = "projectpanel-options-range",
     FooterText = "projectpanel-footer-text"
 }
@@ -192,7 +195,7 @@ export default class ProjectPanel extends Panel {
     }
 
     public openOptionsPanel () {
-        const options = new OptionsMenu(this.world)
+        const options = new OptionsDialog(this.world)
         options.appendTo(this);
         options.element.showModal();
     }
@@ -257,10 +260,10 @@ class PopupPanel extends Dialog {
 
 }
 
-class OptionsMenu extends Dialog {
+class OptionsDialog extends Dialog {
 
     public readonly optionsContainer = new Component("div")
-        .addClass(PanelClasses.Wide)
+        .addClass(ProjectPanelClasses.OptionsContent)
         .appendTo(this);
 
     public readonly buttonContainer = new Component("div")
@@ -354,6 +357,10 @@ class Options extends Component<"div"> {
         .setText("Keybindings")
         .appendTo(this);
 
+    public readonly optionsDiv = new Component("div")
+        .addClass(ProjectPanelClasses.OptionsKeybindsContainer)
+        .appendTo(this);
+
     public constructor () {
         super("div");
         this.addClass(ProjectPanelClasses.OptionsContainer);
@@ -366,14 +373,23 @@ class Options extends Component<"div"> {
                 .addClass(ProjectPanelClasses.OptionsLabel)
                 .addText(translation)
                 .addText(":")
-                .appendTo(this);
+                .appendTo(this.optionsDiv);
 
-            new InputInput()
+            const input = new InputInput()
                 .setId(keybindId)
                 .addClass(ProjectPanelClasses.OptionsInput)
                 .setInput(Store[keybindId])
                 .addChangeListener(input => Store[keybindId] = input.currentInput)
-                .appendTo(this);
+                .appendTo(this.optionsDiv);
+
+            new Button()
+                .addClass(ProjectPanelClasses.OptionsDefaultButton)
+                .addText("↺")
+                .addEventListener("click", () => {
+                    delete Store[keybindId];
+                    input.setInput(Store[keybindId]);
+                })
+                .appendTo(this.optionsDiv);
         }
     }
 }

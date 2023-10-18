@@ -9,6 +9,7 @@ export enum PanelClasses {
     Wrapper = "panel-wrapper",
     Content = "panel-content",
     Wide = "panel-content-wide",
+    ThreeWide = "panel-content-threewide",
     Footer = "panel-footer",
     FooterWide = "panel-footer-wide",
 }
