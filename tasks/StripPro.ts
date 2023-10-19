@@ -22,6 +22,7 @@ if (process.env.STARMAP_STRIPPINGPRO) {
             console.log("stripping pro from ", file.path/*, updatedText*/);
             file.contents = Buffer.from(updatedText);
         })
+        .pipe(vfs.dest("./src/"))
         .on("end", () => console.log("finished!"));
 
 } else {
