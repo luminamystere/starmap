@@ -73,6 +73,8 @@ export default class ProjectPanel extends Panel {
         .addChangeListener(input => this.world.projectName = input.element.value)
         .appendTo(this.content);
 
+    //#pro
+
     public readonly newFaction = new Button()
         .addClass(PanelClasses.Wide)
         .setText("Add Faction")
@@ -82,6 +84,8 @@ export default class ProjectPanel extends Panel {
     public readonly factionBox = new Component("div")
         .addClass(ProjectPanelClasses.FactionBox)
         .appendTo(this.content);
+
+    //#endpro
 
     public readonly starpathColourLabel = new Label("starpathColour")
         .addClass(ProjectPanelClasses.Label)
