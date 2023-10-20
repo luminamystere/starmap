@@ -9,14 +9,14 @@ export default class Faction {
     public set name (input: string) {
         this._name = input;
     }
-    public _description: string;
+    private _description: string;
     public get description () {
         return this._description
     }
     public set description (input: string) {
         this._description = input;
     }
-    public _colour: Color;
+    private _colour: Color;
     public get colour () {
         return `#${this._colour.getHexString()}`;
     }

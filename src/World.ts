@@ -575,7 +575,9 @@ export default class World {
     public updateProjectName (name: string) {
         const speedText = " - " + this.SPEED_MULTIPLIER.toString() + "x";
         const elementText = name + speedText;
+        const pageTitle = name + " - Starmap";
         this.projectNameElement.setText(elementText);
+        document.title = pageTitle;
     }
 
     public spawnOrb () {
@@ -620,39 +622,6 @@ export default class World {
             }
         }
     }
-
-    // public showDetails (event: MouseEvent) {
-    //     this.interacted = true;
-
-    //     const star = this.raycastForStar();
-    //     if (star && event.ctrlKey) {
-    //         this.cursorDistance = this.raycastStarDistance;
-    //         this.starpathStart = star;
-    //         const cursorPos = this.getCursorPosition(this.cursorDistance);
-    //         this.linePoints = [new Vector3(star.position.x, star.position.y, star.position.z),
-    //         new Vector3(cursorPos.x, cursorPos.y, cursorPos.z)];
-
-    //         this.lineGeometry = new BufferGeometry().setFromPoints(this.linePoints);
-    //         this.lineObject = new Line(this.lineGeometry, new LineBasicMaterial({ color: 0xFFFFFF, linewidth: 1 }));
-    //         this._scene.add(this.lineObject);
-    //         return;
-    //     }
-
-    //     if (star) {
-    //         this.showStarPanel(star);
-    //         return;
-    //     }
-
-    //     const starpath = this.raycastForStarpath();
-    //     if (starpath) {
-    //         this.showStarpathPanel(starpath);
-    //         this.saveLocalStorage();
-    //         return;
-    //     }
-
-    //     this.spawnOrb();
-
-    // }
 
     public showProjectPanel () {
         if (this.projectPanel) {
