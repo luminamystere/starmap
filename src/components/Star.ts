@@ -93,7 +93,8 @@ export default class Star {
     public createFactionMaterial () {
         this.factionMaterial = new MeshBasicMaterial({ color: 0xFFFFFF });
         this.factionMaterial.transparent = true;
-        this.factionMaterial.opacity = 0.6;
+        this.factionMaterial.opacity = 0;
+        this.factionMaterial.visible = false;
         return this.factionMaterial;
     }
 
@@ -160,32 +161,32 @@ export default class Star {
     }
 
     public hoverStar () {
-        this.factionMaterial.opacity = 0.4;
-        this.factionMaterial.visible = true;
-        if (this.factionMesh.material instanceof Array) {
-            this.factionMesh.material.forEach(material => material.dispose());
+        if (this.collider.material instanceof Array) {
+            this.collider.material.forEach(material => {
+                material.opacity = 0.4;
+                material.visible = true;
+            });
         } else {
-            this.factionMesh.material.dispose();
+            this.collider.material.opacity = 0.4;
+            this.collider.material.visible = true;
         }
-        this.factionMesh.material = this.factionMaterial;
-
     }
 
     public unHoverStar () {
-        this.factionMaterial.opacity = 0;
-        this.factionMaterial.visible = false;
-        if (this.factionMesh.material instanceof Array) {
-            this.factionMesh.material.forEach(material => material.dispose());
+        if (this.collider.material instanceof Array) {
+            this.collider.material.forEach(material => {
+                material.opacity = 0;
+                material.visible = false;
+            });
         } else {
-            this.factionMesh.material.dispose();
+            this.collider.material.opacity = 0;
+            this.collider.material.visible = false;;
         }
-        this.factionMesh.material = this.factionMaterial;
     }
 
     public updateFaction (input: string) {
         if (input == "None") {
             this.factionMaterial.color = new Color(0xFFFFFF);
-            // this.factionMaterial.emissive = new Color(0xFFFFFF);
             delete this.faction;
         } else {
             //look up faction by name
@@ -196,7 +197,6 @@ export default class Star {
             this.faction = faction;
             const colour = new Color(faction.colour);
             this.factionMaterial.color = colour;
-            // this.factionMaterial.emissive = colour;
         }
         if (this.factionMesh.material instanceof Array) {
             this.factionMesh.material.forEach(material => material.dispose());
@@ -211,7 +211,6 @@ export default class Star {
         if (this.world.starMesh.instanceColor) {
             this.world.starMesh.instanceColor.needsUpdate = true;
         }
-        // debounce(1000, this.world.saveLocalStorage);
     }
 
     public delete () {

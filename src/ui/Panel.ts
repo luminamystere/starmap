@@ -42,6 +42,8 @@ export default class Panel extends Component<"aside"> {
         .addClass(PanelClasses.Footer)
         .appendTo(this.contentWrapper);
 
+    public readonly openedAt = Date.now();
+
     public constructor () {
         super("aside");
         this.addClass(PanelClasses.Main);

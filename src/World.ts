@@ -262,12 +262,13 @@ export default class World {
 
         document.addEventListener("mousedown", () => {
             if (!(InputManager.getHoveredElement()?.closest(`.${PanelClasses.Main}`)) && (this.projectPanel || this.starPanel || this.starpathPanel)) {
-                if (this.projectPanel) {
-                    this.projectPanel.remove();
-                } else if (this.starPanel) {
-                    this.starPanel.remove();
-                } else if (this.starpathPanel) {
-                    this.starpathPanel.remove();
+                const hundredMsAgo = Date.now() - 100;
+                if ((this.projectPanel?.openedAt ?? 0) < hundredMsAgo) {
+                    this.projectPanel?.remove();
+                } else if ((this.starPanel?.openedAt ?? 0) < hundredMsAgo) {
+                    this.starPanel?.remove();
+                } else if ((this.starpathPanel?.openedAt ?? 0) < hundredMsAgo) {
+                    this.starpathPanel?.remove();
                 }
             }
         });
@@ -276,15 +277,12 @@ export default class World {
             if ((this.projectPanel || this.starPanel || this.starpathPanel) && this.popup == false) {
                 if (this.projectPanel) {
                     this.projectPanel.remove();
-                    // this.cameraControls.lockMouse();
                     return true;
                 } else if (this.starPanel) {
                     this.starPanel.remove();
-                    // this.cameraControls.lockMouse();
                     return true;
                 } else if (this.starpathPanel) {
                     this.starpathPanel.remove();
-                    // this.cameraControls.lockMouse();
                     return true;
                 } else {
                     return false;
@@ -313,6 +311,7 @@ export default class World {
 
         InputManager.addListener("down", () => Store.keyCreateStarpath, () => {
             if (this.starPanel || this.starpathPanel || this.projectPanel) {
+                console.log("panel is open (starpath)");
                 return false;
             }
             const star = this.raycastForStar();
@@ -345,6 +344,7 @@ export default class World {
 
         InputManager.addListener("down", () => Store.keyOpenStarPanel, () => {
             if (this.starPanel || this.starpathPanel || this.projectPanel) {
+                console.log("panel is open (star)");
                 return false;
             }
             const star = this.raycastForStar();
@@ -358,6 +358,7 @@ export default class World {
 
         InputManager.addListener("down", () => Store.keyOpenStarpathPanel, () => {
             if (this.starPanel || this.starpathPanel || this.projectPanel) {
+                console.log("panel is open (starpathpanel)");
                 return false;
             }
             const starpath = this.raycastForStarpath();
