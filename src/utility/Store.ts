@@ -39,7 +39,7 @@ const defaults: StoreData = {
     keyCursorCloser: InputData.create("Scroll Up"),
     keyCursorFurther: InputData.create("Scroll Down"),
     keyMoveStar: InputData.create("Left Click"),
-    keyCreateStarpath: InputData.create("Ctrl + Right Click"),
+    keyCreateStarpath: InputData.create("Right Click", true),
     keyOpenStarPanel: InputData.create("Right Click"),
     keyOpenStarpathPanel: InputData.create("Right Click"),
     keyCreateStar: InputData.create("Right Click"),

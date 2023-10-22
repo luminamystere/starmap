@@ -311,7 +311,6 @@ export default class World {
 
         InputManager.addListener("down", () => Store.keyCreateStarpath, () => {
             if (this.starPanel || this.starpathPanel || this.projectPanel) {
-                console.log("panel is open (starpath)");
                 return false;
             }
             const star = this.raycastForStar();
@@ -344,7 +343,6 @@ export default class World {
 
         InputManager.addListener("down", () => Store.keyOpenStarPanel, () => {
             if (this.starPanel || this.starpathPanel || this.projectPanel) {
-                console.log("panel is open (star)");
                 return false;
             }
             const star = this.raycastForStar();
@@ -358,7 +356,6 @@ export default class World {
 
         InputManager.addListener("down", () => Store.keyOpenStarpathPanel, () => {
             if (this.starPanel || this.starpathPanel || this.projectPanel) {
-                console.log("panel is open (starpathpanel)");
                 return false;
             }
             const starpath = this.raycastForStarpath();
@@ -511,7 +508,6 @@ export default class World {
         this.resetWorld();
         const saved: SavedData = JSON.parse(input);
         this.isLoading = true;
-        // console.log(saved);
         this.factions = saved.factions.map(saved => new Faction(saved.name, saved.description, new Color(saved.colour))) as Faction[];
         for (const savedStar of saved.stars) {
             const star = new Star(savedStar.name,
