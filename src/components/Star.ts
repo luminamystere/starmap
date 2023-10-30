@@ -22,8 +22,8 @@ export default class Star {
     public starHolder: Object3D;
     public starMaterial?: MeshStandardMaterial;
     public collider: Collider;
-    //#pro
     public faction?: Faction;
+    //#pro
     public factionMesh: Mesh;
     public factionMaterial: MeshBasicMaterial;
     //#endpro
