@@ -19,5 +19,5 @@ export function debounce<ARGS extends any[]> (time: number, fn: (...args: ARGS) 
         return;
     }
 
-    debounced.queued = setTimeout(debounce, (time - elapsed), time, fn, ...args);
+    debounced.queued = window.setTimeout(debounce, (time - elapsed), time, fn, ...args);
 }

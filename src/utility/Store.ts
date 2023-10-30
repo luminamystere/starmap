@@ -20,7 +20,6 @@ export interface StoreData {
     keyOpenStarpathPanel: InputData;
     keyCreateStar: InputData;
     keyClosePanel: InputData;
-    // starpathModifier: InputData;
 
 }
 
@@ -39,12 +38,11 @@ const defaults: StoreData = {
     keyCursorCloser: InputData.create("Scroll Up"),
     keyCursorFurther: InputData.create("Scroll Down"),
     keyMoveStar: InputData.create("Left Click"),
-    keyCreateStarpath: InputData.create("Ctrl + Right Click"),
+    keyCreateStarpath: InputData.create("Right Click", true),
     keyOpenStarPanel: InputData.create("Right Click"),
     keyOpenStarpathPanel: InputData.create("Right Click"),
     keyCreateStar: InputData.create("Right Click"),
     keyClosePanel: InputData.create("Escape"),
-    // starpathModifier: InputData.create("Right Click", true),
 }
 
 export const rebindableKeyDefinitions: { [KEY in keyof StoreData as KEY extends `key${string}` ? KEY : never]: string } = {

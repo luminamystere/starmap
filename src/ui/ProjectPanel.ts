@@ -25,10 +25,15 @@ export enum ProjectPanelClasses {
     Label = "projectpanel-label",
     Select = "projectpanel-select",
     Description = "projectpanel-description",
+    FactionDialog = "projectpanel-faction-dialog",
+    FactionContainer = "projectpanel-faction-container",
     FactionBox = "projectpanel-faction-box",
     Faction = "projectpanel-faction",
     FactionLabel = "projectpanel-faction-label",
-    FactionButton = "projectpanel-faction-button",
+    FactionsButton = "projectpanel-faction-button",
+    FactionButton = "projectpanel-faction-dialog-button",
+    FactionDetails = "projectpanel-faction-details",
+    FactionSummary = "projectpanel-faction-summary",
     FactionName = "projectpanel-faction-name",
     FactionDesc = "projectpanel-faction-description",
     FactionColour = "projectpanel-faction-colour",
@@ -45,12 +50,15 @@ export enum ProjectPanelClasses {
     ControlsText = "projectpanel-controls-text",
     OptionsInput = "projectpanel-options-input",
     OptionsMenu = "projectpanel-options",
+    OptionsContent = "projectpanel-options-content",
     OptionsContainer = "projectpanel-options-container",
     OptionsLabel = "projectpanel-options-label",
     OptionsHeading = "projectpanel-options-heading",
     OptionsCheck = "projectpanel-options-check",
     OptionsButtonsContainer = "projectpanel-options-buttoncontainer",
+    OptionsKeybindsContainer = "projectpanel-options-keybindscontainer",
     OptionsButtons = "projectpanel-options-button",
+    OptionsDefaultButton = "projectpanel-options-defaultbutton",
     OptionsRange = "projectpanel-options-range",
     FooterText = "projectpanel-footer-text"
 }
@@ -70,15 +78,15 @@ export default class ProjectPanel extends Panel {
         .addChangeListener(input => this.world.projectName = input.element.value)
         .appendTo(this.content);
 
-    public readonly newFaction = new Button()
-        .addClass(PanelClasses.Wide)
-        .setText("Add Faction")
-        .addEventListener("click", () => this.addFaction())
+    //#pro
+
+    public readonly factionsButton = new Button()
+        .addClass(ProjectPanelClasses.FactionsButton)
+        .setText("Factions")
+        .addEventListener("click", () => this.openFactions())
         .appendTo(this.content);
 
-    public readonly factionBox = new Component("div")
-        .addClass(ProjectPanelClasses.FactionBox)
-        .appendTo(this.content);
+    //#endpro
 
     public readonly starpathColourLabel = new Label("starpathColour")
         .addClass(ProjectPanelClasses.Label)
@@ -161,28 +169,21 @@ export default class ProjectPanel extends Panel {
         this.title.element.textContent = "Project";
         this.element.setAttribute("id", "projectPanel");
         this.addClass(ProjectPanelClasses.Main);
-        for (const faction of this.world.factions) {
-            this.displayFaction(faction);
-        }
         this.backgroundSelect.addEntry("None");
         for (const background of this.world.backgrounds) {
             this.backgroundSelect.addEntry(background.name);
         }
     }
 
-    public addFaction () {
-        const name = "faction no " + this.world.factions.length;
-        const colour = new Color(0xffffff);
-        colour.setHex(Math.random() * 0xffffff);
-        const faction = new Faction(name, "Add Text Here!", colour);
-        this.world.factions.push(faction);
-        this.displayFaction(faction);
-        this.world.saveLocalStorage();
+    //#pro
+
+    public openFactions () {
+        const factionPopup = new FactionDialog(this.world);
+        factionPopup.appendTo(this);
+        factionPopup.element.showModal();
     }
 
-    public displayFaction (faction: Faction) {
-        return new FactionEditor(faction, this.world).appendTo(this.factionBox);
-    }
+    //#endpro
 
     public newStarmap () {
         const popup = new PopupPanel(this.world);
@@ -192,18 +193,12 @@ export default class ProjectPanel extends Panel {
     }
 
     public openOptionsPanel () {
-        const options = new OptionsMenu(this.world)
+        const options = new OptionsDialog(this.world)
         options.appendTo(this);
         options.element.showModal();
     }
 
     public refreshPanel () {
-        while (this.factionBox.element.lastElementChild) {
-            this.factionBox.element.removeChild(this.factionBox.element.lastElementChild);
-        }
-        for (const faction of this.world.factions) {
-            this.displayFaction(faction);
-        }
         this.projName.setInputText(this.world.projectName);
         this.starpathColourSelect.setInputColour(this.world.starpathColour);
     }
@@ -257,10 +252,10 @@ class PopupPanel extends Dialog {
 
 }
 
-class OptionsMenu extends Dialog {
+class OptionsDialog extends Dialog {
 
     public readonly optionsContainer = new Component("div")
-        .addClass(PanelClasses.Wide)
+        .addClass(ProjectPanelClasses.OptionsContent)
         .appendTo(this);
 
     public readonly buttonContainer = new Component("div")
@@ -354,6 +349,10 @@ class Options extends Component<"div"> {
         .setText("Keybindings")
         .appendTo(this);
 
+    public readonly optionsDiv = new Component("div")
+        .addClass(ProjectPanelClasses.OptionsKeybindsContainer)
+        .appendTo(this);
+
     public constructor () {
         super("div");
         this.addClass(ProjectPanelClasses.OptionsContainer);
@@ -366,70 +365,143 @@ class Options extends Component<"div"> {
                 .addClass(ProjectPanelClasses.OptionsLabel)
                 .addText(translation)
                 .addText(":")
-                .appendTo(this);
+                .appendTo(this.optionsDiv);
 
-            new InputInput()
+            const input = new InputInput()
                 .setId(keybindId)
                 .addClass(ProjectPanelClasses.OptionsInput)
                 .setInput(Store[keybindId])
                 .addChangeListener(input => Store[keybindId] = input.currentInput)
-                .appendTo(this);
+                .appendTo(this.optionsDiv);
+
+            new Button()
+                .addClass(ProjectPanelClasses.OptionsDefaultButton)
+                .addText("↺")
+                .addEventListener("click", () => {
+                    delete Store[keybindId];
+                    input.setInput(Store[keybindId]);
+                })
+                .appendTo(this.optionsDiv);
         }
     }
 }
 
-class FactionEditor extends Component<"div"> {
+//#pro
+
+class FactionDialog extends Dialog {
+
+    public readonly factionsContainer = new Component("div")
+        .addClass(ProjectPanelClasses.FactionContainer)
+        .appendTo(this);
+
+
+    public readonly addFactionButton = new Button()
+        .addClass(ProjectPanelClasses.FactionButton)
+        .setText("Add Faction")
+        .addEventListener("click", () => this.addFaction())
+        .appendTo(this);
+
+    public readonly closeButton = new Button()
+        .addClass(ProjectPanelClasses.FactionButton)
+        .setText("Close")
+        .addEventListener("click", () => this.remove())
+        .appendTo(this);
+
+    public constructor (world: World) {
+        super(world);
+        this.addClass(ProjectPanelClasses.FactionDialog);
+        this.world.popup = true;
+        this.element.addEventListener("cancel", (event) => event.preventDefault());
+        for (const faction of this.world.factions) {
+            this.appendFaction(faction);
+        }
+    }
+
+    private addFaction () {
+        const name = "faction no " + this.world.factions.length;
+        const colour = new Color(0xffffff);
+        colour.setHex(Math.random() * 0xffffff);
+        const faction = new Faction(name, "Add text here!", colour);
+        this.world.factions.push(faction);
+        this.appendFaction(faction);
+    }
+
+    private appendFaction (faction: Faction) {
+        new FactionEditor(faction, this.world).appendTo(this.factionsContainer);
+    }
+
+    public refreshFactions () {
+
+    }
+}
+
+class FactionEditor extends Component<"details"> {
+
+    public readonly summary = new Component("summary")
+        .addClass(ProjectPanelClasses.FactionSummary)
+        .appendTo(this);
+
+    public readonly label = new Component("span")
+        .appendTo(this.summary);
+
+    public readonly factionDelete = new Button()
+        .addClass(ProjectPanelClasses.FactionDelete)
+        .setText("DELETE")
+        .addEventListener("click", () => this.deleteFaction())
+        .appendTo(this.summary);
+
+    public readonly contents = new Component("div")
+        .addClass(ProjectPanelClasses.Faction)
+        .appendTo(this);
 
     public readonly nameLabel = new Label("factionName")
         .addClass(ProjectPanelClasses.FactionLabel)
         .setText("Name:")
-        .appendTo(this);
+        .appendTo(this.contents);
 
     public readonly factionName = new TextInput()
         .addClass(ProjectPanelClasses.FactionName)
         .setInputText(this.faction.name)
         .setId("factionName")
         .setMaxLength(256)
-        .addChangeListener(input => this.faction.name = input.element.value)
-        .appendTo(this);
+        .addChangeListener(input => {
+            this.faction.name = input.element.value;
+            this.updateLabel(input.element.value);
+        })
+        .appendTo(this.contents);
 
     public readonly descLabel = new Label("factionDesc")
         .addClass(ProjectPanelClasses.FactionLabel)
         .setText("Description:")
-        .appendTo(this);
+        .appendTo(this.contents);
 
     public readonly factionDescription = new TextArea()
         .addClass(ProjectPanelClasses.FactionDesc)
         .setInputText(this.faction.description)
         .setId("factionDesc")
         .addChangeListener(input => this.faction.description = input.element.value)
-        .appendTo(this);
+        .appendTo(this.contents);
 
     public readonly colourLabel = new Label("factionColour")
         .addClass(ProjectPanelClasses.FactionLabel)
         .setText("Colour:")
-        .appendTo(this);
+        .appendTo(this.contents);
 
     public readonly factionColour = new ColourInput()
         .addClass(ProjectPanelClasses.FactionColour)
         .setInputColour(this.faction.colour)
         .setId("factionColour")
-        .addChangeListener(input => this.updateColour(input.element.value as `#${string}`))
-        // .addChangeListener(input => this.faction.colour = input.element.value as `#${string}`)
-        .appendTo(this);
+        .addChangeListener(input => this.onChangeColour(input.element.value as `#${string}`))
+        .appendTo(this.contents);
 
-    public readonly factionDelete = new Button()
-        .addClass(PanelClasses.Wide)
-        .setText("DELETE")
-        .addEventListener("click", () => this.deleteFaction())
-        .appendTo(this);
 
     public constructor (public readonly faction: Faction, public readonly world: World) {
-        super("div");
-        this.addClass(ProjectPanelClasses.Faction);
+        super("details");
+        this.addClass(ProjectPanelClasses.FactionDetails);
+        this.updateLabel(faction.name);
     }
 
-    public updateColour (colour: `#${string}`) {
+    private onChangeColour (colour: `#${string}`) {
         this.faction.colour = colour;
         for (const star of this.world.stars) {
             if (star.faction == this.faction) {
@@ -437,6 +509,10 @@ class FactionEditor extends Component<"div"> {
             }
         }
         this.world.saveLocalStorage();
+    }
+
+    public updateLabel (text: string) {
+        this.label.setText(text);
     }
 
     public deleteFaction () {
@@ -450,3 +526,5 @@ class FactionEditor extends Component<"div"> {
         this.remove();
     }
 }
+
+//#endpro

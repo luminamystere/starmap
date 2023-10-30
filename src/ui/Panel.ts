@@ -9,6 +9,7 @@ export enum PanelClasses {
     Wrapper = "panel-wrapper",
     Content = "panel-content",
     Wide = "panel-content-wide",
+    ThreeWide = "panel-content-threewide",
     Footer = "panel-footer",
     FooterWide = "panel-footer-wide",
 }
@@ -40,6 +41,8 @@ export default class Panel extends Component<"aside"> {
     public readonly footer = new Component("footer")
         .addClass(PanelClasses.Footer)
         .appendTo(this.contentWrapper);
+
+    public readonly openedAt = Date.now();
 
     public constructor () {
         super("aside");

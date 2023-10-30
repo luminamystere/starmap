@@ -43,6 +43,8 @@ export default class StarPanel extends Panel {
         .setId("starDescription")
         .appendTo(this.content);
 
+    //#pro
+
     public readonly factionLabel = new Label("starFaction")
         .addClass(StarPanelClasses.Label)
         .setText("Faction:")
@@ -53,6 +55,8 @@ export default class StarPanel extends Panel {
         .addChangeListener((event) => this.updateFaction(event.element.value))
         .setId("starFaction")
         .appendTo(this.content);
+
+    //#endpro
 
     public readonly colourLabel = new Label("starColour")
         .addClass(StarPanelClasses.Label)
@@ -78,6 +82,8 @@ export default class StarPanel extends Panel {
         this.element.setAttribute("id", "starPanel");
         this.addClass(StarPanelClasses.Main);
 
+        //#pro
+
         this.factionSelect.addEntry("None");
         for (const faction of star.world.factions) {
             if (faction == star.faction) {
@@ -86,6 +92,8 @@ export default class StarPanel extends Panel {
                 this.factionSelect.addEntry(faction.name);
             }
         }
+
+        //#endpro
     }
 
     public deleteStar () {
@@ -93,8 +101,12 @@ export default class StarPanel extends Panel {
         this.remove();
     }
 
+    //#pro
+
     public updateFaction (input: string) {
         this.star.updateFaction(input);
         this.star.world.saveLocalStorage();
     }
+
+    //#endpro
 }

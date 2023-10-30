@@ -1,5 +1,4 @@
 //@ts-check
-// import * as THREE from "three";
 import { createScene } from "./components/scene.js";
 import MouseControls, { SerialisedCameraAngle } from "./systems/MouseControls.js"
 import FlyMovement from "./systems/FlyMovement.js";
@@ -237,6 +236,9 @@ export default class World {
         });
 
         InputManager.addListener("down", () => Store.keyInputSpeedUp, () => {
+            if (this.projectPanel || this.starPanel || this.starpathPanel) {
+                return false;
+            }
             this.SPEED_MULTIPLIER += 1;
             this.SPEED_MULTIPLIER = Math2.clamp(1, 10, this.SPEED_MULTIPLIER);
             this.movementControls?.changeSpeed(this.SPEED_MULTIPLIER);
@@ -247,6 +249,9 @@ export default class World {
 
 
         InputManager.addListener("down", () => Store.keyInputSpeedDown, () => {
+            if (this.projectPanel || this.starPanel || this.starpathPanel) {
+                return false;
+            }
             this.SPEED_MULTIPLIER -= 1;
             this.SPEED_MULTIPLIER = Math2.clamp(1, 10, this.SPEED_MULTIPLIER);
             this.movementControls?.changeSpeed(this.SPEED_MULTIPLIER);
@@ -256,12 +261,13 @@ export default class World {
 
         document.addEventListener("mousedown", () => {
             if (!(InputManager.getHoveredElement()?.closest(`.${PanelClasses.Main}`)) && (this.projectPanel || this.starPanel || this.starpathPanel)) {
-                if (this.projectPanel) {
-                    this.projectPanel.remove();
-                } else if (this.starPanel) {
-                    this.starPanel.remove();
-                } else if (this.starpathPanel) {
-                    this.starpathPanel.remove();
+                const hundredMsAgo = Date.now() - 100;
+                if ((this.projectPanel?.openedAt ?? 0) < hundredMsAgo) {
+                    this.projectPanel?.remove();
+                } else if ((this.starPanel?.openedAt ?? 0) < hundredMsAgo) {
+                    this.starPanel?.remove();
+                } else if ((this.starpathPanel?.openedAt ?? 0) < hundredMsAgo) {
+                    this.starpathPanel?.remove();
                 }
             }
         });
@@ -270,15 +276,12 @@ export default class World {
             if ((this.projectPanel || this.starPanel || this.starpathPanel) && this.popup == false) {
                 if (this.projectPanel) {
                     this.projectPanel.remove();
-                    // this.cameraControls.lockMouse();
                     return true;
                 } else if (this.starPanel) {
                     this.starPanel.remove();
-                    // this.cameraControls.lockMouse();
                     return true;
                 } else if (this.starpathPanel) {
                     this.starpathPanel.remove();
-                    // this.cameraControls.lockMouse();
                     return true;
                 } else {
                     return false;
@@ -504,7 +507,6 @@ export default class World {
         this.resetWorld();
         const saved: SavedData = JSON.parse(input);
         this.isLoading = true;
-        // console.log(saved);
         this.factions = saved.factions.map(saved => new Faction(saved.name, saved.description, new Color(saved.colour))) as Faction[];
         for (const savedStar of saved.stars) {
             const star = new Star(savedStar.name,
@@ -514,10 +516,12 @@ export default class World {
                 this._scene, this);
             this.stars.push(star);
             this.colliders.push(star.collider);
-            const faction = this.factions[savedStar.faction];
-            if (faction) {
-                star.updateFaction(faction.name);
-            }
+            //#pro
+            // const faction = this.factions[savedStar.faction];
+            // if (faction) {
+            //     star.updateFaction(faction.name);
+            // }
+            //#endpro
         }
         for (const savedStarPath of saved.starPaths) {
             const star1 = this.stars[savedStarPath.star1];
@@ -569,7 +573,9 @@ export default class World {
     public updateProjectName (name: string) {
         const speedText = " - " + this.SPEED_MULTIPLIER.toString() + "x";
         const elementText = name + speedText;
+        const pageTitle = name + " - Starmap";
         this.projectNameElement.setText(elementText);
+        document.title = pageTitle;
     }
 
     public spawnOrb () {
@@ -614,39 +620,6 @@ export default class World {
             }
         }
     }
-
-    // public showDetails (event: MouseEvent) {
-    //     this.interacted = true;
-
-    //     const star = this.raycastForStar();
-    //     if (star && event.ctrlKey) {
-    //         this.cursorDistance = this.raycastStarDistance;
-    //         this.starpathStart = star;
-    //         const cursorPos = this.getCursorPosition(this.cursorDistance);
-    //         this.linePoints = [new Vector3(star.position.x, star.position.y, star.position.z),
-    //         new Vector3(cursorPos.x, cursorPos.y, cursorPos.z)];
-
-    //         this.lineGeometry = new BufferGeometry().setFromPoints(this.linePoints);
-    //         this.lineObject = new Line(this.lineGeometry, new LineBasicMaterial({ color: 0xFFFFFF, linewidth: 1 }));
-    //         this._scene.add(this.lineObject);
-    //         return;
-    //     }
-
-    //     if (star) {
-    //         this.showStarPanel(star);
-    //         return;
-    //     }
-
-    //     const starpath = this.raycastForStarpath();
-    //     if (starpath) {
-    //         this.showStarpathPanel(starpath);
-    //         this.saveLocalStorage();
-    //         return;
-    //     }
-
-    //     this.spawnOrb();
-
-    // }
 
     public showProjectPanel () {
         if (this.projectPanel) {
