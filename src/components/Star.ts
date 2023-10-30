@@ -22,9 +22,11 @@ export default class Star {
     public starHolder: Object3D;
     public starMaterial?: MeshStandardMaterial;
     public collider: Collider;
+    //#pro
     public faction?: Faction;
     public factionMesh: Mesh;
     public factionMaterial: MeshBasicMaterial;
+    //#endpro
     public index: number;
     private _name: string;
     public get name () {
@@ -59,8 +61,10 @@ export default class Star {
         this.index = this.world.starMesh.count;
         this.createStar();
         this.collider = this.createCollider(scene);
+        //#pro
         this.factionMaterial = this.createFactionMaterial();
         this.factionMesh = this.createFactionSphere(scene);
+        //#endpro
         this.updateLabel();
         this.updatePosition();
         this.unHoverStar();
@@ -81,7 +85,7 @@ export default class Star {
         scene.add(this.collider);
         return collider;
     }
-
+    //#pro
     public createFactionSphere (scene: Scene) {
         const geometry = new SphereGeometry(2, 32, 32);
         this.factionMesh = new Mesh(geometry, this.factionMaterial);
@@ -90,13 +94,15 @@ export default class Star {
         return this.factionMesh;
     }
 
+
     public createFactionMaterial () {
         this.factionMaterial = new MeshBasicMaterial({ color: 0xFFFFFF });
         this.factionMaterial.transparent = true;
-        this.factionMaterial.opacity = 0;
+        this.factionMaterial.opacity = 0.6;
         this.factionMaterial.visible = false;
         return this.factionMaterial;
     }
+    //#endpro
 
     public get currentCollider () {
         return this.collider;
@@ -155,9 +161,11 @@ export default class Star {
         this.world.starMesh.instanceMatrix.needsUpdate = true;
         this.world.starMesh.computeBoundingSphere();
         this.collider.position.set(this.position.x, this.position.y, this.position.z);
+        //#pro
         if (this.factionMesh) {
             this.factionMesh.position.set(this.position.x, this.position.y, this.position.z);
         }
+        //#endpro
     }
 
     public hoverStar () {
@@ -183,10 +191,11 @@ export default class Star {
             this.collider.material.visible = false;;
         }
     }
-
+    //#pro
     public updateFaction (input: string) {
         if (input == "None") {
             this.factionMaterial.color = new Color(0xFFFFFF);
+            this.factionMaterial.visible = false;
             delete this.faction;
         } else {
             //look up faction by name
@@ -197,6 +206,7 @@ export default class Star {
             this.faction = faction;
             const colour = new Color(faction.colour);
             this.factionMaterial.color = colour;
+            this.factionMaterial.visible = true;
         }
         if (this.factionMesh.material instanceof Array) {
             this.factionMesh.material.forEach(material => material.dispose());
@@ -205,6 +215,7 @@ export default class Star {
         }
         this.factionMesh.material = this.factionMaterial;
     }
+    //#endpro
 
     public updateColour () {
         this.world.starMesh.setColorAt(this.index, this._colour);
@@ -233,6 +244,7 @@ export default class Star {
             }
             this.collider.removeFromParent();
         }
+        //#pro
         this.factionMesh.geometry.dispose();
         if (this.factionMaterial instanceof Array) {
             this.factionMaterial.forEach(material => material.dispose());
@@ -240,6 +252,7 @@ export default class Star {
             this.factionMaterial.dispose();
         }
         this.factionMesh.removeFromParent();
+        //#endpro
 
         const replacementStar = this.world.stars.find((element) => element.index == (this.world.starMesh.count - 1));
         if (replacementStar == null) {

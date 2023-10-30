@@ -1,5 +1,4 @@
 //@ts-check
-// import * as THREE from "three";
 import { createScene } from "./components/scene.js";
 import MouseControls, { SerialisedCameraAngle } from "./systems/MouseControls.js"
 import FlyMovement from "./systems/FlyMovement.js";
@@ -517,10 +516,12 @@ export default class World {
                 this._scene, this);
             this.stars.push(star);
             this.colliders.push(star.collider);
-            const faction = this.factions[savedStar.faction];
-            if (faction) {
-                star.updateFaction(faction.name);
-            }
+            //#pro
+            // const faction = this.factions[savedStar.faction];
+            // if (faction) {
+            //     star.updateFaction(faction.name);
+            // }
+            //#endpro
         }
         for (const savedStarPath of saved.starPaths) {
             const star1 = this.stars[savedStarPath.star1];

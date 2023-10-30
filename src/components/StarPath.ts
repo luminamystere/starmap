@@ -55,7 +55,6 @@ export default class StarPath extends Mesh {
         this.star1 = star1;
         this.star2 = star2;
         this.world = world;
-        // this._colour = new Color(0xCCCCCC);
         this.starpathMaterial = material;
         this.timeCreated = Date.now();
         this.isDashed = false;
@@ -106,7 +105,6 @@ export default class StarPath extends Mesh {
             this.geometry.dispose();
             const distance = this.getDistance();
             this.geometry = new CylinderGeometry(0.05, 0.05, distance, 3, 4, true)
-            // this.layers.set(1);
             this.geometry.applyMatrix4(new Matrix4().makeTranslation(0, distance / 2, 0));
             this.geometry.applyMatrix4(new Matrix4().makeRotationX(MathUtils.degToRad(90)));
             this.position.copy(this.star1.position);
@@ -115,7 +113,6 @@ export default class StarPath extends Mesh {
     }
 
     public updateColour () {
-        // this._colour = this.world._starpathDefaultColor;
         if (this.line.material instanceof LineBasicMaterial) {
             this.line.material.color.set(this._colour);
         } else if (this.line.material instanceof LineDashedMaterial) {

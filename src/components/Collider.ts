@@ -4,7 +4,6 @@ import Star from "./Star.js"
 export default class Collider extends Mesh {
 
     public readonly relatedStar: Star;
-    //public position: Vector3;
 
     public constructor (star: Star) {
         const geometry = new SphereGeometry(0.4, 16, 16);

@@ -20,7 +20,6 @@ export interface StoreData {
     keyOpenStarpathPanel: InputData;
     keyCreateStar: InputData;
     keyClosePanel: InputData;
-    // starpathModifier: InputData;
 
 }
 
@@ -44,7 +43,6 @@ const defaults: StoreData = {
     keyOpenStarpathPanel: InputData.create("Right Click"),
     keyCreateStar: InputData.create("Right Click"),
     keyClosePanel: InputData.create("Escape"),
-    // starpathModifier: InputData.create("Right Click", true),
 }
 
 export const rebindableKeyDefinitions: { [KEY in keyof StoreData as KEY extends `key${string}` ? KEY : never]: string } = {

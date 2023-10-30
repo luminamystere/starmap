@@ -175,11 +175,15 @@ export default class ProjectPanel extends Panel {
         }
     }
 
+    //#pro
+
     public openFactions () {
         const factionPopup = new FactionDialog(this.world);
         factionPopup.appendTo(this);
         factionPopup.element.showModal();
     }
+
+    //#endpro
 
     public newStarmap () {
         const popup = new PopupPanel(this.world);
@@ -382,6 +386,8 @@ class Options extends Component<"div"> {
     }
 }
 
+//#pro
+
 class FactionDialog extends Dialog {
 
     public readonly factionsContainer = new Component("div")
@@ -486,7 +492,6 @@ class FactionEditor extends Component<"details"> {
         .setInputColour(this.faction.colour)
         .setId("factionColour")
         .addChangeListener(input => this.onChangeColour(input.element.value as `#${string}`))
-        // .addChangeListener(input => this.faction.colour = input.element.value as `#${string}`)
         .appendTo(this.contents);
 
 
@@ -521,3 +526,5 @@ class FactionEditor extends Component<"details"> {
         this.remove();
     }
 }
+
+//#endpro
