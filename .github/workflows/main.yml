@@ -25,6 +25,8 @@ jobs:
         
       - name: Build
         run: npm run build
+        env:
+          STARMAP_STRIPPINGPRO: true
           
       - name: Clean
         run: |
