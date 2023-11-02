@@ -199,11 +199,14 @@ export default class World {
         this.starMesh.count = 0;
         this.starMesh.setColorAt(0, this.defaultStarColour);
         this._scene.add(this.starMesh);
+        // this.starMesh.visible = false;
 
         this.cameraControls = new MouseControls(this);
         this.cameraControls.setCamera(this._camera);
 
         this._Initialise();
+
+        Object.assign(window, { world: this });
     }
 
     public _Initialise () {
@@ -419,6 +422,9 @@ export default class World {
         this._scene.add(this.cameraControls.getObject());
         this.loadLocalStorage();
         this._Update();
+        for (const faction of this.factions) {
+            faction.updateMarchingCubes();
+        }
         this.showProjectPanel();
     }
 
@@ -507,7 +513,7 @@ export default class World {
         this.resetWorld();
         const saved: SavedData = JSON.parse(input);
         this.isLoading = true;
-        this.factions = saved.factions.map(saved => new Faction(saved.name, saved.description, new Color(saved.colour))) as Faction[];
+        this.factions = saved.factions.map(saved => new Faction(saved.name, saved.description, new Color(saved.colour), this._scene)) as Faction[];
         for (const savedStar of saved.stars) {
             const star = new Star(savedStar.name,
                 savedStar.description,
@@ -517,10 +523,10 @@ export default class World {
             this.stars.push(star);
             this.colliders.push(star.collider);
             //#pro
-            // const faction = this.factions[savedStar.faction];
-            // if (faction) {
-            //     star.updateFaction(faction.name);
-            // }
+            const faction = this.factions[savedStar.faction];
+            if (faction) {
+                star.updateFaction(faction.name);
+            }
             //#endpro
         }
         for (const savedStarPath of saved.starPaths) {
@@ -786,6 +792,11 @@ export default class World {
             for (const i in this.movingLine) {
                 this.movingLine[i].updatePoint(cursorPos, this.moving[0]);
             }
+            for (const faction of this.factions) {
+                // faction.sphere.reset();
+                // faction.updateSpheres();
+                faction.updateMarchingCubes();
+            }
 
         }
         //right click dragging lines
@@ -801,7 +812,10 @@ export default class World {
         this._Update();
         this._threejs.clear();
 
+
+
         this.bloomRenderer.render();
+        // this._threejs.render(this._scene, this._camera);
         this._labelRender.render(this._scene, this._camera);
 
     }

@@ -421,7 +421,7 @@ class FactionDialog extends Dialog {
         const name = "faction no " + this.world.factions.length;
         const colour = new Color(0xffffff);
         colour.setHex(Math.random() * 0xffffff);
-        const faction = new Faction(name, "Add text here!", colour);
+        const faction = new Faction(name, "Add text here!", colour, this.world._scene);
         this.world.factions.push(faction);
         this.appendFaction(faction);
     }

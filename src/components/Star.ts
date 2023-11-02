@@ -7,6 +7,7 @@ import World from "../World.js";
 import Faction from "./Faction.js";
 import Math2 from "../utility/Math2.js";
 import { debounce } from "../utility/Async.js";
+import { MarchingCubes } from "three/examples/jsm/objects/MarchingCubes.js";
 
 export default class Star {
 
@@ -88,6 +89,7 @@ export default class Star {
     //#pro
     public createFactionSphere (scene: Scene) {
         const geometry = new SphereGeometry(2, 32, 32);
+        // const geometry = new MarchingCubes()
         this.factionMesh = new Mesh(geometry, this.factionMaterial);
         this.factionMesh.position.set(this.position.x || 0, this.position.y || 0, this.position.z || 0);
         scene.add(this.factionMesh);
@@ -204,9 +206,11 @@ export default class Star {
                 return;
             }
             this.faction = faction;
+            this.faction.addSphere(this.position);
+
             const colour = new Color(faction.colour);
             this.factionMaterial.color = colour;
-            this.factionMaterial.visible = true;
+            this.factionMaterial.visible = false;
         }
         if (this.factionMesh.material instanceof Array) {
             this.factionMesh.material.forEach(material => material.dispose());
