@@ -1,4 +1,4 @@
-import { Color } from "three";
+import { Color, Vector3 } from "three";
 
 export default class Faction {
 

@@ -517,10 +517,10 @@ export default class World {
             this.stars.push(star);
             this.colliders.push(star.collider);
             //#pro
-            // const faction = this.factions[savedStar.faction];
-            // if (faction) {
-            //     star.updateFaction(faction.name);
-            // }
+            const faction = this.factions[savedStar.faction];
+            if (faction) {
+                star.updateFaction(faction.name);
+            }
             //#endpro
         }
         for (const savedStarPath of saved.starPaths) {

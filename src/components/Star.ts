@@ -1,4 +1,4 @@
-import { Color, DoubleSide, Matrix4, Mesh, MeshBasicMaterial, MeshLambertMaterial, MeshPhysicalMaterial, MeshStandardMaterial, Object3D, Scene, SphereGeometry, Vector3 } from "three";
+import { Color, DoubleSide, Matrix4, Mesh, MeshBasicMaterial, MeshLambertMaterial, MeshPhysicalMaterial, MeshStandardMaterial, Object3D, Scene, ShaderMaterial, SphereGeometry, Vector3 } from "three";
 import Collider from "./Collider.js";
 import { CSS3DObject } from "three/examples/jsm/renderers/CSS3DRenderer.js";
 import { CSS2DObject } from "three/examples/jsm/renderers/CSS2DRenderer.js";
@@ -7,6 +7,7 @@ import World from "../World.js";
 import Faction from "./Faction.js";
 import Math2 from "../utility/Math2.js";
 import { debounce } from "../utility/Async.js";
+import FactionShaderMaterial from "./shaders/FactionShaderMaterial.js";
 
 export default class Star {
 
@@ -25,7 +26,7 @@ export default class Star {
     public faction?: Faction;
     //#pro
     public factionMesh: Mesh;
-    public factionMaterial: MeshBasicMaterial;
+    public factionMaterial: FactionShaderMaterial;
     //#endpro
     public index: number;
     private _name: string;
@@ -96,9 +97,16 @@ export default class Star {
 
 
     public createFactionMaterial () {
-        this.factionMaterial = new MeshBasicMaterial({ color: 0xFFFFFF });
+        const factionColour = new Color(this.faction?.colour || 0x000000)
+        const vectorColour = new Vector3(factionColour.r, factionColour.g, factionColour.b);
+        this.factionMaterial = new FactionShaderMaterial({
+            uniforms: {
+                sphereColour: {
+                    value: vectorColour
+                }
+            },
+        });
         this.factionMaterial.transparent = true;
-        this.factionMaterial.opacity = 0.6;
         this.factionMaterial.visible = false;
         return this.factionMaterial;
     }
@@ -194,7 +202,9 @@ export default class Star {
     //#pro
     public updateFaction (input: string) {
         if (input == "None") {
-            this.factionMaterial.color = new Color(0xFFFFFF);
+            this.factionMaterial.uniforms.sphereColour = {
+                value: new Vector3(0, 0, 0)
+            };
             this.factionMaterial.visible = false;
             delete this.faction;
         } else {
@@ -204,8 +214,11 @@ export default class Star {
                 return;
             }
             this.faction = faction;
-            const colour = new Color(faction.colour);
-            this.factionMaterial.color = colour;
+            const factionColour = new Color(this.faction.colour);
+            const vectorColour = new Vector3(factionColour.r, factionColour.g, factionColour.b);
+            this.factionMaterial.uniforms.sphereColour = {
+                value: vectorColour
+            }
             this.factionMaterial.visible = true;
         }
         if (this.factionMesh.material instanceof Array) {
