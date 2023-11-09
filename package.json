@@ -17,8 +17,8 @@
     "three": "^0.154.0"
   },
   "scripts": {
-    "watch": "concurrently \"npx tsc --project src/tsconfig.json --watch\" \"npx sass scss/index.scss out/index.css --watch\"",
-    "build": "concurrently \"npx tsc --project src/tsconfig.json\" \"npx sass scss/index.scss out/index.css\"",
+    "watch": "concurrently \"npx tsc --project src/web/tsconfig.json --watch\" \"npx sass scss/index.scss out/index.css --watch\"",
+    "build": "concurrently \"npx tsc --project src/web/tsconfig.json\" \"npx sass scss/index.scss out/index.css\"",
     "strippro": "npx ts-node tasks/StripPro.ts"
   },
   "author": "",
