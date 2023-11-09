@@ -1,0 +1,23 @@
+const { app, BrowserWindow, Menu } = require('electron') as typeof import('electron');
+
+Menu.setApplicationMenu(null);
+
+const createWindow = () => {
+    const window = new BrowserWindow({
+        width: 1024,
+        height: 768,
+    });
+    window.loadFile('index.html');
+};
+
+app.whenReady().then(() => {
+    createWindow();
+
+    app.on('activate', () => {
+        if (BrowserWindow.getAllWindows().length === 0) createWindow();
+    });
+});
+
+app.on('window-all-closed', () => {
+    if (process.platform !== 'darwin') app.quit();
+});
