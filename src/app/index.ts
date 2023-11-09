@@ -7,6 +7,7 @@ const createWindow = () => {
         width: 1024,
         height: 768,
     });
+    window.setIcon('./static/icon/icon.png');
     window.loadFile('index.html');
 };
 

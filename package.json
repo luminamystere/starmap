@@ -39,6 +39,7 @@
       "index.html",
       "static/",
       "node_modules/three/",
+      "build/",
       {
         "from": "no-more-defaults"
       },
