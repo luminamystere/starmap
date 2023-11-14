@@ -133,7 +133,9 @@ export default class InputManager {
 
             if (InputData.equals(checkInput, input)) {
                 if (listener.handler(InputManager)) {
-                    event.preventDefault();
+                    const element = event.target as Partial<HTMLElement> | undefined;
+                    if (element?.tagName !== "INPUT" || (element as HTMLInputElement).type !== "range")
+                        event.preventDefault();
                     break;
                 }
             }

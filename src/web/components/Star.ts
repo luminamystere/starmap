@@ -44,6 +44,15 @@ export default class Star {
     public set description (input: string) {
         this._description = input;
     }
+    private _factionSize: number;
+    public get factionSize () {
+        return this._factionSize;
+    }
+    public set factionSize (input: number) {
+        this._factionSize = input;
+        console.log(this._factionSize);
+        this.updateFactionSize(this._factionSize);
+    }
     public starLabel?: CSS2DObject;
     public starPaths: StarPath[] = [];
     public world: World;
@@ -63,8 +72,10 @@ export default class Star {
         this.createStar();
         this.collider = this.createCollider(scene);
         //#pro
+        this._factionSize = 4;
         this.factionMaterial = this.createFactionMaterial();
         this.factionMesh = this.createFactionSphere(scene);
+        this.updateFactionSize(this._factionSize);
         //#endpro
         this.updateLabel();
         this.updatePosition();
@@ -88,7 +99,7 @@ export default class Star {
     }
     //#pro
     public createFactionSphere (scene: Scene) {
-        const geometry = new SphereGeometry(2, 32, 32);
+        const geometry = new SphereGeometry(1, 32, 32);
         this.factionMesh = new Mesh(geometry, this.factionMaterial);
         this.factionMesh.position.set(this.position.x || 0, this.position.y || 0, this.position.z || 0);
         scene.add(this.factionMesh);
@@ -227,6 +238,11 @@ export default class Star {
             this.factionMesh.material.dispose();
         }
         this.factionMesh.material = this.factionMaterial;
+    }
+
+    public updateFactionSize (size: number) {
+        console.log(this.factionSize);
+        this.factionMesh.scale.set(size, size, size);
     }
     //#endpro
 

@@ -3,6 +3,8 @@ import Button from "./Button.js";
 import ColourInput from "./ColourInput.js";
 import Label from "./Label.js";
 import Panel, { PanelClasses } from "./Panel.js";
+import { ProjectPanelClasses } from "./ProjectPanel.js";
+import RangeInput from "./RangeInput.js";
 import SelectInput from "./SelectInput.js";
 import TextArea from "./TextArea.js";
 import TextInput from "./TextInput.js";
@@ -13,6 +15,7 @@ export enum StarPanelClasses {
     Name = "starpanel-input-name",
     Description = "starpanel-input-description",
     Faction = "starpanel-input-faction",
+    FactionSize = "starpanel-input-factionsize",
     Colour = "starpanel-input-colour",
 }
 
@@ -54,6 +57,18 @@ export default class StarPanel extends Panel {
         .addClass(StarPanelClasses.Faction)
         .addChangeListener((event) => this.updateFaction(event.element.value))
         .setId("starFaction")
+        .appendTo(this.content);
+
+    public readonly factionSizeLabel = new Label("starFactionSize")
+        .addClass(StarPanelClasses.Label)
+        .setText("Faction Size:")
+        .appendTo(this.content);
+
+    public readonly factionSize = new RangeInput(1, 30, 0.5)
+        .addClass(StarPanelClasses.FactionSize)
+        .setId("starFactionSize")
+        .setValue(this.star.factionSize ?? 1)
+        .addChangeListener(input => this.star.factionSize = input.element.valueAsNumber)
         .appendTo(this.content);
 
     //#endpro
