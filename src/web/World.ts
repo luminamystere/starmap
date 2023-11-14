@@ -35,6 +35,7 @@ interface SavedData {
         name: string;
         description: string;
         faction: number;
+        factionSize: number;
         colour: string;
         position: [number, number, number];
     }[]
@@ -462,6 +463,7 @@ export default class World {
                 name: star.name,
                 description: star.description,
                 faction: this.factions.indexOf(star.faction!),
+                factionSize: star.factionSize,
                 colour: star.starColour,
                 position: [star.position.x, star.position.y, star.position.z],
             })),
@@ -517,10 +519,11 @@ export default class World {
             this.stars.push(star);
             this.colliders.push(star.collider);
             //#pro
-            // const faction = this.factions[savedStar.faction];
-            // if (faction) {
-            //     star.updateFaction(faction.name);
-            // }
+            const faction = this.factions[savedStar.faction];
+            if (faction) {
+                star.updateFaction(faction.name);
+                star.factionSize = savedStar.factionSize || 1;
+            }
             //#endpro
         }
         for (const savedStarPath of saved.starPaths) {
