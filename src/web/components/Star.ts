@@ -44,6 +44,7 @@ export default class Star {
     public set description (input: string) {
         this._description = input;
     }
+    //#pro
     private _factionSize: number;
     public get factionSize () {
         return this._factionSize;
@@ -53,6 +54,7 @@ export default class Star {
         console.log(this._factionSize);
         this.updateFactionSize(this._factionSize);
     }
+    //#endpro
     public starLabel?: CSS2DObject;
     public starPaths: StarPath[] = [];
     public world: World;
