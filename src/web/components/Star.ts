@@ -44,8 +44,8 @@ export default class Star {
     public set description (input: string) {
         this._description = input;
     }
-    //#pro
     private _factionSize: number;
+    //#pro
     public get factionSize () {
         return this._factionSize;
     }
@@ -73,8 +73,8 @@ export default class Star {
         this.index = this.world.starMesh.count;
         this.createStar();
         this.collider = this.createCollider(scene);
-        //#pro
         this._factionSize = 4;
+        //#pro
         this.factionMaterial = this.createFactionMaterial();
         this.factionMesh = this.createFactionSphere(scene);
         this.updateFactionSize(this._factionSize);
