@@ -1,20 +1,20 @@
 import { Color } from "three";
 import World from "../World.js";
 import Faction from "../components/Faction.js";
-import Button from "./Button.js";
-import Component from "./Component.js";
-import Panel, { PanelClasses } from "./Panel.js";
-import TextInput from "./TextInput.js";
-import TextArea from "./TextArea.js";
-import ColourInput from "./ColourInput.js";
-import Label from "./Label.js";
-import SelectInput from "./SelectInput.js";
 import Files from "../systems/Files.js";
-import Dialog from "./Dialog.js";
-import CheckboxInput from "./CheckboxInput.js";
 import Store, { rebindableKeyDefinitions } from "../utility/Store.js";
-import RangeInput from "./RangeInput.js";
+import Button from "./Button.js";
+import CheckboxInput from "./CheckboxInput.js";
+import ColourInput from "./ColourInput.js";
+import Component from "./Component.js";
+import Dialog from "./Dialog.js";
 import InputInput from "./InputInput.js";
+import Label from "./Label.js";
+import Panel, { PanelClasses } from "./Panel.js";
+import RangeInput from "./RangeInput.js";
+import SelectInput from "./SelectInput.js";
+import TextArea from "./TextArea.js";
+import TextInput from "./TextInput.js";
 
 export enum ProjectPanelClasses {
     Main = "projectpanel",
@@ -157,10 +157,10 @@ export default class ProjectPanel extends Panel {
         .addEventListener("click", () => this.openOptionsPanel())
         .appendTo(this.buttonContainer);
 
-    public readonly footerText = new Component("p")
-        .addClass(ProjectPanelClasses.FooterText)
-        .setText("Here's some text for the footer!")
-        .appendTo(this.footer);
+    // public readonly footerText = new Component("p")
+    //     .addClass(ProjectPanelClasses.FooterText)
+    //     .setText("Here's some text for the footer!")
+    //     .appendTo(this.footer);
 
 
 
